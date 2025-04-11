@@ -1,0 +1,21 @@
+2025-04-10 13:55:50	1h 59m 32s	astonishing_wozniak	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume
+2025-04-11 09:11:31	5.9s	happy_hamilton	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 09:13:39	13m	cheesy_perlman	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 09:35:23	6m	scruffy_brahmagupta	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 09:51:24	6m 27s	pedantic_maxwell	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 10:51:15	2h 33m 11s	cranky_easley	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 14:49:52	5.2s	stupefied_booth	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 14:53:59	4.3s	small_feynman	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 14:56:12	3.9s	pedantic_turing	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 14:58:01	4.2s	romantic_celsius	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 15:00:48	4.6s	suspicious_ptolemy	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 15:03:49	1m 2s	cheesy_lorenz	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 15:10:04	15.1s	deadly_lamport	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 15:12:06	36.7s	tender_ride	OK	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 15:16:27	10m 18s	hopeful_gutenberg	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 16:01:55	-	gloomy_newton	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 16:03:47	6m 46s	focused_poincare	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 16:13:56	7m 40s	hopeful_cori	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-11 16:41:46	5s	evil_leakey	OK	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
+2025-04-11 16:45:30	3m 48s	festering_torricelli	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
+2025-04-11 16:50:35	16.5s	kickass_banach	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
