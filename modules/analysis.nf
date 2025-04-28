@@ -305,9 +305,9 @@ process annotesv {
         optimal_split=5
     fi
     
-    echo "Total variants: \$total_variants"
-    echo "Max line size: \$max_line_size bytes"
-    echo "Optimal split size: \$optimal_split variants"
+    ###echo "Total variants: \$total_variants"
+    ###echo "Max line size: \$max_line_size bytes"
+    ###echo "Optimal split size: \$optimal_split variants"
 
     # Split variants using calculated optimal size
     cd split_files
@@ -329,10 +329,10 @@ process annotesv {
             -outputFile \${split_file}_annotated.tsv 2> \${split_file}.error; then
             
             # If failed, try with smaller split size
-            echo "Failed with \$optimal_split variants, trying with half..."
-            half_split=\$(( optimal_split / 2 ))
-            split -l \$half_split \$split_file retry_split_
-            for retry_file in retry_split_*; do
+   ###         echo "Failed with \$optimal_split variants, trying with half..."
+               half_split=\$(( optimal_split / 2 ))
+               split -l \$half_split \$split_file retry_split_
+               for retry_file in retry_split_*; do
                 cat header.vcf \$retry_file > \${retry_file}.vcf
                 AnnotSV \
                     -SVinputFile \${retry_file}.vcf \
@@ -432,11 +432,15 @@ process annotatecnv {
           val(threshold)  // Now explicitly receiving threshold
 
    output:
-    tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), emit: rmdcnvplot
-    tuple val(sample_id), path("${sample_id}_tumor_copy_number.txt"), emit: rmdcnvtumornumber
-    tuple val(sample_id), path("${sample_id}_annotatedcnv_filter_header.csv"), emit: rmdcnvfilterheader
-    tuple val(sample_id), path("${sample_id}_cnv_chr9.pdf"), emit: rmdcnvchr9
-    tuple val(sample_id), path("${sample_id}_cnv_chr7.pdf"), emit: rmdcnvchr7
+   tuple val(sample_id), path("${sample_id}_calls_fixed.vcf"), emit: callsfixedout
+   path("${sample_id}_annotatedcnv.csv")
+   path("${sample_id}_annotatedcnv_filter.csv")
+   path("${sample_id}_CNV_plot.pdf")
+   path("${sample_id}_annotatedcnv_filter_header.csv"), emit:rmdannotatedcnvfilter
+   path("${sample_id}_CNV_plot.html")
+   tuple path("${sample_id}_tumor_copy.txt"), path("${sample_id}_bins_filter.bed")
+   tuple path("${sample_id}_CNV_plot.pdf"), path("${sample_id}_annotatedcnv_filter.csv"), emit:cnvpdfandcsvout
+   tuple val(sample_id), path("${sample_id}_cnv_plot_full.pdf"), path("${sample_id}_tumor_copy_number.txt"), path("${sample_id}_annotatedcnv_filter_header.csv"), path("${sample_id}_cnv_chr9.pdf"), path("${sample_id}_cnv_chr7.pdf"), emit: rmdcnvtumornumber
 
    script:
    """
@@ -1569,10 +1573,10 @@ workflow analysis {
             markdown_report(mergecnv_out_map)
         }
 
-    emit:
-        markdown_out = params.run_mode_analysis == 'rmd' ? 
-            markdown_report.out.markdown_report : 
-            Channel.empty()
+    // emit:
+    //     markdown_out = params.run_mode_analysis == 'rmd' ? 
+    //         markdown_report.out.markdown_report : 
+    //         Channel.empty()
 }
 
 // Helper function to extract sample_id from BAM filename

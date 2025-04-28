@@ -19,3 +19,14 @@
 2025-04-11 16:41:46	5s	evil_leakey	OK	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis terp -resume -w /home/chbope/extension/trash
 2025-04-11 16:45:30	3m 48s	festering_torricelli	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
 2025-04-11 16:50:35	16.5s	kickass_banach	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
+2025-04-11 17:16:05	19.1s	prickly_bell	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
+2025-04-14 14:06:55	17.3s	condescending_northcutt	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
+2025-04-14 14:14:41	40.9s	chaotic_church	OK	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
+2025-04-14 14:18:08	-	mighty_shaw	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-14 14:19:39	-	angry_babbage	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-14 14:22:10	-	jovial_williams	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-14 14:22:31	2h 11m 52s	ecstatic_rutherford	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-15 09:13:24	-	modest_payne	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-15 09:26:23	-	cheesy_banach	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-15 09:26:36	2h 54m 32s	disturbed_torricelli	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-15 16:16:47	56.2s	peaceful_tesla	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
