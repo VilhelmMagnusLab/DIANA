@@ -1,36 +1,6 @@
 #!/usr/bin/env nextflow
 
 nextflow.enable.dsl=2
-//params.mgmt_promoter_r_script = "mnt/scripts/MGMT_Prospective2.R"
-// Define the base path as a parameter
-
-// params.path = "/home/chbope/extension"
-
-
-// params.epi2me_dir="/home/chbope/Documents/nanopore/epi2me/wf-human-variation-master/"
-// params.episv ="/home/chbope/extension/results/epi2me/episv"
-// params.epimodkit ="/home/chbope/extension/results/epi2me/epimodkit"
-// params.epicnv ="/home/chbope/extension/results/epi2me/epicnv"
-
-// input reference files for all samples
-
-// params.reference_genome = file("/home/chbope/extension/data/reference/GCF_000001405.39_GRCh38.p13_genomic_chr_only_plus_mt.fa")
-// params.reference_genome_bai = file("/home/chbope/extension/data/reference/CF_000001405.39_GRCh38.p13_genomic_chr_only_plus_mt.fa.fai")
-
-
-// params.tr_bed_file = file("/home/chbope/extension/data/reference/human_GRCh38_trf.bed")
-// //params.epi2me_config_file = file("/home/chbope/Documents/nanopore/epi2me/wf-human-variation-master/nextflow.config")
-// params.epi2me_config_file = file("/home/chbope/Documents/nanopore/nextflow/pipeline/configs/pipeline1.config")
-// //params.epi2me_base_config_file = file("/home/chbope/Documents/nanopore/epi2me/wf-human-variation-master/base.config")
-// //input individual samples files
-
-// //input file folder
-// merge_bam_folder = "/home/chbope/extension/Data_for_Bope/single_bam_folder"
-
-
-
-// Define the available run modes
-
 
 //##############################3
 //## Extract overlapping EPIC sites for methylation based classification 
@@ -44,92 +14,123 @@ nextflow.enable.dsl=2
 //epi2me pipeline to run modkit
 
 process run_epi2me_modkit {
-    cpus 4
+    label 'modkit'
+    cpus 6
     memory '16 GB'
-    label 'pipeline1'
-   // publishDir "${params.output_path}/epi2me/modkit/", mode: "copy", pattern: "epimodkit/*"
+    publishDir "${params.path}/results/epi2me/modkit/", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai), path(tr_bed_file), path(epimodkit)
+    tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai), path(epimodkit)
 
     output:
-    tuple val(sample_id), path("epimodkit")
+    tuple val(sample_id), path("${sample_id}.wf_mods.bedmethyl.gz")
 
     script:
     """
-    nextflow run '${params.epi2me_dir}' \
-        --bam '${bam}' \
-        --ref '${reference_genome}' \
-        --sample_name '${sample_id}' \
-        --mod \
-        --out_dir  'epimodkit' \
-        --annotate FALSE \
-        --threads ${params.threads} \
-        --basecaller_basemod_threads ${params.threads} \
-        --tr_bed '${tr_bed_file}' \
-        --disable_ping \
-        -profile singularity 
+    export PATH=/opt/custflow/epi2meuser/conda/bin:\$PATH
+    
+    # Check if modkit is available
+    which modkit || echo "modkit not found in PATH"
+    
+    # Check if input files exist
+    if [ ! -f "${bam}" ]; then
+        echo "ERROR: BAM file not found: ${bam}"
+        exit 1
+    fi
+    
+    if [ ! -f "${reference_genome}" ]; then
+        echo "ERROR: Reference genome not found: ${reference_genome}"
+        exit 1
+    fi
+    
+    modkit pileup \
+      ${bam} \
+      ${sample_id}.wf_mods.bedmethyl \
+      --ref ${reference_genome} \
+      --interval-size ${params.interval_size} \
+      --log-filepath ${sample_id}_modkit.log
+
+    gzip ${sample_id}.wf_mods.bedmethyl
+    
+    # Check if output was created
+    ls -la ${sample_id}.wf_mods.bedmethyl.gz
     """
 }
 
+
 //epi2me pipeline to run sv with sniffles2 with mosaic option
+
 process run_epi2me_sv {
     cpus 4
     memory '16 GB'
     label 'pipeline1'
-   // publishDir "${params.output_path}/epi2me/sv/", mode: "copy", pattern: "episv/*"
+   publishDir "${params.path}/results/epi2me/episv/", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai), path(tr_bed_file), path(episv)
+  tuple val(sample_id), path(bam), path(bai)
 
     output:
-    tuple val(sample_id), path("episv")
+  tuple val(sample_id), path("${sample_id}.vcf.gz"), path("${sample_id}.vcf.gz.tbi"), emit: svvcf
 
     script:
     """
-    nextflow run '${params.epi2me_dir}' \
-        --bam '${bam}' \
-        --ref '${reference_genome}' \
-        --sample_name '${sample_id}' \
-        --sv \
-        --out_dir  'episv' \
-        --threads ${params.threads} \
-        --basecaller_basemod_threads ${params.threads} \
-        --tr_bed '${tr_bed_file}' \
-        --disable_ping \
-        -profile singularity
+  # Check if sniffles is available
+  which sniffles || echo "sniffles not found in PATH"
+  
+  # Check if input file exists
+  if [ ! -f "${bam}" ]; then
+      echo "ERROR: BAM file not found: ${bam}"
+      exit 1
+  fi
+  
+  # Run Sniffles2
+  sniffles --input ${bam} --vcf ${sample_id}.vcf.gz
+  
+  # Check if output was created
+  ls -la ${sample_id}.vcf.gz
+  
+  # Index the VCF file (commented out for now)
+  #tabix -p vcf ${sample_id}.vcf.gz
     """
 }
-
 //epi2me pipeline to run cnv qdnaseq
 process run_epi2me_cnv {
     cpus 4
     memory '8 GB'
     label 'epi2me'
-    //publishDir "${params.output_path}/epi2me/cnv/", mode: "copy", pattern: "epicnv/**"
+  publishDir "${params.path}/results/epi2me/epicnv/", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai), path(tr_bed_file), path(epicnv)
+  tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai), path(epicnv)
 
     output:
-    tuple val(sample_id), 
-          path("epicnv")
+  tuple val(sample_id), path("${sample_id}_segs.bed"), path("${sample_id}_bins.bed"), path("${sample_id}_segs.vcf"), path("${sample_id}_copyNumbersCalled.rds"), path("${sample_id}_calls.bed"), path("${sample_id}_calls.vcf"), path("${sample_id}_raw_bins.bed"), path("${sample_id}_plots.pdf"), path("${sample_id}_isobar_plot.png"), path("${sample_id}_cov.png")
     
     script:
     """
-    nextflow run '${params.epi2me_dir}' \
-        --bam '${bam}' \
-        --ref '${reference_genome}' \
-        --sample_name ${sample_id} \
-        --cnv \
-        --out_dir  'epicnv' \
-        --threads ${params.threads} \
-        --basecaller_basemod_threads ${params.threads} \
-        --tr_bed '${tr_bed_file}' \
-        --disable_ping \
-        -profile singularity
+  export R_HOME=/usr/local/lib/R
+  echo R_HOME: \$R_HOME
+  
+  # Check if Rscript is available
+  which Rscript || echo "Rscript not found in PATH"
+  
+  # Check if the R script exists
+  if [ ! -f "/home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/bin/run_qdnaseq_rds.r" ]; then
+      echo "ERROR: R script not found"
+      exit 1
+  fi
+
+  Rscript --vanilla /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/bin/run_qdnaseq_rds.r \
+    --bam ${bam} \
+    --binsize ${params.binsize} \
+    --out_prefix ${sample_id}
+    
+  # Check if output files were created
+  ls -la ${sample_id}_*
     """
 }
+
+
 
 workflow epi2me {
     take:
@@ -146,14 +147,10 @@ workflow epi2me {
         if (!params.reference_genome_bai) {
             error "ERROR: Reference genome index path not specified (params.reference_genome_bai)"
         }
-        if (!params.tr_bed_file) {
-            error "ERROR: TR BED file path not specified (params.tr_bed_file)"
-        }
 
         // Create file objects for reference files
         reference_genome = file(params.reference_genome)
         reference_genome_bai = file(params.reference_genome_bai)
-        tr_bed_file = file(params.tr_bed_file)
         episv = file(params.episv)
         epimodkit = file(params.epimodkit)
         epicnv = file(params.epicnv)    
@@ -164,9 +161,6 @@ workflow epi2me {
         }
         if (!reference_genome_bai.exists()) {
             error "ERROR: Reference genome index file not found: ${params.reference_genome_bai}"
-        }
-        if (!tr_bed_file.exists()) {
-            error "ERROR: TR BED file not found: ${params.tr_bed_file}"
         }
 
         // Validate run_mode parameter
@@ -182,8 +176,7 @@ workflow epi2me {
                     bam, 
                     bai,
                     reference_genome,
-                    reference_genome_bai,
-                    tr_bed_file
+                    reference_genome_bai
                 )
             } : Channel
             .from(file(params.epi2me_sample_id_file).readLines())
@@ -205,8 +198,7 @@ workflow epi2me {
                     bam, 
                     bai,
                     reference_genome,
-                    reference_genome_bai,
-                    tr_bed_file
+                    reference_genome_bai
                 )
             }
 
@@ -217,14 +209,13 @@ workflow epi2me {
 
         if (params.run_mode in ['modkit', 'all']) {
             println "Running modkit..."
-            modkit_ch = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed ->
+            modkit_ch = input_channel.map { sid, bam, bai, ref, ref_bai ->
                 tuple(
                     sid, 
                     bam, 
                     bai, 
                     ref, 
                     ref_bai, 
-                    tr_bed, 
                     file("${params.epimodkit}")
                 )
             } | run_epi2me_modkit
@@ -232,14 +223,13 @@ workflow epi2me {
 
         if (params.run_mode in ['cnv', 'all']) {
             println "Running cnv..."
-            cnv_ch = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed ->
+            cnv_ch = input_channel.map { sid, bam, bai, ref, ref_bai ->
                 tuple(
                     sid, 
                     bam, 
                     bai, 
                     ref, 
                     ref_bai, 
-                    tr_bed, 
                     file("${params.epicnv}")
                 )
             } | run_epi2me_cnv
@@ -247,15 +237,11 @@ workflow epi2me {
 
         if (params.run_mode in ['sv', 'all']) {
             println "Running sv..."
-            sv_ch = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed ->
+            sv_ch = input_channel.map { sid, bam, bai, ref, ref_bai ->
                 tuple(
                     sid, 
                     bam, 
-                    bai, 
-                    ref, 
-                    ref_bai, 
-                    tr_bed, 
-                    file("${params.episv}")
+                    bai
                 )
             } | run_epi2me_sv
             
@@ -264,11 +250,11 @@ workflow epi2me {
         }
 
         // Create default channels for empty processes
-        default_modkit = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed -> 
+        default_modkit = input_channel.map { sid, bam, bai, ref, ref_bai -> 
             tuple(sid, file("${params.epimodkit}/${sid}.wf_mods.bedmethyl.gz")) 
         }
         
-        default_cnv = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed -> 
+        default_cnv = input_channel.map { sid, bam, bai, ref, ref_bai -> 
             tuple(
                 sid, 
                 file("${params.epicnv}/qdna_seq/${sid}_segs.bed"),
@@ -277,7 +263,7 @@ workflow epi2me {
             )
         }
         
-        default_sv = input_channel.map { sid, bam, bai, ref, ref_bai, tr_bed -> 
+        default_sv = input_channel.map { sid, bam, bai, ref, ref_bai -> 
             tuple(sid, file("${params.episv}/${sid}.wf_sv.vcf.gz"))
         }
 
@@ -291,7 +277,7 @@ workflow epi2me {
             .join(modkit_results, by: 0)
             .join(cnv_results, by: 0)
             .join(sv_results, by: 0)
-            .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv ->
+            .map { sample_id, bam, bai, ref, ref_bai, modkit, segs_bed, bins_bed, segs_vcf, sv ->
                 log.info "Processing completed for sample: ${sample_id}"
                 tuple(
                     sample_id,
@@ -310,4 +296,3 @@ workflow epi2me {
                 results
             }
 }
-    

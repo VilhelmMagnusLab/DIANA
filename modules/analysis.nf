@@ -17,11 +17,20 @@ def validateParameters() {
 def loadSampleThresholds() {
     return file(params.analyse_sample_id_file).readLines()
         .collectEntries { line ->
-            def tokens = line.tokenize("\t")
-            if (tokens.size() < 2) {
+            def tokens = line.trim().split(/\s+/)  // Handle any whitespace
+            if (tokens.size() == 2) {
+                // User provided tumor content: [sample_id, tumor_content]
+                def threshold = tokens[1].toFloat()
+                if (threshold < 0 || threshold > 1) {
+                    throw new IllegalArgumentException("Tumor content must be between 0-1: ${line}")
+                }
+                [(tokens[0]) : threshold]
+            } else if (tokens.size() == 1) {
+                // User needs ACE calculation: [sample_id]
+                [(tokens[0]) : null]  // null indicates need ACE calculation
+            } else {
                 throw new IllegalArgumentException("Invalid line format in sample_id_file: ${line}")
             }
-            [(tokens[0]) : tokens[1]]
         }
 }
 
@@ -85,8 +94,10 @@ process extract_epic {
     """
 }
 
+
+//Sturgeon classifier
 process sturgeon {
-    cpus 4
+    cpus 2
     memory '2 GB'
     label 'epic'
     publishDir "${params.output_path}/classifier/sturgeon", mode: "copy", overwrite: true
@@ -97,13 +108,14 @@ process sturgeon {
     output:
     tuple path("${sample_id}_bedmethyl_sturgeon.bed"), path("${sample_id}_bedmethyl_sturgeon")
 
-    script:
+
     """
-    /sturgeon/venv/bin/sturgeon inputtobed -i $sturgeon_bed -o ${sample_id}_bedmethyl_sturgeon.bed -s modkit_pileup --reference-genome hg38
-    /sturgeon/venv/bin/sturgeon predict -i ${sample_id}_bedmethyl_sturgeon.bed -o ${sample_id}_bedmethyl_sturgeon --model-files $sturgeon_model --plot-results
+    /sturgeon/venv/bin/sturgeon inputtobed -i $sturgeon_bed  -o ${sample_id}_bedmethyl_sturgeon.bed  -s modkit_pileup  --reference-genome hg38
+   
+    /sturgeon/venv/bin/sturgeon predict -i ${sample_id}_bedmethyl_sturgeon.bed   -o  ${sample_id}_bedmethyl_sturgeon --model-files $sturgeon_model  --plot-results
+
     """
 }
-
 process nanodx {
     cpus 4
     memory '16 GB'
@@ -201,200 +213,85 @@ process mgmt_promoter {
 }
 
 process svannasv {
-   cpus 4
-   memory '2 GB'
+
     label 'svannasv'
+   cpus 2
+   memory '2 GB'
    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
 
    input:
-    tuple val(sample_id), path(sv_file), path(sv_file_tbi), path(occ_fusions)
+   tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(occ_fusions)
 
    output:
+   //file("${sample_id}_OCC_SVs.vcf")
+   tuple val(sample_id), path("${sample_id}_OCC_SVs.vcf"), emit: occsvannavcfout
    tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.html"), emit:rmdsvannahtml 
    tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.vcf.gz"), emit: occsvannaannotationannotationvcf
 
+//   export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+//   export PATH=$JAVA_HOME/bin:$PATH
    script:
    """
-    echo "Processing sample: ${sample_id}"
-    echo "SV file: ${sv_file}"
-    echo "SV index: ${sv_file_tbi}"
-    if [[ "${sv_file}" == *.gz && "${sv_file_tbi}" != "NO_INDEX_NEEDED" ]]; then
-        gunzip -c ${sv_file} > tmp.vcf
-        SV_INPUT="tmp.vcf"
-    else
-        SV_INPUT="${sv_file}"
-    fi
-    intersectBed -a \$SV_INPUT -b ${occ_fusions} -header > ${sample_id}_OCC_SVs.vcf
+
+   intersectBed -a $wf_sv  -b $occ_fusions  -header > ${sample_id}_OCC_SVs.vcf
+
+   # Check if intersection file is empty (excluding header)
    if [ \$(grep -v '^#' ${sample_id}_OCC_SVs.vcf | wc -l) -eq 0 ]; then
-        INPUT_FILE=\$SV_INPUT
+      # If empty, use original wf_sv file
+      INPUT_FILE=$wf_sv
    else
+      # If not empty, use intersection file
       INPUT_FILE=${sample_id}_OCC_SVs.vcf
    fi
-    /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ${params.bin_dir}/svanna-cli-1.0.3.jar prioritize \\
-        -d ${params.svanna_dir}/svanna-data \\
-        --vcf \$INPUT_FILE \\
-        --phenotype-term HP:0100836 \\
-        --output-format html,vcf \\
+ 
+   /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ${params.bin_dir}/svanna-cli-1.0.3.jar prioritize  \
+   -d ${params.svanna_dir}/svanna-data  \
+   --vcf \$INPUT_FILE \
+   --phenotype-term HP:0100836 \
+   --output-format html,vcf \
    --prefix ${sample_id}_occ_svanna_annotation
-   cp "${sample_id}_occ_svanna_annotation.html" "${params.output_path}/report/${sample_id}_occ_svanna_annotation.html"
+
+  # cp "${sample_id}_occ_svanna_annotation.html" "${params.output_path}/report/${sample_id}_svanna.html"
+
    """
 }
 
-process annotesv {
-    debug true
-    cpus 4
-    memory '4 GB'
-    label 'annotesv'
-    time = '4h'
-    publishDir "${params.output_path}/structure_variant/annotsv/", mode: "copy", overwrite: true
 
-    input:
-        tuple val(sample_id), path(sv_file), path(sv_file_tbi), path(occ_fusions), path(occ_fusion_genes_list)
-
-    output:
-        path("${sample_id}_OCC_SVs.vcf")
-        tuple val(sample_id), path("annotated_variants.tsv"), emit: annotatedvariantsout
-        tuple val(sample_id), path("${sample_id}_annotSV_fusion_extraction.csv"), emit: annotsvfusion
-        path("${sample_id}_annotated_variants.tsv")
-
-    script:
-    """
-    echo "Processing sample: ${sample_id}"
-    echo "SV file: ${sv_file}"
-    echo "SV index: ${sv_file_tbi}"
-    # Prepare input file
-    if [[ "${sv_file}" == *.gz && "${sv_file_tbi}" != "NO_INDEX_NEEDED" ]]; then
-        gunzip -c ${sv_file} > tmp.vcf
-        SV_INPUT="tmp.vcf"
-    else
-        SV_INPUT="${sv_file}"
-    fi
-    
-    intersectBed -a \$SV_INPUT -b ${occ_fusions} -header > ${sample_id}_OCC_SVs.vcf
-    
-    if [ \$(grep -v '^#' ${sample_id}_OCC_SVs.vcf | wc -l) -eq 0 ]; then
-        INPUT_FILE=\$SV_INPUT
-    else
-        INPUT_FILE=${sample_id}_OCC_SVs.vcf
-    fi
-
-    # Copy candidate genes file to local directory
-    cp ${occ_fusion_genes_list} ./candidate_genes.txt
-
-    # Create directory for split files
-    mkdir -p split_files
-
-    # Extract header and variants separately
-    grep '^#' \$INPUT_FILE > split_files/header.vcf
-    grep -v '^#' \$INPUT_FILE > split_files/variants.vcf
-
-    # Calculate optimal split size based on file characteristics
-    total_variants=\$(wc -l < split_files/variants.vcf)
-    max_line_size=\$(awk '{print length}' split_files/variants.vcf | sort -nr | head -1)
-    tcl_limit=2147483647
-    
-    # Calculate optimal number of variants per split
-    # Using 80% of TCL limit to be safe
-    safe_limit=\$(( tcl_limit * 8 / 10 ))
-    optimal_split=\$(( safe_limit / max_line_size ))
-    
-    # Ensure split size is at least 1 and no more than 5
-    if [ \$optimal_split -lt 1 ]; then
-        optimal_split=1
-    elif [ \$optimal_split -gt 5 ]; then
-        optimal_split=5
-    fi
-    
-    ###echo "Total variants: \$total_variants"
-    ###echo "Max line size: \$max_line_size bytes"
-    ###echo "Optimal split size: \$optimal_split variants"
-
-    # Split variants using calculated optimal size
-    cd split_files
-    split -l \$optimal_split variants.vcf split_variant_
-    
-    # Process each split file
-    for split_file in split_variant_*; do
-        # Add header to each split file
-        cat header.vcf \$split_file > \${split_file}.vcf
-        
-        # Run AnnotSV on each split file with error handling
-        if ! AnnotSV \
-            -SVinputFile \${split_file}.vcf \
-            -annotationsDir ${params.annotate_dir} \
-            -vcf 1 \
-            -genomeBuild GRCh38 \
-            -candidateGenesFile ../candidate_genes.txt \
-            -candidateGenesFiltering 1 \
-            -outputFile \${split_file}_annotated.tsv 2> \${split_file}.error; then
-            
-            # If failed, try with smaller split size
-   ###         echo "Failed with \$optimal_split variants, trying with half..."
-               half_split=\$(( optimal_split / 2 ))
-               split -l \$half_split \$split_file retry_split_
-               for retry_file in retry_split_*; do
-                cat header.vcf \$retry_file > \${retry_file}.vcf
-                AnnotSV \
-                    -SVinputFile \${retry_file}.vcf \
-                    -annotationsDir ${params.annotate_dir} \
-                    -vcf 1 \
-                    -genomeBuild GRCh38 \
-                    -candidateGenesFile ../candidate_genes.txt \
-                    -candidateGenesFiltering 1 \
-                    -outputFile \${retry_file}_annotated.tsv || true
-            done
-        fi
-    done
-    cd ..
-
-    # Merge results - keep header from first file only
-    head -n 1 \$(ls split_files/*/split_variant_*_annotated.tsv split_files/*/retry_split_*_annotated.tsv 2>/dev/null | head -n 1) > annotated_variants.tsv
-    for f in split_files/*/split_variant_*_annotated.tsv split_files/*/retry_split_*_annotated.tsv; do
-        if [ -f "\$f" ]; then
-            tail -n +2 \$f >> annotated_variants.tsv
-        fi
-    done
-
-    # Run fusion filter on merged results
-    annotsv_fusion_filter.py ./annotated_variants.tsv ${occ_fusion_genes_list} ${sample_id}_annotSV_fusion_extraction.csv
-    cp ./annotated_variants.tsv ${sample_id}_annotated_variants.tsv
-
-    # Cleanup
-    rm -rf split_files candidate_genes.txt
-
-    if [ ! -f "${sample_id}_annotated_variants.tsv" ]; then
-        echo "Error: Processing failed. Debugging information:"
-        ls -la
-        pwd
-        exit 1
-    fi
-    """
-}
-
-process knotannotsv {
+process svannasv_fusion_events {
     cpus 4
     memory '2 GB'
-   label 'knotannotsv'
-   publishDir "${params.output_path}/structure_variant/annotsv/", mode: "copy", overwrite: true
-   
-   input:
-   tuple val(sample_id), path(annotsv_output), path(knotannov_conf)
+    label 'svannasv'
+    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(occ_svannavcf), path(genecode_bed), path(occ_fusions_genes)
 
     output:
-    tuple val(sample_id), path("${sample_id}_annotated_variants.html"), emit: rmdannotsvhtml
-    path("${sample_id}_annotated_variants.xlsm")
+    tuple val(sample_id), path("${sample_id}_filter_fusion_event.tsv"), emit: filterfusioneventout
 
     script:
+
     """
-    knotAnnotSV.pl --annotSVfile ${annotsv_output} --configFile ${knotannov_conf} --outDir 
-    knotAnnotSV2XL.pl --annotSVfile ${annotsv_output} --configFile ${knotannov_conf} --outDir 
-   cp annotated_variants.html ${sample_id}_annotated_variants.html
-   cp annotated_variants.xlsm ${sample_id}_annotated_variants.xlsm
+    breaking_point_bed_translocation.py --vcf $occ_svannavcf --out  ${sample_id}_breaking_bedpoints.bed
+
+    awk 'BEGIN{OFS="\t"} {if (\$1 !~ /^chr/) \$1 = "chr"\$1; print}' ${sample_id}_breaking_bedpoints.bed > ${sample_id}_breaking_bedpoints_sort.bed
+
+    intersectBed -a ${sample_id}_breaking_bedpoints_sort.bed  -b $genecode_bed  -wb  > ${sample_id}_breaking_bedpoints_genecode.bed
+
+    #remove duplicate bed points
+
+    remove_duplicate_report.py --in  ${sample_id}_breaking_bedpoints_genecode.bed  \
+            --formatted ${sample_id}_breaking_bedpoints_genecode_format.bed \
+             --out ${sample_id}_breaking_bedpoints_genecode_clean.bed    \
+             --paired ${sample_id}_breaking_bedpoints_genecode_clean_paired.bed  \
+             --gene-list $occ_fusions_genes \
+             --filtered ${sample_id}_filter_fusion_event.tsv
+
     """
 }
 
 process circosplot {
-    cpus 4
+    cpus 2
     memory '2 GB'
    label 'circos'
    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
@@ -407,6 +304,7 @@ process circosplot {
 
    script:
    """
+   # Check if file is empty (excluding header)
    if [ \$(grep -v '^#' ${annotsv_output} | wc -l) -eq 0 ]; then
       echo "Warning: ${annotsv_output} is empty. Skipping vcf2circos plot generation."
       touch ${sample_id}_vcf2circo.html
@@ -433,13 +331,13 @@ process annotatecnv {
 
    output:
    tuple val(sample_id), path("${sample_id}_calls_fixed.vcf"), emit: callsfixedout
-   path("${sample_id}_annotatedcnv.csv")
-   path("${sample_id}_annotatedcnv_filter.csv")
-   path("${sample_id}_CNV_plot.pdf")
-   path("${sample_id}_annotatedcnv_filter_header.csv"), emit:rmdannotatedcnvfilter
-   path("${sample_id}_CNV_plot.html")
-   tuple path("${sample_id}_tumor_copy.txt"), path("${sample_id}_bins_filter.bed")
-   tuple path("${sample_id}_CNV_plot.pdf"), path("${sample_id}_annotatedcnv_filter.csv"), emit:cnvpdfandcsvout
+   tuple val(sample_id), path("${sample_id}_annotatedcnv.csv"), emit:annotatedcnvcsvout
+   tuple val(sample_id), path("${sample_id}_annotatedcnv_filter.csv"), emit:annotatedcnvfiltercsvout
+   tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), emit:cnvpdfout
+   tuple val(sample_id), path("${sample_id}_annotatedcnv_filter_header.csv"), emit:rmdannotatedcnvfilter
+   tuple val(sample_id), path("${sample_id}_CNV_plot.html"), emit:rmdcnvhtml
+   tuple val(sample_id), path("${sample_id}_tumor_copy.txt"), path("${sample_id}_bins_filter.bed"), emit:tumorcopyandbinsfilterout
+   tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), path("${sample_id}_annotatedcnv_filter.csv"), emit:cnvpdfandcsvout
    tuple val(sample_id), path("${sample_id}_cnv_plot_full.pdf"), path("${sample_id}_tumor_copy_number.txt"), path("${sample_id}_annotatedcnv_filter_header.csv"), path("${sample_id}_cnv_chr9.pdf"), path("${sample_id}_cnv_chr7.pdf"), emit: rmdcnvtumornumber
 
    script:
@@ -506,12 +404,11 @@ process clair3 {
     output:
     tuple val(sample_id), path('output_clair3/')
     tuple val(sample_id), path('occ_pileup_snvs_avinput')
-    path("${sample_id}_occ_pileup_annotateandfilter.csv")
-    path("${sample_id}_occ_pileup_annotateandfilter.csv"), emit:occpileupannotateandfilterout
+    tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), emit:occpileupannotateandfilterout
     path('occ_merge_snv_avinpt')
     path('occ_merge.hg38_multianno.txt')
-    path("${sample_id}_merge_annotateandfilter.csv"), emit:mergeannotateandfilterout
-    tuple path("${sample_id}_occ_pileup_annotateandfilter.csv"), path("${sample_id}_merge_annotateandfilter.csv"), emit:clair3output 
+    tuple val(sample_id), path("${sample_id}_merge_annotateandfilter.csv"), emit:mergeannotateandfilterout
+    tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), path("${sample_id}_merge_annotateandfilter.csv"), emit:clair3output 
 
 
     script:
@@ -597,9 +494,9 @@ process clairs_to {
     output:
     tuple val(sample_id), path('clairsto_output/')
     tuple val(sample_id), path('clairS_To_snv_avinput')
-    path('ClairS_TO_snv.hg38_multianno.txt')
+    tuple val(sample_id), path('ClairS_TO_snv.hg38_multianno.txt')
     tuple val(sample_id), path("${sample_id}_annotateandfilter_clairsto.csv"), emit:annotateandfilter_clairstoout
-    path("${sample_id}_merge_snv_indel_claisto.vcf.gz")
+    tuple val(sample_id), path("${sample_id}_merge_snv_indel_claisto.vcf.gz")
 
     script:
     """
@@ -661,7 +558,9 @@ process merge_annotation {
     tuple val(sample_id), path(merge_file), path(pileup_file), path(clairsto_file), path(occ_genes)
     
     output:
-    tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall.csv"), emit: occmergeout
+    tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv"), emit: occmergeout
+    tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall.csv")
+    
 
     script:
     """
@@ -680,7 +579,9 @@ process merge_annotation {
         "${pileup_file}" \\
         "${clairsto_file}" \\
         "${sample_id}_merge_annotation_filter_snvs_allcall.csv" \\
-        "${occ_genes}"
+        "${occ_genes}" \\
+        ${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv
+
     """
 }
 
@@ -700,7 +601,7 @@ process igv_tools {
     """
     export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     create_report $tertp_variants --fasta $reference_genome --flanking 1000 --tracks $tertp_variants $occ_bam $ncbirefseq --output ${sample_id}_tertp_id1.html
-    cp "${sample_id}_tertp_id1.html" "${params.output_path}/report/${sample_id}_tertp_id1.html"
+    ##cp "${sample_id}_tertp_id1.html" "${params.output_path}/report/${sample_id}_tertp_id1.html"
     """
 }
 
@@ -868,34 +769,54 @@ process markdown_report {
 
     input:
     tuple val(sample_id), 
-          val(craminoreport),
-          val(nanodx), 
-          val(dictionaire), 
-          val(logo), 
-          val(cnv_plot), 
-          val(tumor_number), 
-          val(annotatecnv),
-          val(cnv_chr9),
-          val(cnv_chr7), 
-          val(mgmt_results),
-          val(merge_results),
-          val(annotSV_fusion), 
-          val(terphtml),
-          val(svannahtml), 
-          val(annotsvhtml),
-          val(egfr_coverage),
-          val(idh1_coverage),
-          val(tertp_coverage)
+          path(craminoreport),
+          path(nanodx), 
+          path(dictionaire), 
+          path(logo), 
+          path(cnv_plot), 
+          path(tumor_number), 
+          path(annotatecnv),
+          path(cnv_chr9),
+          path(cnv_chr7), 
+          path(mgmt_results),
+          path(merge_results),
+          path(fusion_events),
+          path(svannahtml), 
+          path(terphtml),
+          path(egfr_coverage),
+          path(idh1_coverage),
+          path(tertp_coverage)
 
     output:
     file("${sample_id}_markdown_pipeline_report.pdf")
 
-
     script:
     """
-    
-    Rscript -e "rmarkdown::render('/home/chbope/Documents/nanopore/clone/nextflow/bin/nextflow_markdown_pipeline3.Rmd',output_file=commandArgs(trailingOnly=TRUE)[20])" "${sample_id}" "${craminoreport}" "${nanodx}" "${dictionaire}" "${logo}" "${cnv_plot}" "${tumor_number}" "${annotatecnv}" "${cnv_chr9}" "${cnv_chr7}" "${mgmt_results}" "${merge_results}" "${annotSV_fusion}"  "${terphtml}" "${svannahtml}" "${annotsvhtml}" "${egfr_coverage}" "${idh1_coverage}" "${tertp_coverage}" "\${PWD}/${sample_id}_markdown_pipeline_report.pdf"
+    # Output PDF path
+    output_file="${sample_id}_markdown_pipeline_report.pdf"
 
+    # Now call the Rscript with the updated Rmd file
+    Rscript -e "rmarkdown::render('${workflow.projectDir}/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])" \
+      "${sample_id}" \
+      "${craminoreport}" \
+      "${params.analyse_sample_id_file}" \
+      "${nanodx}" \
+      "${dictionaire}" \
+      "${logo}" \
+      "${cnv_plot}" \
+      "${tumor_number}" \
+      "${annotatecnv}" \
+      "${cnv_chr9}" \
+      "${cnv_chr7}" \
+      "${mgmt_results}" \
+      "${merge_results}" \
+      "${fusion_events}" \
+      "${terphtml}" \
+      "${svannahtml}" \
+      "${egfr_coverage}" \
+      "${idh1_coverage}" \
+      "${tertp_coverage}" \
+      "\${PWD}/\${output_file}"
     """
 }
 
@@ -905,7 +826,7 @@ process ace_tmc {
     publishDir "${params.output_path}/cnv/ace/", mode: "copy", overwrite: true
     
     input:
-    tuple val(sample_id), path(bam_dir)
+    tuple val(sample_id), path(rds_file)
     
     output:
         tuple val(sample_id), path("${sample_id}_ace_results"), emit: aceresults
@@ -915,24 +836,25 @@ process ace_tmc {
     """
     #!/bin/bash
     set -e
-    
+
     # Check if we're in a container and use appropriate conda setup
     if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
-        # Container environment
         source /opt/conda/etc/profile.d/conda.sh
         conda activate ace_env
     else
-        # Local environment
     source activate ace_env
     fi
     
     # Debug info
     echo "Processing sample: ${sample_id}"
-    echo "Input directory: ${bam_dir}"
-    ls -l ${bam_dir}
+    echo "Input RDS file: ${rds_file}"
+    ls -l ${rds_file}
+
+    # Create output directory
+    mkdir -p ${sample_id}_ace_results
     
-    # Run ACE TMC analysis with the directory containing BAM
-    ace_tmc.R "${bam_dir}" "${sample_id}_ace_results" "${sample_id}"
+    # Run ACE TMC analysis
+    ace_tmc.R "${rds_file}" "${sample_id}_ace_results" "${sample_id}"
     
     # Read and export the threshold value
     threshold_value=\$(cat "${sample_id}_ace_results/threshold_value.txt")
@@ -1286,17 +1208,12 @@ workflow analysis {
         if (params.run_mode in ['annotsv', 'all']) {
             println "Running AnnotSV Analysis..."
             
-            // Run AnnotSV analysis
-            annotesv(boosts_annotsv_channel)
-            annotsv_output = annotesv.out.annotatedvariantsout
-                .map { sample_id, annotated_variants -> 
-                    tuple(sample_id, annotated_variants, file(params.knotannotsv_conf)) 
-                }
-            knotannotsv(annotsv_output)
             svannasv(boosts_svanna_channel)
-            svannasv_out = svannasv.out.occsvannaannotationannotationvcf.map{sample_id,svannavcfoutput -> [sample_id, svannavcfoutput, file(params.vcf2circos_json)]}
+            svannasv_out = svannasv.out.occsvannaannotationannotationvcf.map{sample_id,svannavcfoutput -> [sample_id, svannavcfoutput, params.vcf2circos_json]}
             circosplot(svannasv_out)
             circosplot_out=circosplot.out.circosout
+            svannaoutfusion_events= svannasv.out.occsvannavcfout.map{sample_id, occsvannavcfout -> [sample_id, occsvannavcfout, params.genecode_bed, params.occ_fusion_genes_list]}
+            svannasv_fusion_events(svannaoutfusion_events)
         }
 
         // OCC analysis
@@ -1305,9 +1222,11 @@ workflow analysis {
             
             // Run variant callers and get outputs
             clair3(boosts_clair3_channel)
+            
+            
+            // Create properly structured channels for combination
             def clair3_results = clair3.out.clair3output
-                .map { pileup_file, merge_file -> 
-                    def sample_id = pileup_file.toString().split('/')[-1].split('_')[0]
+                .map { sample_id, pileup_file, merge_file -> 
                     tuple(sample_id, pileup_file, merge_file)
                 }
                 .view { "Clair3 mapped: $it" }
@@ -1333,7 +1252,7 @@ workflow analysis {
 
             // Run merge annotation
             merge_annotation(combine_file)
-        }
+         }
 
         // TERP analysis
         if (params.run_mode in ['terp', 'all']) {
@@ -1347,24 +1266,48 @@ workflow analysis {
         if (params.run_mode in ['cnv', 'all', 'rmd'] || params.run_order_mode) {
             println "Running CNV Analysis..."
             
-            // Create channel for ACE input
-            ace_input = Channel
-                .fromPath("${params.merge_bam_folder}/*.merge.bam")
-                .map { bam -> 
-                    def sample_id = bam.name.toString().split('\\.')[0]
-                    def bam_dir = bam.parent
-                    println "Found BAM file for ACE: ${bam} (sample: ${sample_id}, directory: ${bam_dir})"
-                    tuple(sample_id, bam_dir)
-                }
-                .view { "ACE input: $it" }
+            // Separate samples that need ACE from those that don't
+            def samples_needing_ace = sample_thresholds.findAll { k, v -> v == null }.keySet()
+            def samples_with_provided_threshold = sample_thresholds.findAll { k, v -> v != null }
 
-            // Run ACE analysis to get thresholds
+            println "Samples needing ACE calculation: ${samples_needing_ace}"
+            println "Samples with provided thresholds: ${samples_with_provided_threshold}"
+
+            // Run ACE only for samples that need calculation (have null threshold)
+            if (samples_needing_ace.size() > 0) {
+        ace_input = Channel
+            .fromPath("${params.cnv_rds}/*_*.rds")
+            .map { rds_file -> 
+                def sample_id = rds_file.name.toString().split("_")[0]
+                        if (samples_needing_ace.contains(sample_id)) {
+                    println "Found matching RDS file for sample ${sample_id}: ${rds_file}"
+                            tuple(sample_id, rds_file)
+                } else {
+                    null
+                }
+            }
+            .filter { it != null }
+
+                // Run ACE analysis
             ace_tmc(ace_input)
+                
             ace_thresholds = ace_tmc.out.threshold_value
                 .map { sample_id, threshold -> 
-                    println "Threshold for ${sample_id}: ${threshold}"
-                    tuple(sample_id, threshold)
+                        println "Calculated threshold for ${sample_id}: ${threshold}"
+                        tuple(sample_id, threshold.toFloat())
                 }
+            } else {
+                ace_thresholds = Channel.empty()
+            }
+
+            // Create final threshold mapping
+            def final_thresholds = [:]
+            samples_with_provided_threshold.each { sample_id, threshold ->
+                final_thresholds[sample_id] = threshold
+                println "Using provided threshold for ${sample_id}: ${threshold}"
+            }
+
+            println "Final threshold mapping: ${final_thresholds}"
 
             // Create channel for annotatecnv based on run mode
             if (params.run_order_mode) {
@@ -1374,10 +1317,10 @@ workflow analysis {
                         println "Processing epi2me results for sample: ${sample_id} from epi2me output"
                         tuple(
                             sample_id,
-                            file("${params.path}/results/epi2me/epicnv/qdna_seq/${sample_id}_segs.vcf"),
+                            file("${params.path}/results/epi2me/epicnv/${sample_id}_segs.vcf"),
                             file(params.occ_fusions),
-                            file("${params.path}/results/epi2me/epicnv/qdna_seq/${sample_id}_bins.bed"),
-                            file("${params.path}/results/epi2me/epicnv/qdna_seq/${sample_id}_segs.bed")
+                            file("${params.path}/results/epi2me/epicnv/${sample_id}_bins.bed"),
+                            file("${params.path}/results/epi2me/epicnv/${sample_id}_segs.bed")
                         )
                     }
             } else {
@@ -1396,54 +1339,65 @@ workflow analysis {
             }
 
             // Combine with thresholds and prepare final input
-            annotatecnv_input = annotatecnv_input
-                .combine(ace_thresholds, by: 0)
-                .map { it -> 
-                    println "Preparing annotatecnv input for ${it[0]} with tumor content ${it[5]}"
+            // For samples with provided thresholds, use them directly
+            def annotatecnv_with_provided = annotatecnv_input
+                .filter { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed -> 
+                    final_thresholds.containsKey(sample_id)
+                }
+                .map { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed -> 
+                    def threshold = final_thresholds[sample_id]
+                    println "Preparing annotatecnv input for ${sample_id} with provided tumor content ${threshold}"
                     tuple(
-                        it[0],              // sample_id
-                        it[1],              // segs_vcf
-                        it[2],              // occ_fusions
-                        it[3],              // bins_bed
-                        it[4],              // segs_bed
-                        it[5].toString()    // threshold value as string
+                        sample_id,              // sample_id
+                        segs_vcf,               // segs_vcf
+                        occ_fusions,            // occ_fusions
+                        bins_bed,               // bins_bed
+                        segs_bed,               // segs_bed
+                        threshold.toString()    // threshold value as string
                     )
                 }
+
+            // For samples with calculated thresholds, combine with ace_thresholds
+            def annotatecnv_with_calculated = annotatecnv_input
+                .filter { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed -> 
+                    !final_thresholds.containsKey(sample_id)
+                }
+                .combine(ace_thresholds, by: 0)
+                .map { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed, threshold -> 
+                    println "Preparing annotatecnv input for ${sample_id} with calculated tumor content ${threshold}"
+                    tuple(
+                        sample_id,              // sample_id
+                        segs_vcf,               // segs_vcf
+                        occ_fusions,            // occ_fusions
+                        bins_bed,               // bins_bed
+                        segs_bed,               // segs_bed
+                        threshold.toString()    // threshold value as string
+                    )
+                }
+
+            // Combine both channels
+            annotatecnv_input = annotatecnv_with_provided.mix(annotatecnv_with_calculated)
                 .view { "Annotatecnv input: $it" }
 
             // Run annotatecnv
             annotatecnv(annotatecnv_input)
             annotatecnv_results = annotatecnv.out
-            annotatecnv.out.rmdcnvtumornumber.view { "Annotatecnv results: $it" }
+            //annotatecnv.out.rmdcnvtumornumber.each { println "Annotatecnv results: $it" }
+            
+            // Run plot_genomic_regions for coverage analysis
+            //plot_genomic_regions(boosts_plot_genomic_regions_channel)
         }
 
         // RMD report generation
         if (params.run_mode in ['rmd', 'all']) {
             println "Running RMD Report Generation..."
             
-            // MGMT analysis channels and processes
-        //     mgmt_ch = Channel.fromPath("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz")
-        //         .map { gz ->
-        //             def sample_id = gz.getBaseName().split("\\.")[0]
-        //             tuple(sample_id, gz, file(params.epicsites), file(params.mgmt_cpg_island_hg38))
-        //         }
-        //         .filter { it[0] in sample_thresholds }
-            
-        //     // Run MGMT related processes
-        //     extract_epic(mgmt_ch)
-        // MGMT_output = extract_epic.out.MGMTheaderout
-        //     //MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-        //         .map { sample_id, sturgeoninput -> tuple(sample_id, sturgeoninput, params.sturgeon_model) }
-        // //sturgeon(MGMT_sturgeon)
-        // mgmt_promoter(MGMT_output)
-        //     mgmt_nanodx = extract_epic.out.epicselectnanodxinput
-        //         .map { sample_id, epicselectnanodxinput -> tuple(sample_id, epicselectnanodxinput, params.hg19_450model) }
-        // nanodx(mgmt_nanodx)
-        //     nanodx_out = nanodx.out.nanodx450out
-        //         .map { sample_id, nanodx450out -> tuple(sample_id, nanodx450out, params.nanodx_450model, params.snakefile_nanodx, params.nn_model) }
-        // run_nn_classifier(nanodx_out)
-        //    rmd_nanodx_out = run_nn_classifier.out.rmdnanodx
-
+            // Reuse MGMT outputs from earlier analysis if available
+            // If MGMT analysis was not run, we need to run it here
+            if (!(params.run_mode in ['mgmt', 'all'])) {
+                println "MGMT analysis not run earlier, running now for RMD report..."
+                
+                // Create channel for MGMT analysis
         mgmt_ch = params.run_order_mode ? 
                 input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
                     tuple(
@@ -1497,22 +1451,33 @@ workflow analysis {
             
             run_nn_classifier(nanodx_out)
             rmd_nanodx_out = run_nn_classifier.out.rmdnanodx
+            } else {
+                println "Reusing MGMT outputs from earlier analysis"
+                // The outputs are already available from the MGMT section
+            }
 
-            // SV analysis
+            // SV analysis - reuse outputs if already run
+            if (!(params.run_mode in ['annotsv', 'all'])) {
+                println "SV analysis not run earlier, running now for RMD report..."
         svannasv(boosts_svanna_channel)
         rmd_svanna_html = svannasv.out.rmdsvannahtml
             svannasv_out = svannasv.out.occsvannaannotationannotationvcf
                 .map { sample_id, svannavcfoutput -> tuple(sample_id, svannavcfoutput, params.vcf2circos_json) }
         circosplot(svannasv_out)
+            } else {
+                println "Reusing SV outputs from earlier analysis"
+            }
 
             // AnnotSV analysis
-        annotesv(boosts_annotsv_channel)
-            annotsv_output = annotesv.out.annotatedvariantsout
-                .map { sample_id, annotated_variants -> tuple(sample_id, annotated_variants, file(params.knotannotsv_conf)) }
-        knotannotsv(annotsv_output)
-        rmd_knotannotsv_html = knotannotsv.out.rmdannotsvhtml
+            //annotesv(boosts_annotsv_channel)
+            //annotsv_output = annotesv.out.annotatedvariantsout
+            //.map { sample_id, annotated_variants -> tuple(sample_id, annotated_variants, file(params.knotannotsv_conf)) }
+            //knotannotsv(annotsv_output)
+            //rmd_knotannotsv_html = knotannotsv.out.rmdannotsvhtml
 
-            // OCC analysis
+            // OCC analysis - reuse outputs if already run
+            if (!(params.run_mode in ['occ', 'all'])) {
+                println "OCC analysis not run earlier, running now for RMD report..."
         clair3(boosts_clair3_channel)
         clair3_out = clair3.out.clair3output
         clairs_to(boosts_clairSTo_channel)
@@ -1522,12 +1487,25 @@ workflow analysis {
                     tuple(sample_id, merge_annotateandfilter, occ_pileup_annotateandfilter, annotateandfilter_clairsto, file(params.occ_genes))
     }
         merge_annotation(combine_file)
+            } else {
+                println "Reusing OCC outputs from earlier analysis"
+            }
 
-            // Other tools
+            // Other tools - reuse outputs if already run
+            if (!(params.run_mode in ['terp', 'all'])) {
+                println "TERP analysis not run earlier, running now for RMD report..."
         igv_tools(boosts_igv_channel)
-        
         cramino_report(boosts_cramino)
         plot_genomic_regions(boosts_plot_genomic_regions_channel)
+            } else {
+                println "Reusing TERP outputs from earlier analysis"
+            }
+
+            // Add a new run_mode 'stat' for the cramino_report process
+            if (params.run_mode in ['stat', 'all']) {
+                println "Running Cramino Statistics..."
+                cramino_report(boosts_cramino)
+            }
 
             // Combine all results for markdown report
             // Use the stored annotatecnv results from earlier CNV analysis
@@ -1539,14 +1517,13 @@ workflow analysis {
             .combine(merge_annotation.out.occmergeout, by:0)
             .combine(run_nn_classifier.out.rmdnanodx, by: 0)
             .combine(mgmt_promoter.out.mgmtresultsout, by:0)
-            .combine(annotesv.out.annotsvfusion, by:0)
             .combine(svannasv.out.rmdsvannahtml, by:0)
-            .combine(knotannotsv.out.rmdannotsvhtml, by:0)
+            .combine(svannasv_fusion_events.out.filterfusioneventout, by:0)
             .combine(igv_tools.out.tertp_out_igv, by:0)
             .combine(cramino_report.out.craminostatout, by:0)
             .combine(plot_genomic_regions.out.plot_genomic_regions_out, by:0)
             // Create final map for markdown report
-        mergecnv_out_map = mergecnv_out.map { sample_id, cnv_plot, tumor_copy_number, annotatedcnv_filter_header, cnv_chr9, cnv_chr7, merge_annotation_filter_snvs_allcall, nanodx_classifier, mgmt_results, annotSV_fusion_extraction, svannahtml, annotsvhtml, terphtml, craminoreport, egfr_coverage, idh_coverage, tertp_coverage -> [
+        mergecnv_out_map = mergecnv_out.map { sample_id, cnv_plot, tumor_copy_number, annotatedcnv_filter_header, cnv_chr9, cnv_chr7, merge_annotation_filter_snvs_allcall, nanodx_classifier, mgmt_results, svannahtml, fusion_events, terphtml, craminoreport, egfr_coverage, idh_coverage, tertp_coverage -> [
                     sample_id,
                     craminoreport,
                     nanodx_classifier,
@@ -1559,10 +1536,9 @@ workflow analysis {
                     cnv_chr7,
                     mgmt_results,
                     merge_annotation_filter_snvs_allcall,
-                    annotSV_fusion_extraction,
-                    terphtml,
+                    fusion_events,
                     svannahtml,
-                    annotsvhtml,
+                    terphtml,
                     egfr_coverage,
                     idh_coverage,
                     tertp_coverage

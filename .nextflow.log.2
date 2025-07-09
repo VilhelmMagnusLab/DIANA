@@ -1,59 +1,46 @@
-Apr-15 09:26:22.382 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
-Apr-15 09:26:22.485 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 24.10.1
-Apr-15 09:26:22.504 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/chbope/.nextflow/plugins; core-plugins: nf-amazon@2.9.1,nf-azure@1.10.2,nf-cloudcache@0.4.2,nf-codecommit@0.2.2,nf-console@1.1.4,nf-google@1.15.2,nf-tower@1.9.3,nf-wave@1.7.3
-Apr-15 09:26:22.522 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
-Apr-15 09:26:22.523 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
-Apr-15 09:26:22.526 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
-Apr-15 09:26:22.538 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
-Apr-15 09:26:22.569 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
-Apr-15 09:26:22.574 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
-Apr-15 09:26:22.600 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/chbope/.nextflow/secrets/store.json
-Apr-15 09:26:22.603 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@64e92d61] - activable => nextflow.secret.LocalSecretsProvider@64e92d61
-Apr-15 09:26:22.616 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
-Apr-15 09:26:23.431 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
-Apr-15 09:26:23.444 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [cheesy_banach] DSL2 - revision: 67b7256835
-Apr-15 09:26:23.445 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
-Apr-15 09:26:23.445 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
-Apr-15 09:26:23.496 [main] DEBUG nextflow.Session - Session UUID: e14ff79b-920f-42f6-ac20-610bdbeeab77
-Apr-15 09:26:23.496 [main] DEBUG nextflow.Session - Run name: cheesy_banach
-Apr-15 09:26:23.496 [main] DEBUG nextflow.Session - Executor pool size: 12
-Apr-15 09:26:23.504 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
-Apr-15 09:26:23.510 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
-Apr-15 09:26:23.533 [main] DEBUG nextflow.cli.CmdRun - 
-  Version: 24.10.1 build 5930
-  Created: 18-11-2024 12:21 UTC (13:21 CEST)
-  System: Linux 5.4.0-212-generic
-  Runtime: Groovy 4.0.23 on OpenJDK 64-Bit Server VM 11.0.26+4-post-Ubuntu-1ubuntu120.04
-  Encoding: UTF-8 (UTF-8)
-  Process: 2806802@chbope [127.0.1.1]
-  CPUs: 12 - Mem: 78.2 GB (556.2 MB) - Swap: 6 GB (5.9 GB)
-Apr-15 09:26:23.567 [main] DEBUG nextflow.Session - Work-dir: /home/chbope/extension/trash [ext2/ext3]
-Apr-15 09:26:23.605 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
-Apr-15 09:26:23.615 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
-Apr-15 09:26:23.641 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
-Apr-15 09:26:23.651 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 13; maxThreads: 1000
-Apr-15 09:26:23.659 [main] ERROR nextflow.cli.Launcher - Unable to acquire lock on session with ID e14ff79b-920f-42f6-ac20-610bdbeeab77
+Jul-09 12:49:47.079 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --run_run_order_mode
+Jul-09 12:49:47.376 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.04.6
+Jul-09 12:49:47.398 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/chbope/.nextflow/plugins; core-plugins: nf-amazon@2.15.0,nf-azure@1.16.0,nf-cloudcache@0.4.3,nf-codecommit@0.2.3,nf-console@1.2.1,nf-google@1.21.1,nf-k8s@1.0.0,nf-tower@1.11.4,nf-wave@1.12.1
+Jul-09 12:49:47.432 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Jul-09 12:49:47.433 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Jul-09 12:49:47.437 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Jul-09 12:49:47.463 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Jul-09 12:49:47.492 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
+Jul-09 12:49:47.495 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
+Jul-09 12:49:47.526 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/chbope/.nextflow/secrets/store.json
+Jul-09 12:49:47.530 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@7cedfa63] - activable => nextflow.secret.LocalSecretsProvider@7cedfa63
+Jul-09 12:49:47.543 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Jul-09 12:49:48.176 [main] DEBUG nextflow.config.ConfigBuilder - In the following config snippet the attribute `params.profile` is empty:
+  input=null
+  outdir='./results'
+  run_mode_epi2me=false
+  run_mode_analysis=false
+  run_mode_mergebam=false
+  run_order_mode=false
+  max_cpus=16
+  max_memory='128.GB'
+  max_time='240.h'
+  work_dir="/home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work"
+  nanodx_workflow_dir=null
+  run_run_order_mode=true
 
-Common reasons for this error are:
- - You are trying to resume the execution of an already running pipeline
- - A previous execution was abruptly interrupted, leaving the session open
-
-You can see which process is holding the lock file by using the following command:
- - lsof /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/.nextflow/cache/e14ff79b-920f-42f6-ac20-610bdbeeab77/db/LOCK
-java.io.IOException: Unable to acquire lock on session with ID e14ff79b-920f-42f6-ac20-610bdbeeab77
-
-Common reasons for this error are:
- - You are trying to resume the execution of an already running pipeline
- - A previous execution was abruptly interrupted, leaving the session open
-
-You can see which process is holding the lock file by using the following command:
- - lsof /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/.nextflow/cache/e14ff79b-920f-42f6-ac20-610bdbeeab77/db/LOCK
-	at nextflow.cache.DefaultCacheStore.openDb(DefaultCacheStore.groovy:91)
-	at nextflow.cache.DefaultCacheStore.open(DefaultCacheStore.groovy:106)
-	at nextflow.cache.DefaultCacheStore.open(DefaultCacheStore.groovy)
-	at nextflow.cache.CacheDB.open(CacheDB.groovy:59)
-	at nextflow.Session.init(Session.groovy:441)
-	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:129)
-	at nextflow.cli.CmdRun.run(CmdRun.groovy:376)
-	at nextflow.cli.Launcher.run(Launcher.groovy:503)
-	at nextflow.cli.Launcher.main(Launcher.groovy:658)
+Jul-09 12:49:48.178 [main] ERROR nextflow.cli.Launcher - Unknown config attribute `params.profile` -- check config file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
+nextflow.exception.ConfigParseException: Unknown config attribute `params.profile` -- check config file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.config.ConfigBuilder.validate(ConfigBuilder.groovy:462)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.config.ConfigBuilder.validate(ConfigBuilder.groovy:469)
+	at nextflow.config.ConfigBuilder.validate(ConfigBuilder.groovy:449)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.config.ConfigBuilder.merge0(ConfigBuilder.groovy:419)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.config.ConfigBuilder.buildConfig0(ConfigBuilder.groovy:374)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.config.ConfigBuilder.buildGivenFiles(ConfigBuilder.groovy:318)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.config.ConfigBuilder.buildConfigObject(ConfigBuilder.groovy:816)
+	at org.codehaus.groovy.vmplugin.v8.IndyInterface.fromCache(IndyInterface.java:321)
+	at nextflow.config.ConfigBuilder.build(ConfigBuilder.groovy:829)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:333)
+	at nextflow.cli.Launcher.run(Launcher.groovy:513)
+	at nextflow.cli.Launcher.main(Launcher.groovy:673)

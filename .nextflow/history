@@ -23,10 +23,571 @@
 2025-04-14 14:06:55	17.3s	condescending_northcutt	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
 2025-04-14 14:14:41	40.9s	chaotic_church	OK	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
 2025-04-14 14:18:08	-	mighty_shaw	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
-2025-04-14 14:19:39	-	angry_babbage	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
+2025-04-14 14:19:39	29d 18h 16m 24s	angry_babbage	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_order_mode -resume -w /home/chbope/extension/trash
 2025-04-14 14:22:10	-	jovial_williams	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
 2025-04-14 14:22:31	2h 11m 52s	ecstatic_rutherford	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
-2025-04-15 09:13:24	-	modest_payne	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-15 09:13:24	28d 23h 22m 38s	modest_payne	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
 2025-04-15 09:26:23	-	cheesy_banach	-	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
 2025-04-15 09:26:36	2h 54m 32s	disturbed_torricelli	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
 2025-04-15 16:16:47	56.2s	peaceful_tesla	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-29 15:07:28	4.4s	small_plateau	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-29 15:08:04	31.8s	pedantic_moriondo	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-29 15:12:03	31s	berserk_faraday	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-29 15:16:22	32.3s	nasty_curry	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-04-30 14:50:21	32.3s	insane_lumiere	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-05-05 10:31:38	4.4s	sleepy_euler	ERR	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
+2025-05-05 10:34:49	5.3s	nostalgic_gutenberg	OK	67b72568354b4de7bbed5db628f58777	e14ff79b-920f-42f6-ac20-610bdbeeab77	nextflow run main.nf --run_mode_analysis cnv -resume -w /home/chbope/extension/trash
+2025-05-05 10:39:57	4.8s	happy_kalman	ERR	67b72568354b4de7bbed5db628f58777	47ff3b4d-27c8-458a-98d6-51a7894dd08f	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 10:44:29	3m 16s	compassionate_swartz	OK	67b72568354b4de7bbed5db628f58777	5e40378d-7806-437f-9efa-0c8aa2f82ddf	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:07:04	-	pensive_swirles	-	67b72568354b4de7bbed5db628f58777	8605c52a-85d8-4cd5-9f0d-0c5bae2abb8a	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:07:26	2m 45s	thirsty_swartz	OK	67b72568354b4de7bbed5db628f58777	4b597cdc-2225-47d7-a599-1f0e0b2202b3	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:26:22	8d 21h 9m 35s	backstabbing_lalande	ERR	67b72568354b4de7bbed5db628f58777	505e6321-1018-430d-98a2-7ab32f75f392	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:27:17	-	boring_thompson	-	67b72568354b4de7bbed5db628f58777	76ce71ba-8a6c-4267-bd1b-58ee72ebeb13	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:29:47	4.4s	naughty_gautier	OK	67b72568354b4de7bbed5db628f58777	4dffe108-0c6c-4798-9877-234a056c772a	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:31:05	4.6s	jovial_venter	OK	67b72568354b4de7bbed5db628f58777	e508b32a-626a-4aa9-a33b-3b0f7d1a3380	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:35:48	4s	kickass_kay	OK	67b72568354b4de7bbed5db628f58777	588c7f59-43cb-49da-ae93-666cb8a6f569	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:38:24	-	grave_meninsky	-	67b72568354b4de7bbed5db628f58777	168f4edf-1d2f-4bba-b5c4-7c6754cc29da	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:38:39	4.8s	maniac_euclid	ERR	67b72568354b4de7bbed5db628f58777	bb06e2fa-fe99-4e30-8764-69b838aeb45e	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:54:02	4.6s	furious_marconi	OK	67b72568354b4de7bbed5db628f58777	af178203-6314-44be-917b-392621c14a82	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:54:59	4.8s	mighty_mahavira	OK	67b72568354b4de7bbed5db628f58777	a8d0ee3f-d4f8-48e8-aa21-3c27e8dfe2b4	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:55:49	-	mad_tesla	-	67b72568354b4de7bbed5db628f58777	e8ec8597-b93b-47fd-89f5-0cfbd06582bd	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:57:13	3.8s	evil_lovelace	OK	67b72568354b4de7bbed5db628f58777	d832e567-e102-4948-8bae-0ee4c367e538	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 11:58:23	8d 20h 37m 35s	nauseous_planck	ERR	67b72568354b4de7bbed5db628f58777	27cd85bc-0795-4d7c-922a-29e092b7fd57	nextflow run main.nf --run_order_mode -w /home/chbope/extension/trash
+2025-05-05 13:21:31	4.2s	special_allen	OK	67b72568354b4de7bbed5db628f58777	fcc3fa90-bac5-4e48-9bb4-10998296ec0f	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:22:48	4.8s	clever_caravaggio	OK	67b72568354b4de7bbed5db628f58777	ca99d2a8-c02d-4564-9167-4bbc28ef2438	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:26:35	-	zen_hypatia	-	67b72568354b4de7bbed5db628f58777	40765cd6-c557-4ae4-af25-c3dd940769e4	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:29:50	4.8s	kickass_mcclintock	OK	67b72568354b4de7bbed5db628f58777	0e9db8c7-ab9b-469a-995a-a6dea454d3eb	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:32:04	4s	compassionate_kalam	OK	67b72568354b4de7bbed5db628f58777	2f2a53dd-87ed-47c3-b7e3-278e4bbfcc23	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:33:30	4.9s	thirsty_davinci	OK	67b72568354b4de7bbed5db628f58777	a34eee07-f007-4186-98cf-722a41b269f1	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:35:35	4.3s	nasty_brenner	OK	67b72568354b4de7bbed5db628f58777	c7c192b5-6c61-4bb4-93d5-bed2c86db584	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:38:45	4.4s	crazy_tesla	OK	67b72568354b4de7bbed5db628f58777	747f9193-f8ea-4263-a710-34399406c661	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:42:59	4.3s	sick_sanger	ERR	67b72568354b4de7bbed5db628f58777	ab8ec6ac-c5b4-4414-bc28-f3ef9d372990	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:45:17	4.5s	pensive_keller	OK	67b72568354b4de7bbed5db628f58777	26939255-bfe2-4773-87fb-21a7809fa364	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:48:35	4.3s	nauseous_bhaskara	OK	67b72568354b4de7bbed5db628f58777	2c534fc2-28b7-4f9e-a8e9-c124199df089	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:52:40	4.1s	condescending_ritchie	OK	67b72568354b4de7bbed5db628f58777	b4fe25ed-b006-4113-ac2e-4da70aa61ed7	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:58:18	3.9s	thirsty_monod	OK	67b72568354b4de7bbed5db628f58777	a3eb45d5-ffa1-4556-ba7b-915540c8c1a5	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 13:58:58	3.8s	kickass_curie	OK	67b72568354b4de7bbed5db628f58777	9470f2c8-3d39-44fc-93d7-444d564b30d3	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:05:14	4.4s	peaceful_bose	OK	67b72568354b4de7bbed5db628f58777	5f5037b3-1535-49d1-940c-a29c1bacda53	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:24:06	4.1s	extravagant_albattani	OK	67b72568354b4de7bbed5db628f58777	1f3b8315-3e25-4031-ae3f-668bee7553aa	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:26:03	4.1s	festering_joliot	OK	67b72568354b4de7bbed5db628f58777	bea557c8-6044-457d-a8d5-763c2e7467cf	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:28:00	4.2s	distracted_solvay	ERR	67b72568354b4de7bbed5db628f58777	eea070b9-e701-4a9d-9492-138438d03a59	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:30:59	4.2s	disturbed_plateau	ERR	67b72568354b4de7bbed5db628f58777	6367dd9b-159b-4a81-8b9d-60572def45e7	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:31:59	3.6s	shrivelled_meucci	OK	67b72568354b4de7bbed5db628f58777	cf16a892-a51b-49ba-8a57-5532c7b785d1	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:34:59	-	distraught_wegener	-	67b72568354b4de7bbed5db628f58777	b0136cbb-709b-4fe3-8cc2-9ac9a1a2f0af	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:35:51	4s	gloomy_wright	OK	67b72568354b4de7bbed5db628f58777	2a911520-3491-460a-ac05-8f2eb4dd70f8	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:36:39	8d 17h 59m 17s	cheesy_bernard	ERR	67b72568354b4de7bbed5db628f58777	438a8342-39a4-4e73-9618-ecc0d6f4c081	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:44:27	-	loving_majorana	-	67b72568354b4de7bbed5db628f58777	0c831bd0-15d0-4dc1-9b56-d46c529f41a1	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:45:54	-	loquacious_brown	-	67b72568354b4de7bbed5db628f58777	09643bfd-71bd-4fe2-9694-287a322fa02e	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:48:49	-	happy_leavitt	-	67b72568354b4de7bbed5db628f58777	f1637b2b-1b64-48a4-aa98-439f3c1f93fc	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:50:18	-	loving_planck	-	67b72568354b4de7bbed5db628f58777	641faac5-ee4f-4eb1-8443-3b2eeabc1afc	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:51:06	3.9s	exotic_mcclintock	OK	67b72568354b4de7bbed5db628f58777	8a6d82e6-9a47-4aab-a5f8-eab2cc64eff2	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:52:47	4.3s	scruffy_elion	OK	67b72568354b4de7bbed5db628f58777	eec0cd3b-1263-4f04-af97-a5d569244a1c	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 14:58:28	4.1s	big_ekeblad	OK	67b72568354b4de7bbed5db628f58777	b7ca24e9-c3b7-4dee-b3d2-e09476f582ae	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:01:17	4.7s	distraught_feynman	OK	67b72568354b4de7bbed5db628f58777	17a6a4e6-3a6a-4f69-95e9-be30ec83f1b2	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:01:32	1m 31s	cheesy_panini	OK	67b72568354b4de7bbed5db628f58777	2d674a58-9725-4252-9647-f37ab2770e54	nextflow run main.nf --run_mode_analysis terp -w /home/chbope/extension/trash
+2025-05-05 15:04:00	8d 17h 31m 56s	nice_descartes	ERR	67b72568354b4de7bbed5db628f58777	ed5404fe-fc99-4f1f-8c33-f0c93cf54321	nextflow run main.nf --run_mode_analysis occ -w /home/chbope/extension/trash
+2025-05-05 15:07:34	4.6s	elegant_ride	OK	67b72568354b4de7bbed5db628f58777	3bb4f00d-a1f3-4fd9-aa3a-7f3dc574dfab	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:22:49	4s	ridiculous_majorana	OK	67b72568354b4de7bbed5db628f58777	6ac96b01-52b8-4c28-b2dd-11147e244159	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:33:58	4s	fabulous_dubinsky	OK	67b72568354b4de7bbed5db628f58777	fcdd0ab3-ab1d-4b2d-b109-01f33c37fa0d	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:37:19	4.3s	tiny_meucci	OK	67b72568354b4de7bbed5db628f58777	4477e944-084f-4f5d-916a-bd4d52cd3931	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:37:29	4.5s	serene_angela	OK	67b72568354b4de7bbed5db628f58777	dd551e94-0c7b-48ee-bae9-a115f4af6527	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:38:21	4.8s	crazy_angela	OK	67b72568354b4de7bbed5db628f58777	f1393877-1536-4698-98cc-68cc0c8dde95	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:39:50	4.4s	special_stallman	ERR	e6f502126b752a19be9eb3b5a211827e	dda358c2-0894-4789-aae1-6b03b52a7415	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:40:44	4.1s	suspicious_stone	ERR	e6f502126b752a19be9eb3b5a211827e	4dbfaf9e-d568-4604-832c-cb9fa542bcca	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:51:39	4.3s	mighty_faraday	ERR	e6f502126b752a19be9eb3b5a211827e	2b3880d5-0965-4eec-a5ed-ab59774ad5a0	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:52:59	3.9s	big_lovelace	ERR	e6f502126b752a19be9eb3b5a211827e	5a886491-d49f-4d39-a284-07b9372bff89	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:55:16	3.9s	friendly_jones	ERR	e6f502126b752a19be9eb3b5a211827e	90cf491e-37ef-4a5f-8829-a947b808901c	nextflow run main.nf --run_mode_analysis cnv --sample_id T10-01 -w /home/chbope/extension/trash
+2025-05-05 15:57:12	4.8s	curious_descartes	ERR	e6f502126b752a19be9eb3b5a211827e	1f895905-dbf5-41db-ba21-c6f0f5b21be8	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 15:57:48	4.1s	admiring_curie	ERR	e6f502126b752a19be9eb3b5a211827e	a9966935-7b4e-4eb7-9df2-e331e540b3ef	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 16:03:19	4.5s	loquacious_church	ERR	e6f502126b752a19be9eb3b5a211827e	3d689364-97f6-4351-8122-855c565a4025	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 16:04:07	3.9s	suspicious_brattain	ERR	e6f502126b752a19be9eb3b5a211827e	3bbeb405-378c-4d6e-9eb7-d7f098a6c970	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 16:07:58	4.4s	voluminous_swartz	ERR	e6f502126b752a19be9eb3b5a211827e	b58c6181-cf56-426c-abcc-804614842d8b	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 16:11:24	4.5s	infallible_pauling	ERR	816936753c8f4f01491d0384d1eb1447	a2a5ea5a-1e33-4155-97fa-d997917745e4	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 16:16:27	4.5s	berserk_edison	OK	67b72568354b4de7bbed5db628f58777	4d6ba2c9-4adf-4bdd-8d4a-af2abfb5c797	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 16:16:40	4.7s	distraught_shockley	OK	67b72568354b4de7bbed5db628f58777	d095c86c-ee5f-4a74-92b1-4ff7a017ea46	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 16:17:44	5s	pensive_wilson	OK	67b72568354b4de7bbed5db628f58777	62c01150-0642-482d-a505-46d7ad42d145	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-05 16:22:10	4.3s	high_panini	OK	67b72568354b4de7bbed5db628f58777	bddbe259-54a5-4bd7-8656-9d64c1757190	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-13 11:36:53	5.1s	furious_spence	ERR	67b72568354b4de7bbed5db628f58777	94b16138-9993-4d16-a2d9-98c0819f65b8	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-13 11:39:26	4.7s	jovial_mirzakhani	OK	67b72568354b4de7bbed5db628f58777	0df4ad1f-dcaa-4789-85f2-195ba6fae368	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-13 11:45:39	4.2s	intergalactic_albattani	OK	67b72568354b4de7bbed5db628f58777	e9156903-2e4e-4021-92de-b6779c8b8484	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-13 11:46:27	4.5s	exotic_kowalevski	OK	67b72568354b4de7bbed5db628f58777	373da084-4a31-4165-b88b-346b6ae339c7	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-13 11:46:51	4.5s	shrivelled_wegener	OK	67b72568354b4de7bbed5db628f58777	07e01c0d-9173-47cf-af12-821223913025	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-13 11:47:28	4.3s	loquacious_bohr	OK	67b72568354b4de7bbed5db628f58777	ffe75b5a-8d2d-4b9a-becc-e22568386c6b	nextflow run main.nf --run_mode_analysis cnv -w /home/chbope/extension/trash
+2025-05-13 11:49:26	-	happy_lattes	-	67b72568354b4de7bbed5db628f58777	5644ef31-17f7-4779-a8c8-258ca0aee058	nextflow run main.nf --run_order_mode -w /home/chbope/extension/trash
+2025-05-13 11:51:09	20h 44m 48s	gloomy_hoover	ERR	67b72568354b4de7bbed5db628f58777	81f3fa0a-b9ac-43fa-a899-56a1319165e9	nextflow run main.nf --run_order_mode -w /home/chbope/extension/trash
+2025-05-13 13:18:32	-	ridiculous_poitras	-	67b72568354b4de7bbed5db628f58777	6fe32065-0b84-47b4-ad13-814e9bfa9e11	nextflow run main.nf --run_mode_analysis all -w /home/chbope/extension/trash
+2025-05-13 13:18:43	-	disturbed_curry	-	67b72568354b4de7bbed5db628f58777	6fe32065-0b84-47b4-ad13-814e9bfa9e11	nextflow run main.nf --run_mode_analysis all -w /home/chbope/extension/trash -resume
+2025-05-13 13:18:52	-	marvelous_einstein	-	67b72568354b4de7bbed5db628f58777	6fe32065-0b84-47b4-ad13-814e9bfa9e11	nextflow run main.nf --run_mode_analysis all -w /home/chbope/extension/trash -resume
+2025-05-13 13:19:32	2h 41m 55s	thirsty_kimura	ERR	67b72568354b4de7bbed5db628f58777	6fe32065-0b84-47b4-ad13-814e9bfa9e11	nextflow run main.nf --run_mode_analysis rmd -w /home/chbope/extension/trash -resume
+2025-05-13 15:11:06	-	pensive_goodall	-	67b72568354b4de7bbed5db628f58777	6fe32065-0b84-47b4-ad13-814e9bfa9e11	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-05-13 15:11:16	56m 27s	cranky_curry	ERR	67b72568354b4de7bbed5db628f58777	6fe32065-0b84-47b4-ad13-814e9bfa9e11	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-05-14 08:40:17	1m 21s	infallible_edison	ERR	67b72568354b4de7bbed5db628f58777	6fe32065-0b84-47b4-ad13-814e9bfa9e11	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-05-14 08:59:22	2h 3m 14s	reverent_volta	OK	67b72568354b4de7bbed5db628f58777	6fe32065-0b84-47b4-ad13-814e9bfa9e11	nextflow run main.nf --run_mode_analysis rmd -resume -w /home/chbope/extension/trash
+2025-07-01 10:18:34	-	stupefied_panini	-	67b72568354b4de7bbed5db628f58777	fe0564ec-02b0-418c-b6d6-6c54898bdd82	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:19:20	-	festering_legentil	-	67b72568354b4de7bbed5db628f58777	5168196a-9c68-4a2a-af0f-fb50b629ada6	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:19:58	-	scruffy_ramanujan	-	67b72568354b4de7bbed5db628f58777	513f6a7b-0545-4b0f-93fd-db618a97fa90	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:20:26	-	confident_dijkstra	-	67b72568354b4de7bbed5db628f58777	5d568d96-9f59-4b89-aa38-28a9cc2015cc	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:21:39	-	suspicious_swirles	-	67b72568354b4de7bbed5db628f58777	13b08270-37e9-4674-9df5-e800776eb386	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:22:18	-	cheeky_euclid	-	67b72568354b4de7bbed5db628f58777	db3c74e6-d287-4682-b038-bdca4fe95e60	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:37:04	-	distracted_tesla	-	67b72568354b4de7bbed5db628f58777	1042888e-41cc-4b26-964b-bdfb6365e662	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:39:19	-	pedantic_descartes	-	67b72568354b4de7bbed5db628f58777	e859bc46-c57f-4c90-b55b-530f3781dcbd	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:44:55	-	berserk_gautier	-	67b72568354b4de7bbed5db628f58777	76600e7f-143d-4336-8ac9-f6f86a174f64	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:48:18	-	insane_sax	-	67b72568354b4de7bbed5db628f58777	99264f5d-ad26-4e85-a142-9e7ac1525034	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:50:16	-	ecstatic_morse	-	67b72568354b4de7bbed5db628f58777	f56367af-4fdf-4ad3-92a8-2fe26a18c9a5	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:51:20	4.5s	spontaneous_pesquet	OK	67b72568354b4de7bbed5db628f58777	5c7da0fe-a854-4501-87b8-8cb73f1035c3	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:54:45	4.1s	nauseous_dalembert	OK	67b72568354b4de7bbed5db628f58777	1aacff1e-bf42-45c3-abbc-b9e5e036fc7c	nextflow run main.nf --run_mode_mergebam
+2025-07-01 10:55:36	4.2s	pensive_boyd	OK	67b72568354b4de7bbed5db628f58777	89902f15-01e5-4b1e-a2bc-bfa4481dfa4d	nextflow run main.nf --run_mode_mergebam
+2025-07-01 11:12:56	4.8s	insane_hodgkin	ERR	67b72568354b4de7bbed5db628f58777	30423faa-c1cc-4b18-9c04-96f357792398	nextflow run main.nf --run_mode_mergebam
+2025-07-01 11:17:21	4.4s	amazing_mccarthy	ERR	67b72568354b4de7bbed5db628f58777	cea3afc3-70ac-4ec9-af3d-e0eaadaeb6af	nextflow run main.nf --run_mode_mergebam
+2025-07-01 11:19:01	13.5s	clever_franklin	ERR	67b72568354b4de7bbed5db628f58777	d9d4a255-fe73-42ef-9f5a-577a10da087a	nextflow run main.nf --run_mode_mergebam
+2025-07-01 11:20:42	5.3s	irreverent_wozniak	ERR	67b72568354b4de7bbed5db628f58777	793d0c0a-5672-4ced-a7c5-dba1f0b1ec63	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 11:24:22	6.2s	serene_hopper	ERR	67b72568354b4de7bbed5db628f58777	765f80fa-87a5-4e09-874e-d88436dcc567	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 11:25:49	5.3s	big_stone	ERR	67b72568354b4de7bbed5db628f58777	31ffab6d-7e47-4e14-91ab-f7cd02e8c7d6	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 11:27:51	5.8s	tiny_magritte	ERR	67b72568354b4de7bbed5db628f58777	39cd3a60-94bb-4e5d-906c-ae3dc250e205	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 11:53:06	5.9s	confident_tesla	ERR	67b72568354b4de7bbed5db628f58777	dbf22e4f-30c5-439b-8200-db946fd4e8c0	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 11:55:16	5.6s	happy_plateau	ERR	67b72568354b4de7bbed5db628f58777	130db066-8acc-4a67-8997-e592108f5bff	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 11:57:12	5.4s	wise_joliot	ERR	67b72568354b4de7bbed5db628f58777	935c67cc-f775-4527-8fd1-ace8b1175d9f	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:35:30	5.7s	marvelous_boyd	ERR	67b72568354b4de7bbed5db628f58777	439dc76e-5ce6-4fac-92f6-79defb9af989	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:42:13	5.6s	pensive_engelbart	ERR	67b72568354b4de7bbed5db628f58777	a996203a-50c4-422b-a1a8-d44c879f86a0	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:44:40	5.4s	happy_kare	ERR	67b72568354b4de7bbed5db628f58777	50456e25-128e-4057-8f6b-96df90034f1c	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:46:18	6.1s	stupefied_mendel	ERR	67b72568354b4de7bbed5db628f58777	bbeaf429-af0a-4c98-a31d-a079d44eb994	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:49:52	5.2s	elated_allen	ERR	67b72568354b4de7bbed5db628f58777	bc042290-3b45-4216-ab5f-c9f5b88c7311	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:50:23	5.2s	shrivelled_khorana	ERR	67b72568354b4de7bbed5db628f58777	b642dbae-aa55-425a-a748-b1f54ac0b7ca	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:53:03	6s	nostalgic_stallman	ERR	67b72568354b4de7bbed5db628f58777	1b5f9d87-9034-4933-b966-9d3d1e694f12	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:56:14	5.6s	happy_lalande	ERR	67b72568354b4de7bbed5db628f58777	64834c0e-83c0-4031-9611-2ef737160d01	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 12:56:49	5.6s	trusting_noyce	ERR	67b72568354b4de7bbed5db628f58777	a0eb2ba2-f734-44de-9ef0-92baa35c77c8	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 13:00:23	5.3s	tender_kimura	ERR	67b72568354b4de7bbed5db628f58777	4b78cfe5-fcb0-4ae4-8c90-6c9c6f833dc3	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 13:03:52	5.6s	elated_lichterman	ERR	67b72568354b4de7bbed5db628f58777	50cc9cdd-d7e2-4f74-a012-33599a09f5f0	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 13:10:35	13s	backstabbing_pesquet	ERR	67b72568354b4de7bbed5db628f58777	4ab9ec54-bb78-4e07-a3ff-ec0ceda14167	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 13:11:16	-	maniac_kimura	-	67b72568354b4de7bbed5db628f58777	7940a2d6-55a0-4c74-bfe2-3c282f6baef2	nextflow run main.nf --run_mode_analysis -w /home/chbope/extension/trash/tmp
+2025-07-01 13:11:35	-	goofy_boyd	-	67b72568354b4de7bbed5db628f58777	bf615491-85d8-4564-b962-fe3bfd8c1f5f	nextflow run main.nf --run_mode_analysis all -w /home/chbope/extension/trash/tmp
+2025-07-01 13:12:56	5.5s	shrivelled_aryabhata	ERR	67b72568354b4de7bbed5db628f58777	0cb1c92c-3b15-4970-943e-545252098557	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-01 13:16:04	4.9s	jolly_kowalevski	ERR	67b72568354b4de7bbed5db628f58777	136739f8-2b4b-47db-9c90-ce95001a1074	nextflow run main.nf --run_mode_mergebam
+2025-07-01 13:16:35	5.6s	spontaneous_panini	ERR	67b72568354b4de7bbed5db628f58777	699ed81a-ca26-4256-93f7-a04b34383951	nextflow run main.nf --run_mode_mergebam
+2025-07-01 13:25:20	6s	irreverent_goldberg	ERR	67b72568354b4de7bbed5db628f58777	16064692-c763-4dbe-9f41-b7758a04bf7d	nextflow run main.nf --run_mode_mergebam
+2025-07-01 13:28:13	3m 52s	adoring_heisenberg	OK	67b72568354b4de7bbed5db628f58777	9b8f650e-0d88-437a-afc4-e890995126dd	nextflow run main.nf --run_mode_mergebam
+2025-07-01 13:38:41	4.6s	suspicious_galileo	OK	67b72568354b4de7bbed5db628f58777	9b8f650e-0d88-437a-afc4-e890995126dd	nextflow run main.nf --run_mode_mergebam -resume
+2025-07-01 13:40:48	3m 16s	ridiculous_jones	OK	67b72568354b4de7bbed5db628f58777	06211106-bec5-4f43-a423-c518f8718d2b	nextflow run main.nf --run_mode_mergebam
+2025-07-01 13:51:59	-	small_thompson	-	67b72568354b4de7bbed5db628f58777	ffb1a68f-c5df-481e-b700-eaec50bba1b0	nextflow run main.nf --run_mode_epi2me
+2025-07-01 13:52:26	-	compassionate_euler	-	67b72568354b4de7bbed5db628f58777	607e40e3-e1de-4c54-9f59-8088dbbf6c72	nextflow run main.nf --run_mode_epi2me
+2025-07-01 13:52:57	-	condescending_elion	-	67b72568354b4de7bbed5db628f58777	d598a5d7-4c92-4674-920f-bcc80806cdbc	nextflow run main.nf --run_mode_epi2me
+2025-07-01 13:53:13	4.5s	evil_wing	ERR	67b72568354b4de7bbed5db628f58777	04caec7a-09ce-4c69-a71e-efddd0d6ee16	nextflow run main.nf --run_mode_epi2me all
+2025-07-01 13:54:53	4.1s	spontaneous_dijkstra	ERR	67b72568354b4de7bbed5db628f58777	c2b22020-03b7-4da9-969c-1586026bb069	nextflow run main.nf --run_mode_epi2me all
+2025-07-01 14:00:30	4.5s	trusting_kowalevski	ERR	67b72568354b4de7bbed5db628f58777	bdb53741-ec3d-4c79-ba90-3eba78ac8ce7	nextflow run main.nf --run_mode_epi2me all
+2025-07-01 14:01:02	4.8s	condescending_torricelli	ERR	67b72568354b4de7bbed5db628f58777	7771ac06-964f-4fbb-8654-2f6fafdac999	nextflow run main.nf --run_mode_epi2me all
+2025-07-01 14:04:09	4.9s	cheesy_bohr	ERR	67b72568354b4de7bbed5db628f58777	41e4ba12-9341-4fb0-b211-74f24aa30be5	nextflow run main.nf --run_mode_epi2me all
+2025-07-01 14:07:10	4.5s	pedantic_church	ERR	67b72568354b4de7bbed5db628f58777	635746cc-7c0a-4887-82f2-e24458d3648a	nextflow run main.nf --run_mode_epi2me all
+2025-07-01 14:11:47	5s	festering_meucci	ERR	67b72568354b4de7bbed5db628f58777	f580504a-a2c7-4a4b-906f-2bc649836ef7	nextflow run main.nf --run_mode_epi2me all
+2025-07-01 14:12:57	4.1s	pensive_leakey	ERR	67b72568354b4de7bbed5db628f58777	981de670-a76e-4cae-802c-dfc268868a61	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-01 14:16:31	4.6s	cheeky_agnesi	ERR	67b72568354b4de7bbed5db628f58777	e56806fe-fb36-4774-ae9f-53c923a0b026	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-01 14:23:33	5s	mighty_waddington	ERR	67b72568354b4de7bbed5db628f58777	9dbb14ef-a98d-42ff-bf2f-bea47c2c4f7e	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-01 14:25:24	4.9s	clever_plateau	ERR	67b72568354b4de7bbed5db628f58777	d8a1edee-1b9e-4f56-a1d3-d7710c392074	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-01 14:26:52	4.6s	serene_archimedes	ERR	67b72568354b4de7bbed5db628f58777	4d57159b-82ce-42bb-9742-c45ce929133c	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-01 14:29:07	4.7s	serene_agnesi	ERR	67b72568354b4de7bbed5db628f58777	524f6408-926b-4443-9140-edd16fcd21cb	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-02 08:35:35	-	desperate_gilbert	-	67b72568354b4de7bbed5db628f58777	266d258b-6bae-40f6-8b6a-1999e3357bd8	nextflow run main.nf --run_mode_epi2me
+2025-07-02 08:35:48	4.5s	fabulous_sax	ERR	67b72568354b4de7bbed5db628f58777	1c4dec7b-757e-496d-ae1b-3aefa7bd2a7d	nextflow run main.nf --run_mode_epi2me all
+2025-07-02 08:37:26	3.9s	fervent_mahavira	ERR	67b72568354b4de7bbed5db628f58777	b0c2ca0a-5a6c-4e8c-9383-9cb192d69159	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-02 09:33:52	3.6s	suspicious_mclean	ERR	67b72568354b4de7bbed5db628f58777	8374da2f-39d7-4ed3-b888-691ab1362bf3	nextflow run main.nf --run_mode_analysis occ
+2025-07-02 09:46:58	3.5s	insane_lichterman	ERR	67b72568354b4de7bbed5db628f58777	1967ceba-8fd4-4005-8d9d-63863fc47946	nextflow run main.nf --run_mode_analysis occ
+2025-07-02 09:47:49	4.4s	infallible_monod	ERR	67b72568354b4de7bbed5db628f58777	cf76c207-22ad-4ed3-86db-1f042405112f	nextflow run main.nf --run_mode_analysis occ
+2025-07-02 10:15:51	5.1s	fabulous_dijkstra	ERR	67b72568354b4de7bbed5db628f58777	9631e788-abf2-43b3-af58-c1001f44aa83	nextflow run main.nf --run_mode_analysis occ
+2025-07-02 10:32:16	-	determined_carlsson	-	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ
+2025-07-02 10:45:05	-	high_fermat	-	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 10:45:14	9m 25s	elated_brenner	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:00:35	3.9s	zen_yonath	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:05:15	4.3s	focused_allen	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:19:11	4.4s	adoring_heyrovsky	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:21:50	4.7s	tiny_lovelace	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:22:28	4.7s	irreverent_franklin	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:24:45	4.3s	high_cantor	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:26:40	4.4s	naughty_bohr	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:29:26	4.8s	stupefied_visvesvaraya	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:31:36	9.5s	desperate_elion	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:34:40	14.7s	dreamy_jepsen	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:38:27	-	nauseous_mayer	-	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 11:39:49	17.5s	elated_mahavira	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 12:52:00	-	elated_koch	-	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 12:53:08	6.1s	berserk_poisson	OK	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 12:54:24	3.8s	romantic_joliot	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 12:55:18	5.8s	chaotic_bhabha	OK	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 12:56:05	1d 1h 41m 34s	ecstatic_kowalevski	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 13:05:53	-	lethal_swanson	-	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 13:07:02	4.5s	spontaneous_mayer	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 13:10:44	3.6s	tiny_morse	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 13:12:00	1d 1h 25m 39s	small_fermat	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 13:15:05	-	grave_woese	-	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 13:15:15	4m 35s	evil_brenner	OK	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 13:22:12	-	gloomy_golick	-	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis stat -resume
+2025-07-02 13:22:46	12m 26s	soggy_gates	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 14:00:13	7s	berserk_crick	OK	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-02 14:01:40	4.9s	amazing_allen	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis terp -resume
+2025-07-02 14:03:16	8.9s	sleepy_gates	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis terp -resume
+2025-07-02 14:08:10	28.3s	compassionate_spence	OK	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_analysis terp -resume
+2025-07-02 14:11:33	4.8s	distracted_lamarck	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:14:14	4.7s	hungry_galileo	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:15:30	4.9s	distraught_visvesvaraya	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:17:48	-	chaotic_boyd	-	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:22:30	4.6s	cranky_murdock	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:24:36	4.8s	condescending_brazil	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:27:06	4.3s	tiny_khorana	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:32:11	4.4s	modest_carson	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:56:31	5.1s	distracted_marconi	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:57:07	4.8s	evil_lumiere	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 14:57:57	4.1s	magical_dijkstra	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:02:15	4.5s	big_hypatia	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:06:50	4.2s	nostalgic_joliot	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:08:38	4.8s	suspicious_mcclintock	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:13:04	11.4s	jovial_montalcini	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:39:38	26.9s	high_swartz	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:42:28	10.4s	nice_shockley	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:43:29	5.2s	high_albattani	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:47:38	10.8s	hungry_fermi	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:49:23	27.4s	zen_torvalds	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:51:14	28.7s	mighty_mestorf	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 15:59:08	28.4s	serene_bartik	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 16:01:11	27.9s	stupefied_roentgen	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-02 16:07:58	9.3s	sad_pike	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-03 08:40:30	28.4s	astonishing_feynman	ERR	67b72568354b4de7bbed5db628f58777	4bdf4be2-b52f-41c8-9795-b20bb18034b8	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-03 08:51:28	27.3s	festering_fermi	ERR	67b72568354b4de7bbed5db628f58777	5e0f3325-8ec6-4b89-b3e8-1d11dc47bd55	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 08:54:53	28.7s	furious_aryabhata	ERR	67b72568354b4de7bbed5db628f58777	2e5c0eb9-2f95-4d11-a566-0ae80b242a27	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 08:58:42	20s	curious_carson	ERR	67b72568354b4de7bbed5db628f58777	b83d0ca6-0db4-4368-98d0-5853f9e3bb90	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 09:45:54	5.5s	gigantic_stone	ERR	67b72568354b4de7bbed5db628f58777	465a5d6e-13c9-4e4e-a9b2-96dc1d0380ec	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 09:46:59	5.1s	evil_easley	ERR	67b72568354b4de7bbed5db628f58777	206d547d-0456-42f2-a8fe-a1aad219fe60	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 09:49:02	4.4s	nasty_lumiere	ERR	67b72568354b4de7bbed5db628f58777	fd7f6fb3-a51e-4b8e-944e-3d74ffd6f777	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 09:50:26	5s	distracted_roentgen	ERR	67b72568354b4de7bbed5db628f58777	a604dc97-8685-4cd3-99da-ac91b66b3530	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 09:52:36	5.1s	sick_wozniak	ERR	67b72568354b4de7bbed5db628f58777	dc0c65f8-0cde-45e1-b312-764e1e5979af	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 09:52:59	4.7s	extravagant_plateau	ERR	67b72568354b4de7bbed5db628f58777	c7f33d9d-8bd3-4cae-be5a-0f02de581709	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:03:40	3m 53s	thirsty_rutherford	OK	67b72568354b4de7bbed5db628f58777	2611994b-d2fd-4124-ad1d-8eb49194bfda	nextflow run main.nf --run_mode_mergebam
+2025-07-03 10:08:55	-	focused_hugle	-	67b72568354b4de7bbed5db628f58777	2611994b-d2fd-4124-ad1d-8eb49194bfda	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-03 10:09:37	-	awesome_banach	-	67b72568354b4de7bbed5db628f58777	2611994b-d2fd-4124-ad1d-8eb49194bfda	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-03 10:09:55	4h 27m 44s	distracted_swartz	ERR	67b72568354b4de7bbed5db628f58777	2611994b-d2fd-4124-ad1d-8eb49194bfda	nextflow run main.nf --run_mode_analysis occ -resume
+2025-07-03 10:14:47	4.7s	sharp_roentgen	ERR	67b72568354b4de7bbed5db628f58777	5153c23a-dc9d-4848-84c0-412f6f879342	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 10:15:47	4.8s	nauseous_mercator	ERR	67b72568354b4de7bbed5db628f58777	1169d2b3-4b07-4fdd-b47f-00f587bbabcd	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 10:20:16	5.1s	modest_mcclintock	ERR	67b72568354b4de7bbed5db628f58777	c2cf2146-641b-49e0-a767-566d373e76a5	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 10:20:43	-	hungry_pesquet	-	67b72568354b4de7bbed5db628f58777	3caa6451-94f4-4fe8-b827-7c51c225e690	nextflow run main.nf --run_mode_epi2me ssv
+2025-07-03 10:20:58	4.4s	cheeky_planck	ERR	67b72568354b4de7bbed5db628f58777	7a88c8d5-c5ec-4652-afb1-2a70f08bc367	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:26:41	4.9s	modest_poincare	ERR	67b72568354b4de7bbed5db628f58777	9ea650fd-cc3e-43ef-8d91-ceaa070dcdf8	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:30:10	4.2s	crazy_becquerel	ERR	67b72568354b4de7bbed5db628f58777	58f536f8-4549-4fe2-a208-a4e3d58aa9af	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:31:16	4s	drunk_boltzmann	ERR	67b72568354b4de7bbed5db628f58777	51a9f0dd-fd3a-4f06-9489-572e6483ff35	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:38:10	3.7s	nostalgic_visvesvaraya	ERR	67b72568354b4de7bbed5db628f58777	a9013c7d-ec5c-44bd-bb74-32fd8a2b3191	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:39:10	4.9s	hopeful_neumann	ERR	67b72568354b4de7bbed5db628f58777	29f7ecae-7fd3-4125-babe-5038646b91de	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:40:27	4.4s	voluminous_faraday	ERR	67b72568354b4de7bbed5db628f58777	5cf68b59-4502-4e53-9a78-e1a27a9c5daa	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:40:47	4s	nice_maxwell	ERR	67b72568354b4de7bbed5db628f58777	e020fb28-37d7-4346-9efe-ee29ae042723	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:41:23	3.9s	fervent_sanger	ERR	67b72568354b4de7bbed5db628f58777	25f99603-4ca8-4ba6-a978-0a6ef05e0f2f	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:42:20	4.5s	irreverent_torricelli	ERR	67b72568354b4de7bbed5db628f58777	66cb4a74-bc13-417f-bc15-fbbd5072f13b	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:46:27	3.8s	serene_ardinghelli	ERR	67b72568354b4de7bbed5db628f58777	e50b7699-6765-453d-ac58-429f09576fde	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:48:15	4.3s	fervent_tuckerman	ERR	67b72568354b4de7bbed5db628f58777	fcf57381-917a-4e5f-91d3-dac1c26200e2	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 10:55:18	4.2s	shrivelled_dijkstra	ERR	67b72568354b4de7bbed5db628f58777	73aef580-a494-4596-82b6-a3c02d46002a	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:02:07	4.4s	stoic_sanger	ERR	67b72568354b4de7bbed5db628f58777	cadc9828-cee3-4cec-9eb8-148cc32e8fba	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:03:43	4.9s	jolly_ardinghelli	ERR	67b72568354b4de7bbed5db628f58777	8788095b-a530-46d0-8f0f-c68b67d9c7a3	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:06:20	4.4s	nice_einstein	ERR	67b72568354b4de7bbed5db628f58777	3822855b-9bc6-4fe2-a6d0-5071272616c4	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:21:33	3.9s	friendly_stonebraker	ERR	67b72568354b4de7bbed5db628f58777	c5f0526c-e434-4610-b1a4-09fa594539a2	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:25:26	4s	agitated_legentil	ERR	67b72568354b4de7bbed5db628f58777	678a3201-449d-42d0-a736-86ff05f82568	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:28:21	3.7s	angry_leibniz	ERR	67b72568354b4de7bbed5db628f58777	a4baf422-f5f2-4f18-b7a3-1a5891b6686d	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:32:03	4.6s	silly_dubinsky	ERR	67b72568354b4de7bbed5db628f58777	a222f424-0a66-4109-a152-0eae516cf663	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:32:54	4.5s	extravagant_banach	ERR	67b72568354b4de7bbed5db628f58777	689354eb-855b-4cf6-ba4b-5d8c53c230aa	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:33:44	4.5s	suspicious_pesquet	ERR	67b72568354b4de7bbed5db628f58777	b8ef2f50-1b8b-4ff3-9b06-24edab61ccbf	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:34:18	4s	elegant_knuth	ERR	67b72568354b4de7bbed5db628f58777	f6d2dba7-1b95-4224-9177-799faedc2e3e	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:36:21	4.3s	loving_pasteur	ERR	67b72568354b4de7bbed5db628f58777	54b1a71c-2b08-4dbb-87ff-8180f8889989	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:39:04	4.9s	astonishing_swartz	ERR	67b72568354b4de7bbed5db628f58777	82fa96fb-d6d1-4b8a-8774-664c3ed98123	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:44:08	4.3s	gigantic_mandelbrot	ERR	67b72568354b4de7bbed5db628f58777	df9f94b4-f3c9-4866-bc7a-4024c7401c26	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:44:58	4.2s	amazing_ekeblad	ERR	67b72568354b4de7bbed5db628f58777	35d3ca25-96d7-445f-81e0-225bb4e130fd	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:45:33	4.8s	deadly_leavitt	ERR	67b72568354b4de7bbed5db628f58777	65a7fa91-5503-4185-ae5d-12aa00f97845	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 11:54:33	4.1s	goofy_mclean	ERR	67b72568354b4de7bbed5db628f58777	12cf5969-39fd-4a52-8220-7e8c9a304a63	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 13:35:03	4.1s	magical_coulomb	ERR	67b72568354b4de7bbed5db628f58777	53f4ed8d-3d69-4a41-ae22-c4323d047771	nextflow run main.nf --run_mode_epi2me sv
+2025-07-03 14:02:16	4.2s	lethal_ardinghelli	ERR	67b72568354b4de7bbed5db628f58777	9dcd3ffd-b3f6-4028-b1d8-5d614309effb	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:02:40	4.5s	cheesy_kowalevski	ERR	67b72568354b4de7bbed5db628f58777	cbd54cca-ba6b-4ee5-a375-12e9b43c480a	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:03:04	4.7s	sharp_feynman	ERR	67b72568354b4de7bbed5db628f58777	af9c8c67-db1f-4b68-aafb-41db074a1d9f	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:03:40	4.6s	nasty_cray	ERR	67b72568354b4de7bbed5db628f58777	c4b8674e-ff2d-41d5-b316-1d34fbccff81	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:04:32	3.9s	loving_lamarr	ERR	67b72568354b4de7bbed5db628f58777	44fb9278-9fcd-47af-a684-2f0b011d339b	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:05:13	4s	modest_panini	ERR	67b72568354b4de7bbed5db628f58777	e7a8ec8c-8e32-46b7-9724-8207219b88a2	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:05:32	4.3s	wise_lattes	ERR	67b72568354b4de7bbed5db628f58777	282d88f0-257d-4835-9f4a-31a01cbe08c3	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:08:22	-	elated_wescoff	-	67b72568354b4de7bbed5db628f58777	23f5c847-59ef-4679-bb39-b06081e0e513	nextflow run main.nf --run_mode_epi2me
+2025-07-03 14:08:34	3.8s	elegant_swanson	ERR	67b72568354b4de7bbed5db628f58777	9b02fa55-6d96-46b6-a576-d90c14c0ebaf	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:09:32	-	fervent_lovelace	-	67b72568354b4de7bbed5db628f58777	e3d45517-6b4a-43aa-91a7-0951c8f9c5f8	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:41:16	13s	furious_lalande	ERR	67b72568354b4de7bbed5db628f58777	d4664fcc-c296-4f9d-987d-664bdab352a2	nextflow run main.nf --run_mode_mergebam -w /home/chbope/extension/trash/tmp
+2025-07-03 14:43:33	-	trusting_lalande	-	67b72568354b4de7bbed5db628f58777	ee41c2a1-2df1-4ab0-bd06-9759a135eab1	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:49:13	4.5s	kickass_swartz	ERR	67b72568354b4de7bbed5db628f58777	a38746c6-00c5-4afb-8f52-12749fb43b50	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:49:50	5.2s	prickly_lichterman	ERR	67b72568354b4de7bbed5db628f58777	5f9d2af0-477e-4412-9f3a-88a141193782	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:50:25	5.8s	romantic_lamport	ERR	67b72568354b4de7bbed5db628f58777	6d6a2c91-7a0f-4503-9484-27e42fc8f731	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:51:37	9.1s	stupefied_stallman	ERR	67b72568354b4de7bbed5db628f58777	18502192-8c89-4b25-982b-63dde17d9107	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:54:17	6.1s	sharp_albattani	ERR	67b72568354b4de7bbed5db628f58777	21b2223d-7542-446b-bd4a-bcf7983e2d2a	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 14:57:32	6.2s	loving_lagrange	ERR	67b72568354b4de7bbed5db628f58777	02176abc-2542-419b-95b3-dd1a26f133bd	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:00:11	6.3s	awesome_avogadro	ERR	67b72568354b4de7bbed5db628f58777	9abeb949-4953-4826-8340-32ac6750e03a	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:02:02	6.1s	peaceful_swartz	ERR	67b72568354b4de7bbed5db628f58777	a1d31075-7dff-49c2-b2e1-48eb1caacc3a	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:04:22	6.3s	angry_cajal	ERR	67b72568354b4de7bbed5db628f58777	bd8402e5-a59c-4280-b53f-4106e5567410	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:06:04	5.8s	high_yonath	ERR	67b72568354b4de7bbed5db628f58777	47305fb6-1e95-4d19-9610-98ee65697be1	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:07:14	6s	insane_shockley	ERR	67b72568354b4de7bbed5db628f58777	cafac5f2-84aa-41f7-862a-929b81114a7b	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:10:25	6s	thirsty_laplace	ERR	67b72568354b4de7bbed5db628f58777	84175fdf-0c4a-40ed-b63b-1afc957a9960	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:12:45	6.2s	big_euclid	ERR	67b72568354b4de7bbed5db628f58777	0cf5c9a1-e5cc-426b-8b78-30e3255f902e	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:13:17	5.2s	jolly_torricelli	ERR	67b72568354b4de7bbed5db628f58777	ea193e76-c233-480c-be20-aae22ed8c810	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:17:30	5.5s	sleepy_cori	ERR	67b72568354b4de7bbed5db628f58777	fa16df9d-1d5a-4f47-bb4d-f0b228ce9dd4	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:20:33	5.9s	mighty_colden	ERR	67b72568354b4de7bbed5db628f58777	f277f18d-16f2-4d16-bcca-4c01bcc1edb4	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:21:48	5.4s	silly_shockley	ERR	67b72568354b4de7bbed5db628f58777	36dc407b-afa6-4d33-8e0b-d29ec803d3c1	nextflow run main.nf --run_mode_epi2me all
+2025-07-03 15:22:16	-	soggy_fourier	-	67b72568354b4de7bbed5db628f58777	08929448-df77-492e-98e8-f9fb14a17b8d	nextflow run main.nf --run_mode_analysis
+2025-07-03 15:22:27	56.6s	jolly_cray	ERR	67b72568354b4de7bbed5db628f58777	f2875239-f3d8-4fed-a5c9-51550fd2001d	nextflow run main.nf --run_mode_analysis terp
+2025-07-03 15:28:53	4.2s	sad_pauling	ERR	67b72568354b4de7bbed5db628f58777	806d9333-908f-401d-a6bf-394c75212249	nextflow run main.nf --run_mode_analysis terp
+2025-07-03 15:30:13	5.2s	astonishing_ardinghelli	ERR	67b72568354b4de7bbed5db628f58777	a0a0fd17-d255-47de-bd34-b2f94aa7d839	nextflow run main.nf --run_mode_analysis terp
+2025-07-03 15:30:55	5.2s	ecstatic_poitras	ERR	67b72568354b4de7bbed5db628f58777	293e7362-ad74-4bb6-9285-a8cc8fba7755	nextflow run main.nf --run_mode_analysis terp
+2025-07-03 15:33:52	5.3s	loquacious_nobel	ERR	67b72568354b4de7bbed5db628f58777	88699528-69ab-43e2-ade6-036c75412d8a	nextflow run main.nf --run_mode_analysis terp
+2025-07-03 15:34:59	5.2s	irreverent_euler	ERR	67b72568354b4de7bbed5db628f58777	cb27adb9-bdc0-40a1-a873-c6855f6dc2b8	nextflow run main.nf --run_mode_analysis terp
+2025-07-03 15:56:55	-	gigantic_saha	-	67b72568354b4de7bbed5db628f58777	d54af66a-2d79-42b1-a2b6-4a8a8d4b9499	nextflow run main.nf --run_mode_analysis terp
+2025-07-03 15:57:13	4s	magical_stallman	ERR	67b72568354b4de7bbed5db628f58777	c975b3f5-0fe0-47bf-966b-e04a44f7b4d0	nextflow run main.nf --run_mode_analysis terp
+2025-07-04 12:41:50	8.2s	silly_stonebraker	ERR	67b72568354b4de7bbed5db628f58777	e27ac384-b8ed-4c5e-b54a-979c323e44c7	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 12:42:43	30.6s	gloomy_cajal	OK	67b72568354b4de7bbed5db628f58777	db06f7d2-88aa-41d5-bb85-a6de981f1567	nextflow run main.nf --run_mode_analysis terp
+2025-07-04 12:43:23	8.8s	mighty_panini	ERR	67b72568354b4de7bbed5db628f58777	f538570a-dacb-447d-a5ba-415f87a8f867	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:24:15	4.8s	naughty_austin	ERR	67b72568354b4de7bbed5db628f58777	e470b964-d3fa-4e6a-96c0-e3b72fe706ae	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:29:21	4.6s	stoic_avogadro	ERR	67b72568354b4de7bbed5db628f58777	cede7cac-3034-4e45-9ae4-40a0a0bc4674	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:38:15	4.9s	gloomy_kimura	ERR	67b72568354b4de7bbed5db628f58777	d9998ddc-37cf-40b4-b002-583eef251ed5	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:41:00	5.5s	distraught_pasteur	ERR	67b72568354b4de7bbed5db628f58777	7b551ecf-a488-4b42-b04a-06a5454b0097	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:41:39	5.3s	lethal_bhabha	ERR	67b72568354b4de7bbed5db628f58777	7e68efe1-597b-46ea-93c2-f2619c40cdcf	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:44:10	4.5s	extravagant_elion	ERR	67b72568354b4de7bbed5db628f58777	2dd17402-4d4e-4dcf-8fd1-649ccc4af366	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:46:12	4.9s	nostalgic_ptolemy	ERR	67b72568354b4de7bbed5db628f58777	8e024086-c118-4345-9c59-e794485374dd	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:46:46	5.9s	boring_poisson	ERR	67b72568354b4de7bbed5db628f58777	8a81f42e-f606-4080-bd8f-a21a10d325d3	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:47:54	5.6s	nasty_brattain	ERR	67b72568354b4de7bbed5db628f58777	259779b4-18b1-4a34-a2e1-0438469bd9cc	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:48:54	15.8s	adoring_hopper	ERR	67b72568354b4de7bbed5db628f58777	03b5f55b-028a-4f6d-8d51-ae84c1718adc	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:52:51	16s	sleepy_varahamihira	OK	67b72568354b4de7bbed5db628f58777	18d8a9e2-39ae-45cb-9b01-b5cd9da918b2	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:55:26	15.9s	berserk_tesla	OK	67b72568354b4de7bbed5db628f58777	68b22662-9f37-4d66-a9e4-682cb880b568	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:57:41	15.5s	magical_kilby	OK	67b72568354b4de7bbed5db628f58777	228fab25-c52a-4ed2-a2e6-fd4cdfc3a506	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 13:59:25	15.5s	goofy_torricelli	OK	67b72568354b4de7bbed5db628f58777	723ddacf-5fdc-4adb-9a72-165326f5fa78	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:00:41	3.8s	cheesy_stallman	ERR	67b72568354b4de7bbed5db628f58777	4c780ad7-1db2-42af-bbbd-69e74cde9e92	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:03:00	15.7s	maniac_bardeen	OK	67b72568354b4de7bbed5db628f58777	cd506e56-7774-4ea4-b2c7-33947dc3fca0	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:04:57	16.1s	elated_dalembert	OK	67b72568354b4de7bbed5db628f58777	c8ee05f0-8e56-4ce5-8f93-978555239b84	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:07:33	16.1s	exotic_escher	OK	67b72568354b4de7bbed5db628f58777	83ff5291-2819-4702-83a8-c61ce956bc6f	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:08:10	4.3s	crazy_jennings	ERR	67b72568354b4de7bbed5db628f58777	2e9ba109-e866-4fe6-af1f-b20c94d56e14	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:08:34	4.6s	tender_crick	ERR	67b72568354b4de7bbed5db628f58777	390f69b9-5255-4145-ba57-bf3cc5d3df2f	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:08:43	4.6s	reverent_woese	ERR	67b72568354b4de7bbed5db628f58777	9b76b9f5-1cf5-4414-a359-534ee8e5dc79	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:08:55	4.3s	lonely_mcclintock	ERR	67b72568354b4de7bbed5db628f58777	e1a6a5e5-5e18-4425-b7d0-50e866af58c7	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:09:05	4s	chaotic_mercator	ERR	67b72568354b4de7bbed5db628f58777	f0c1154b-ef84-4a31-8ffe-aede3583b659	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:09:17	3.8s	romantic_noyce	ERR	67b72568354b4de7bbed5db628f58777	f0c1154b-ef84-4a31-8ffe-aede3583b659	nextflow run main.nf --run_mode_epi2me sv -resume
+2025-07-04 14:09:25	4.8s	fabulous_heisenberg	ERR	67b72568354b4de7bbed5db628f58777	26c687a6-d3e2-447b-ab16-691efafce6d1	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:09:37	4.1s	adoring_banach	ERR	67b72568354b4de7bbed5db628f58777	5eb7c29c-1c27-4f5a-8ab8-7765ac1d1d2e	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:10:22	15.7s	desperate_visvesvaraya	OK	67b72568354b4de7bbed5db628f58777	d19f3078-e9f8-46d4-b2df-beca7f122802	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:11:15	4.5s	nice_curran	ERR	67b72568354b4de7bbed5db628f58777	7f52f299-f30f-47eb-ba2b-651961ace732	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:11:29	4.4s	admiring_bohr	ERR	67b72568354b4de7bbed5db628f58777	0e2944f5-8382-4381-9f2e-c198b4d515c4	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:11:44	4.7s	modest_torvalds	ERR	67b72568354b4de7bbed5db628f58777	58c9439d-588a-426b-96f6-6050246d73f5	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:12:51	4.5s	stoic_stone	ERR	67b72568354b4de7bbed5db628f58777	4b475890-21ff-4b90-a433-b4ef3cb8f9d2	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:13:22	4.6s	backstabbing_northcutt	ERR	67b72568354b4de7bbed5db628f58777	83df845a-27f3-4b8f-9bf8-ef11d91b0aa9	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:13:41	15.9s	amazing_pare	OK	67b72568354b4de7bbed5db628f58777	804a66fc-9d21-4d60-b222-193950a6c741	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:15:56	16.2s	special_montalcini	OK	67b72568354b4de7bbed5db628f58777	9488c435-efa2-4708-b538-e6c196ed33cd	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:16:35	15.4s	zen_hilbert	OK	67b72568354b4de7bbed5db628f58777	4c5c4023-e6e1-4256-8109-29174a91eea0	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 14:29:30	5.1s	confident_brazil	ERR	67b72568354b4de7bbed5db628f58777	cece72ab-5775-475b-ac8b-dc3da35639bd	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 14:30:43	5.9s	modest_williams	ERR	67b72568354b4de7bbed5db628f58777	1ed9169f-05e4-46a3-bf4f-0799ce20c3a4	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 14:32:27	5.7s	fervent_celsius	ERR	67b72568354b4de7bbed5db628f58777	d0581f6a-ed67-4716-8a45-ddb7dd68e486	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 14:43:57	4.8s	sick_cajal	ERR	67b72568354b4de7bbed5db628f58777	b59893fe-7dcb-4408-9956-d5637e05104f	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:01:54	5.7s	sharp_kimura	ERR	67b72568354b4de7bbed5db628f58777	153488a0-2d9d-42c6-8d51-83e400f8c6a8	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:03:27	14m 35s	jolly_curry	ERR	67b72568354b4de7bbed5db628f58777	9d386932-8068-46da-af21-82e132f47d67	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:18:30	5.4s	nostalgic_leavitt	ERR	67b72568354b4de7bbed5db628f58777	cc628bf2-5e5b-4a9d-b1e1-2dd2e7e2a90e	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:19:53	5.4s	modest_rubens	ERR	67b72568354b4de7bbed5db628f58777	62cedeb9-1317-409b-a355-172f8eee0600	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:22:57	5s	marvelous_jang	ERR	67b72568354b4de7bbed5db628f58777	0c583dff-bff2-4991-9b6b-b07c5309d3f3	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:23:46	16.3s	prickly_waddington	OK	67b72568354b4de7bbed5db628f58777	620d2e8b-9217-480b-a4fb-92bffd8f0e1b	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:24:43	4.1s	evil_rubens	ERR	67b72568354b4de7bbed5db628f58777	7f8ff8a2-9fc3-4b3e-a0c6-3d72bada970e	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:24:55	4.8s	nauseous_escher	ERR	67b72568354b4de7bbed5db628f58777	1a29d245-4e99-4db6-9e6c-30ed89bdcf51	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:25:35	4.2s	goofy_volhard	ERR	67b72568354b4de7bbed5db628f58777	275e57be-42ac-40d0-ab85-b8ded5ff1112	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:25:43	4.7s	evil_yonath	ERR	67b72568354b4de7bbed5db628f58777	f7408922-4192-4c53-9486-46b6f3c494ab	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:26:06	4.1s	distracted_snyder	ERR	67b72568354b4de7bbed5db628f58777	745f6a56-072e-4c1a-9f5b-3c57b31a8d1a	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:26:16	3.9s	friendly_wescoff	ERR	67b72568354b4de7bbed5db628f58777	03d67d69-9eec-4225-8f49-d801791e9eb8	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:26:36	3.8s	pedantic_minsky	ERR	67b72568354b4de7bbed5db628f58777	dc6ddc0e-19c3-4fb7-9203-e072e7e79c67	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:28:42	3.9s	sleepy_elion	ERR	67b72568354b4de7bbed5db628f58777	5f36fcde-0886-4c92-836b-508613f5852d	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:28:53	3.7s	backstabbing_nightingale	ERR	67b72568354b4de7bbed5db628f58777	7d0f2956-da03-4846-9fd9-6b7c6bea958a	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:29:27	4.1s	gloomy_davinci	ERR	67b72568354b4de7bbed5db628f58777	91a907fd-2f3c-4696-b536-106cf0c096a1	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:29:54	4s	desperate_mahavira	ERR	67b72568354b4de7bbed5db628f58777	70ccb3b4-0bda-41b4-b86d-f0df24745585	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:30:08	4.9s	marvelous_ramanujan	ERR	67b72568354b4de7bbed5db628f58777	ebf766f9-b447-40ce-966f-060b643a4a20	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:30:27	4.4s	furious_murdock	ERR	67b72568354b4de7bbed5db628f58777	645d81e3-e94f-4ab8-8222-990c09d268c5	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:31:07	4.6s	friendly_rosalind	ERR	67b72568354b4de7bbed5db628f58777	a10aff21-ce59-4194-818a-c07400b28805	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:31:54	3.8s	cheesy_ramanujan	ERR	67b72568354b4de7bbed5db628f58777	40e7cf75-1bad-40ec-87d3-f500c2f083b0	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:33:03	4.3s	cheesy_gates	ERR	67b72568354b4de7bbed5db628f58777	7c19060b-9947-4958-9aaa-debb902707d1	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:33:27	3.9s	high_allen	ERR	67b72568354b4de7bbed5db628f58777	9c17e585-c9f1-4e16-b35b-b767dac28189	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:34:10	4.5s	tiny_stone	ERR	67b72568354b4de7bbed5db628f58777	4511e41c-1c0e-421d-aaff-18ef8ba39ae3	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:34:19	4s	awesome_fermat	ERR	67b72568354b4de7bbed5db628f58777	6142fb7d-db47-4b6c-9fb4-ddd5c5acf8fe	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:35:51	4.7s	cheesy_torricelli	ERR	67b72568354b4de7bbed5db628f58777	40f8205a-eee2-4992-96c1-ed7929e33767	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:36:10	4.1s	sleepy_mcnulty	ERR	67b72568354b4de7bbed5db628f58777	0086a25d-ca24-4182-bd0d-2f1fd4c96ef9	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:36:35	4.1s	awesome_kilby	ERR	67b72568354b4de7bbed5db628f58777	be8344e0-8d6b-46bf-b5b4-073555270e66	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:37:04	4d 20h 6m 43s	serene_becquerel	ERR	67b72568354b4de7bbed5db628f58777	dc52e345-322f-43ea-8cd1-d703d8b08943	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:40:23	4d 20h 3m 24s	adoring_hodgkin	ERR	67b72568354b4de7bbed5db628f58777	81497525-c346-4c97-b86e-30705c8f75f0	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:40:46	4.4s	deadly_agnesi	ERR	67b72568354b4de7bbed5db628f58777	af365a29-d032-4ad7-80e9-c739b9c7e3aa	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:40:57	4.5s	exotic_curran	ERR	67b72568354b4de7bbed5db628f58777	1a022c21-3118-43d4-bace-68a6b2c4e1eb	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:41:17	2m 17s	loquacious_gautier	OK	67b72568354b4de7bbed5db628f58777	5c3b95ea-a38f-49f5-9152-940c11390433	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:46:58	34.9s	amazing_fermat	OK	67b72568354b4de7bbed5db628f58777	3d5319b2-a638-4ccb-8e9e-33dffc80a065	nextflow run main.nf --run_mode_epi2me sv
+2025-07-04 15:47:57	5.8s	adoring_mercator	ERR	67b72568354b4de7bbed5db628f58777	478a7698-029c-49dd-bcbc-f9cb488de59e	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:52:08	5.4s	astonishing_goodall	ERR	67b72568354b4de7bbed5db628f58777	37aed67f-40a6-4f85-8ab4-81aaeae3f902	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:53:15	5.2s	crazy_kilby	ERR	67b72568354b4de7bbed5db628f58777	ea790c03-c151-4481-b1ad-c9b8a9cb8d4b	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:53:36	5.5s	spontaneous_galileo	ERR	67b72568354b4de7bbed5db628f58777	c40714f5-3b97-493d-8e1a-bc49e55cd3b8	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:54:00	5.4s	pensive_darwin	ERR	67b72568354b4de7bbed5db628f58777	1dc33969-2249-4192-a45d-0d33bc9f1b12	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:56:08	5.5s	reverent_mandelbrot	ERR	67b72568354b4de7bbed5db628f58777	406d46b2-24fa-450b-94c7-52b4d6681102	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:58:49	5.5s	pedantic_banach	ERR	67b72568354b4de7bbed5db628f58777	a83d0ce4-d5ce-4616-8379-c1f65ce4bb65	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 15:59:55	5.2s	kickass_solvay	ERR	67b72568354b4de7bbed5db628f58777	9c1daf00-4280-450f-9611-90a3bd42735f	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:00:18	5.5s	furious_archimedes	ERR	67b72568354b4de7bbed5db628f58777	df26385f-d15e-444d-a9e2-8d50cac3bcf5	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:01:59	5s	wise_tuckerman	ERR	67b72568354b4de7bbed5db628f58777	ddc8a1dd-d75d-4e50-9f74-eb797b04bf69	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:07:49	5.9s	golden_ampere	ERR	67b72568354b4de7bbed5db628f58777	60d464c4-3207-42e0-bb0b-e4a0e3698802	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:08:28	4.8s	elated_banach	ERR	67b72568354b4de7bbed5db628f58777	9e6d7e5d-02c4-4c78-8436-1661d059ee6d	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:08:51	4.9s	angry_kalman	ERR	67b72568354b4de7bbed5db628f58777	c06228d6-bae2-439b-a07a-e92ca1646b3d	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:09:59	5.6s	zen_dalembert	ERR	67b72568354b4de7bbed5db628f58777	bb5177b1-1634-4a95-a499-c8adcdfc56f3	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:19:53	2m 2s	ridiculous_miescher	ERR	67b72568354b4de7bbed5db628f58777	0dc58ded-77d1-4194-b6d4-7337d9bb0108	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:25:49	6.1s	dreamy_marconi	ERR	67b72568354b4de7bbed5db628f58777	fee00116-440a-4e25-966b-9a485e73d1e6	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:30:22	8.6s	hungry_spence	ERR	67b72568354b4de7bbed5db628f58777	f73b1239-5b21-42ca-b271-d27176aec495	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:31:39	8.6s	mad_hoover	ERR	67b72568354b4de7bbed5db628f58777	b29c1071-d295-403e-ac7e-71e371857c27	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:35:06	5.2s	backstabbing_stallman	ERR	67b72568354b4de7bbed5db628f58777	f0faae3b-de2d-42a8-bffe-12de428761dc	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:35:22	5.2s	compassionate_nightingale	ERR	67b72568354b4de7bbed5db628f58777	80fc551e-0646-46db-b28b-9800b898d05d	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:35:46	8.8s	magical_euler	ERR	67b72568354b4de7bbed5db628f58777	08660800-7909-4c34-98ed-ccaee9007834	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:36:47	8.3s	awesome_torricelli	ERR	67b72568354b4de7bbed5db628f58777	ed33d259-777d-4590-91c6-cdc36485d3f2	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-04 16:38:40	5.5s	berserk_noyce	ERR	67b72568354b4de7bbed5db628f58777	fde36597-2dc1-4813-9eab-6f618a159612	nextflow run main.nf --run_mode_epi2me sv
+2025-07-07 10:17:58	2d 1h 25m 49s	grave_picasso	ERR	67b72568354b4de7bbed5db628f58777	cc0dde3b-7a97-456b-ab04-9c0cc136296b	nextflow run main.nf --run_mode_epi2me sv
+2025-07-07 10:18:49	34.6s	sharp_pasteur	ERR	67b72568354b4de7bbed5db628f58777	b3eb3ff2-5660-4680-80a7-7b8feb4a8020	nextflow run main.nf --run_mode_epi2me sv
+2025-07-07 10:19:53	35.3s	confident_wozniak	OK	67b72568354b4de7bbed5db628f58777	b3eb3ff2-5660-4680-80a7-7b8feb4a8020	nextflow run main.nf --run_mode_epi2me sv -resume
+2025-07-07 10:24:24	8.6s	scruffy_koch	ERR	67b72568354b4de7bbed5db628f58777	b3eb3ff2-5660-4680-80a7-7b8feb4a8020	nextflow run main.nf --run_mode_epi2me cnv -resume
+2025-07-07 10:38:42	5.5s	grave_hypatia	ERR	67b72568354b4de7bbed5db628f58777	b3eb3ff2-5660-4680-80a7-7b8feb4a8020	nextflow run main.nf --run_mode_epi2me cnv -resume
+2025-07-07 10:41:46	8.6s	wise_swartz	ERR	67b72568354b4de7bbed5db628f58777	b3eb3ff2-5660-4680-80a7-7b8feb4a8020	nextflow run main.nf --run_mode_epi2me cnv -resume
+2025-07-07 10:59:30	4.8s	reverent_kimura	ERR	67b72568354b4de7bbed5db628f58777	0032f797-a92a-437f-8c22-cd39cb39df68	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:07:39	5.1s	reverent_poisson	ERR	67b72568354b4de7bbed5db628f58777	f98b6018-2d18-4d25-aeee-e8fea0f5c95c	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:14:53	-	mighty_miescher	-	67b72568354b4de7bbed5db628f58777	52cfef4f-cc74-4a58-b0bc-d86b5534d91f	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:15:56	5.1s	sleepy_angela	ERR	67b72568354b4de7bbed5db628f58777	431b90d9-39e3-4b03-96ec-1760225a902d	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:17:30	4.5s	insane_knuth	ERR	67b72568354b4de7bbed5db628f58777	23adc82f-e1df-458e-a266-d4e8f568ee64	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:19:12	4.6s	nostalgic_torvalds	ERR	67b72568354b4de7bbed5db628f58777	5072b24d-b98b-4b28-8b6e-bd77c11176bf	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:23:24	-	berserk_celsius	-	67b72568354b4de7bbed5db628f58777	140de6d3-b17d-44bd-bba6-83aeecf73041	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:23:47	4.8s	evil_shockley	ERR	67b72568354b4de7bbed5db628f58777	4723d45a-5efe-4d03-b0d1-b9d101ec9ae7	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:24:27	5.3s	soggy_khorana	ERR	67b72568354b4de7bbed5db628f58777	f36363cf-777b-4c6c-8828-9a263ce7b7b2	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:26:31	5s	infallible_ramanujan	ERR	67b72568354b4de7bbed5db628f58777	10e335f1-1dd9-4c7f-8357-f91b6867eaed	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:27:14	5.5s	jolly_ptolemy	ERR	67b72568354b4de7bbed5db628f58777	e24d435b-64a3-43b3-b5fd-91aa49d8ccbb	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:34:09	4.8s	berserk_caravaggio	ERR	67b72568354b4de7bbed5db628f58777	4f77d8d7-4a75-44c9-bcfa-97a66f6a5beb	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:40:03	-	infallible_bhabha	-	67b72568354b4de7bbed5db628f58777	99605b02-0237-4d40-bf7b-9aa0759a84f4	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:41:01	-	admiring_gutenberg	-	67b72568354b4de7bbed5db628f58777	a5ade67d-6655-4d36-a8c5-4ecfe655668a	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:42:39	5.3s	drunk_church	ERR	67b72568354b4de7bbed5db628f58777	52671828-eb23-489d-a45c-8917956d0df8	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:43:10	4.7s	goofy_mercator	ERR	67b72568354b4de7bbed5db628f58777	a027c6bb-e673-4ce9-86f1-417e868ed613	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:43:46	4.9s	deadly_babbage	ERR	67b72568354b4de7bbed5db628f58777	cfd9d5a1-504f-4193-b7e7-1e75a665517d	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:48:11	5m 19s	small_sinoussi	ERR	67b72568354b4de7bbed5db628f58777	12247ca9-ba62-426c-ae4d-837147535b0f	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:56:33	7.6s	marvelous_fermat	OK	67b72568354b4de7bbed5db628f58777	d5379aa4-1059-4757-95bd-6e4b71e08089	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 11:58:26	6.8s	golden_laplace	OK	67b72568354b4de7bbed5db628f58777	10562c9a-f132-4446-864e-9e97219682b7	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 12:00:18	7.3s	elegant_feynman	OK	67b72568354b4de7bbed5db628f58777	82302ac5-96c1-41ea-a56d-35e7d65c3b2e	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 12:55:20	7.3s	grave_stonebraker	OK	67b72568354b4de7bbed5db628f58777	80fb9a60-d130-4b9d-b8be-aac68b5d9c45	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 14:13:35	3.9s	irreverent_lamarck	ERR	67b72568354b4de7bbed5db628f58777	caba7820-afb3-4134-9e40-bd25096c5e5a	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:15:48	4.2s	sad_brahmagupta	ERR	67b72568354b4de7bbed5db628f58777	bc7034ae-f160-4a5f-8283-39e01908aa3c	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:16:20	4.5s	suspicious_shaw	ERR	67b72568354b4de7bbed5db628f58777	fdf8514c-2f3d-4e0e-af59-c823d94f5af2	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:17:07	4.2s	irreverent_keller	ERR	67b72568354b4de7bbed5db628f58777	b966460c-2708-4939-b132-cec8da0d76c3	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:18:36	5s	compassionate_mclean	ERR	67b72568354b4de7bbed5db628f58777	faffd552-7d32-4384-a05f-a94bf3407202	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:19:54	4.1s	sad_liskov	ERR	67b72568354b4de7bbed5db628f58777	c9509633-bb15-437f-be84-9da8cfd4e615	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:21:08	3.9s	fervent_rubens	ERR	67b72568354b4de7bbed5db628f58777	86fd40f8-b63d-444a-8ba7-06d7ff2f743a	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:35:55	4s	shrivelled_noether	ERR	67b72568354b4de7bbed5db628f58777	76edcbd8-37b4-4ff5-867f-7f6536cfacb0	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:37:02	4.4s	backstabbing_jennings	ERR	67b72568354b4de7bbed5db628f58777	5506f876-3f23-4a9b-bd18-a63305935deb	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 14:37:39	4.5s	big_lalande	ERR	67b72568354b4de7bbed5db628f58777	11ea1d45-01e8-427f-983c-8821cc6f145f	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 14:38:17	4s	insane_leibniz	ERR	67b72568354b4de7bbed5db628f58777	0c9a9098-eff2-4dd3-a4de-a0ba3bbb1573	nextflow run main.nf --run_mode_epi2me sv
+2025-07-07 14:40:29	2m 21s	mighty_hugle	OK	67b72568354b4de7bbed5db628f58777	c91c1ffd-b80a-4121-a5ee-14a46d568182	nextflow run main.nf --run_mode_epi2me sv
+2025-07-07 14:43:14	6.9s	romantic_meninsky	OK	67b72568354b4de7bbed5db628f58777	b09d80de-3e95-49e9-b8e9-db4c3124c0dc	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 14:44:02	8.3s	sad_montalcini	ERR	67b72568354b4de7bbed5db628f58777	9ce97f71-e659-4d8b-9fec-7c34e6dd239b	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:48:21	8.1s	determined_bardeen	ERR	67b72568354b4de7bbed5db628f58777	11e0d7b7-f2f0-41f1-8a9e-304a99f14431	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:52:10	8.1s	clever_lamport	ERR	67b72568354b4de7bbed5db628f58777	b59226f6-5a1d-45fb-b68d-e4073640aff1	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:53:16	8.2s	chaotic_bartik	ERR	67b72568354b4de7bbed5db628f58777	0afc7f1a-2606-4731-b354-70c84b560358	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:53:36	5.1s	pedantic_gilbert	ERR	67b72568354b4de7bbed5db628f58777	6f97ffc4-ec4a-4142-8a07-58a64878711b	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:54:03	8.1s	dreamy_dubinsky	ERR	67b72568354b4de7bbed5db628f58777	61ebe74e-5c61-44e4-987f-5a6c35b04e30	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:56:35	1m 44s	intergalactic_lamport	OK	67b72568354b4de7bbed5db628f58777	93f599ff-1464-4646-9f33-79683c2f8f04	nextflow run main.nf --run_mode_epi2me cnv
+2025-07-07 14:59:09	34.7s	cheesy_nobel	OK	67b72568354b4de7bbed5db628f58777	815d4479-a2c0-4547-9f2c-16f9e1cd7354	nextflow run main.nf --run_mode_epi2me sv
+2025-07-07 14:59:55	7.1s	nice_kalman	OK	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit
+2025-07-07 15:01:02	4.5s	scruffy_bardeen	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:01:38	4.3s	curious_watson	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:02:37	3.8s	deadly_legentil	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:03:11	4.1s	cranky_gutenberg	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:03:56	-	desperate_wegener	-	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:04:26	3.8s	admiring_feynman	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:05:19	-	special_mayer	-	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:06:00	-	furious_torvalds	-	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:06:45	4s	spontaneous_gautier	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:08:30	4.7s	astonishing_joliot	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:09:26	4.6s	magical_becquerel	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:10:15	4.7s	admiring_carlsson	OK	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:10:30	34.1s	naughty_solvay	OK	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me sv -resume
+2025-07-07 15:11:13	1m 43s	chaotic_turing	OK	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me cnv -resume
+2025-07-07 15:15:28	4.9s	thirsty_gauss	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:15:54	4.8s	sleepy_bose	OK	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:16:52	4.3s	peaceful_morse	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:19:37	4.1s	boring_maxwell	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:20:19	4.3s	gloomy_sammet	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:21:16	4.7s	naughty_pare	OK	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-07 15:28:04	1m 43s	nostalgic_cray	OK	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-07 15:39:41	1m 45s	hopeful_dalembert	OK	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-07 17:11:19	1d 18h 32m 28s	agitated_yonath	ERR	67b72568354b4de7bbed5db628f58777	3e2b49d8-b46f-4612-8410-8c698e066369	nextflow run main.nf --run_mode_epi2me all -resume
+2025-07-07 17:12:20	10.6s	berserk_bartik	ERR	67b72568354b4de7bbed5db628f58777	20c39bb9-25bf-4922-b9ba-f568f26422bb	nextflow run main.nf --run_mode_epi2me all
+2025-07-07 17:13:23	1h 56m 6s	backstabbing_brown	OK	67b72568354b4de7bbed5db628f58777	e1da11cd-66e3-4713-b5e3-0f5c6cc8370a	nextflow run main.nf --run_mode_epi2me all
+2025-07-08 13:28:59	14.8s	nauseous_gautier	OK	67b72568354b4de7bbed5db628f58777	e1da11cd-66e3-4713-b5e3-0f5c6cc8370a	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-08 13:33:21	4.9s	pensive_bohr	ERR	67b72568354b4de7bbed5db628f58777	e1da11cd-66e3-4713-b5e3-0f5c6cc8370a	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-08 13:34:41	8h 12m 56s	serene_saha	OK	67b72568354b4de7bbed5db628f58777	e1da11cd-66e3-4713-b5e3-0f5c6cc8370a	nextflow run main.nf --run_mode_epi2me modkit -resume
+2025-07-08 13:44:34	-	fabulous_avogadro	-	67b72568354b4de7bbed5db628f58777	97b30ff9-ed46-4a6d-bc40-79f254a561a3	nextflow run main.nf --run_order_mode
+2025-07-08 13:54:54	-	drunk_gates	-	67b72568354b4de7bbed5db628f58777	fd79c068-1b79-4378-b82f-f4d7225e98cc	nextflow run main.nf --run_order_mode
+2025-07-08 14:02:47	-	furious_meitner	-	67b72568354b4de7bbed5db628f58777	2a649cc6-f626-4799-a138-af12e0b32272	nextflow run main.nf --run_mode_analysis
+2025-07-08 14:03:02	4.3s	confident_golick	ERR	67b72568354b4de7bbed5db628f58777	568abefc-fd46-454c-9088-9c691ecaa309	nextflow run main.nf --run_mode_analysis occ
+2025-07-08 14:04:58	21h 38m 47s	deadly_ride	ERR	67b72568354b4de7bbed5db628f58777	2e3db2d6-a736-41f4-aa4b-a222dd5dfdcb	nextflow run main.nf --run_mode_analysis occ
+2025-07-08 14:19:22	3.9s	infallible_ochoa	OK	67b72568354b4de7bbed5db628f58777	482c2070-0b92-49cb-8b49-62f1b347a1fb	nextflow run main.nf --run_mode_analysis cnv
+2025-07-08 14:20:03	-	shrivelled_miescher	-	67b72568354b4de7bbed5db628f58777	94bf9716-f2cc-44d2-b3fc-37ae130d6636	nextflow run main.nf --run_mode_epi2me all
+2025-07-08 14:20:49	-	sleepy_sanger	-	67b72568354b4de7bbed5db628f58777	b2418e80-a7d2-4664-96e8-8b9205e3481f	nextflow run main.nf --run_mode_epi2me all
+2025-07-08 14:22:46	-	ridiculous_pasteur	-	67b72568354b4de7bbed5db628f58777	0db7dde2-f91c-4081-bdc1-8a0b57c5b9ea	nextflow run main.nf --run_mode_epi2me all
+2025-07-08 14:27:06	21h 16m 39s	marvelous_lovelace	ERR	67b72568354b4de7bbed5db628f58777	34cce88a-47a5-41e6-954d-d0579e733d67	nextflow run main.nf --run_mode_mergebam
+2025-07-08 14:28:33	21.1s	pensive_easley	OK	67b72568354b4de7bbed5db628f58777	7c65ba81-fc3b-404e-bce9-ab5ff0eafd1d	nextflow run main.nf --run_mode_analysis mgmt
+2025-07-08 14:30:20	4.3s	desperate_lichterman	ERR	67b72568354b4de7bbed5db628f58777	080bd89b-17fb-4c17-ba5b-f4002674d079	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 14:32:18	4.7s	sharp_yalow	ERR	67b72568354b4de7bbed5db628f58777	f0c0289f-759b-4515-906c-17c081eff1c3	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 14:35:17	21h 8m 28s	intergalactic_swirles	ERR	67b72568354b4de7bbed5db628f58777	50ae165e-c69e-463a-9ccc-05e01e7e3dca	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 14:37:53	37.1s	distracted_shirley	ERR	67b72568354b4de7bbed5db628f58777	2eb72c02-bd3f-4921-9b82-ddcfc8282cec	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 14:38:54	32.8s	trusting_curran	ERR	67b72568354b4de7bbed5db628f58777	bc6caf70-89e1-4276-b30a-94704624bcd3	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 14:40:34	34.5s	drunk_poisson	OK	67b72568354b4de7bbed5db628f58777	7d645de8-49f0-41af-a221-aee91206c2cb	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 14:47:31	-	elated_pike	-	67b72568354b4de7bbed5db628f58777	7d645de8-49f0-41af-a221-aee91206c2cb	nextflow run main.nf --run_mode_analysis annotsv -resume
+2025-07-08 14:47:47	-	special_mendel	-	67b72568354b4de7bbed5db628f58777	95e1c3df-3f67-4307-8ff8-856adaa6edc5	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 14:58:10	31.5s	curious_meninsky	ERR	67b72568354b4de7bbed5db628f58777	3146cd7d-ecaf-4d46-8a74-b280476ade82	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 15:06:18	-	awesome_faggin	-	67b72568354b4de7bbed5db628f58777	8002c406-7e79-4506-b3c0-01e1d1b3108f	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 15:07:25	32.8s	kickass_jennings	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis annotsv
+2025-07-08 15:31:41	4.4s	nice_becquerel	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis annotsv -resume
+2025-07-08 15:33:18	20s	drunk_poincare	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis annotsv -resume
+2025-07-08 15:37:21	5s	amazing_nobel	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis annotsv -resume
+2025-07-08 15:39:04	16.2s	loving_mclean	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis annotsv -resume
+2025-07-08 15:40:26	17.2s	mad_plateau	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis annotsv -resume
+2025-07-08 15:41:52	13.9s	curious_ptolemy	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis mgmt -resume
+2025-07-08 15:44:47	46.1s	admiring_bhaskara	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis terp -resume
+2025-07-09 08:55:46	14.2s	kickass_woese	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis mgmt -resume
+2025-07-09 08:56:53	3.6s	intergalactic_bhaskara	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis mgmt -resume
+2025-07-09 09:05:03	3.7s	jolly_booth	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:11:35	4.2s	reverent_bose	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:11:55	4.3s	nostalgic_mirzakhani	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis terp -resume
+2025-07-09 09:14:07	3.8s	friendly_einstein	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:14:59	3.7s	crazy_jepsen	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:16:03	-	peaceful_sax	-	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis methylation -resume
+2025-07-09 09:16:18	12.5s	silly_koch	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis mgmt -resume
+2025-07-09 09:16:43	4.5s	crazy_engelbart	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis annotsv -resume
+2025-07-09 09:17:50	4s	goofy_tuckerman	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:22:27	4s	intergalactic_khorana	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:23:17	3.8s	infallible_easley	OK	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:27:59	13.9s	dreamy_jones	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:34:20	11.4s	infallible_volta	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:41:11	12.4s	golden_hilbert	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:49:14	10.9s	elated_lagrange	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:58:10	3.7s	furious_stallman	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 09:59:43	3.8s	elegant_noether	ERR	67b72568354b4de7bbed5db628f58777	940fcf86-d89a-4ad2-b63b-ef48cb81d8e3	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 10:01:33	4.4s	desperate_chandrasekhar	ERR	67b72568354b4de7bbed5db628f58777	4af12609-c492-4739-89d7-f5291edfd48d	nextflow run main.nf --run_mode_analysis cnv
+2025-07-09 10:02:43	11.3s	intergalactic_lalande	ERR	67b72568354b4de7bbed5db628f58777	4af12609-c492-4739-89d7-f5291edfd48d	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 10:03:30	11.7s	goofy_kalman	ERR	67b72568354b4de7bbed5db628f58777	4af12609-c492-4739-89d7-f5291edfd48d	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 10:06:19	-	romantic_hawking	-	67b72568354b4de7bbed5db628f58777	23c49c5b-8467-45cb-9cfd-55a5e2c06755	nextflow run main.nf --run_mode_analysis cnv
+2025-07-09 10:07:07	11.6s	maniac_hugle	ERR	67b72568354b4de7bbed5db628f58777	b756a462-be2b-4383-af97-a6e7ec125a7e	nextflow run main.nf --run_mode_analysis cnv
+2025-07-09 10:09:23	10.8s	fabulous_legentil	ERR	67b72568354b4de7bbed5db628f58777	05da2922-11cb-4053-b723-98240ec6be9c	nextflow run main.nf --run_mode_analysis cnv
+2025-07-09 10:10:16	56s	focused_rutherford	OK	67b72568354b4de7bbed5db628f58777	05da2922-11cb-4053-b723-98240ec6be9c	nextflow run main.nf --run_mode_analysis cnv -resume
+2025-07-09 10:11:37	48.9s	sharp_faraday	OK	67b72568354b4de7bbed5db628f58777	d705a877-166a-49ba-9172-cd3c6845133d	nextflow run main.nf --run_mode_analysis cnv
+2025-07-09 10:25:39	-	pedantic_faraday	-	67b72568354b4de7bbed5db628f58777	99e1ab62-03c1-44bb-be53-561955bd53dd	nextflow run main.nf --run_mode_analysis cnv --analyse_sample_id_file assets/test_sample_ids.txt
+2025-07-09 10:26:43	4s	fabulous_elion	ERR	67b72568354b4de7bbed5db628f58777	642b0f0c-fe0b-44f9-ab39-6d0469a3e023	nextflow run main.nf --run_mode_analysis cnv --analyse_sample_id_file assets/test_sample_ids.txt
+2025-07-09 10:28:22	34.5s	amazing_church	OK	67b72568354b4de7bbed5db628f58777	81d7b633-c59b-404f-8963-3d26edf0b89f	nextflow run main.nf --run_mode_analysis cnv
+2025-07-09 10:29:39	35.4s	loquacious_blackwell	OK	67b72568354b4de7bbed5db628f58777	b904538a-3643-4f92-9192-2570419ddd5e	nextflow run main.nf --run_mode_analysis cnv
+2025-07-09 10:30:53	25.1s	gloomy_ramanujan	ERR	67b72568354b4de7bbed5db628f58777	6b6bb4d5-b1b6-41b3-af02-a1c7f2f9c5bd	nextflow run main.nf --run_mode_analysis cnv
+2025-07-09 10:32:23	-	shrivelled_lovelace	-	67b72568354b4de7bbed5db628f58777	ce8e1650-3948-4441-8404-c213bd6efcf7	nextflow run main.nf --run_mode_analysis all
+2025-07-09 10:33:37	-	elated_swanson	-	67b72568354b4de7bbed5db628f58777	12ca63e5-6efb-4a31-80df-ffed521e7252	nextflow run main.nf --run_mode_analysis all
+2025-07-09 10:35:21	-	cranky_salas	-	67b72568354b4de7bbed5db628f58777	3c76274d-672d-43c1-b140-d9a2597c9e9c	nextflow run main.nf --run_mode_analysis all --analyse_sample_id_file assets/test_sample_ids.txt
+2025-07-09 10:36:04	-	sad_ochoa	-	67b72568354b4de7bbed5db628f58777	425a0084-d1c2-46a3-9644-38cef394b3cc	nextflow run main.nf --run_mode_analysis all --analyse_sample_id_file assets/test_sample_ids.txt
+2025-07-09 10:37:59	-	nasty_elion	-	67b72568354b4de7bbed5db628f58777	ff09a93a-102e-42a9-b2f8-b43bf6a48918	nextflow run main.nf --run_mode_analysis all
+2025-07-09 10:39:06	-	ridiculous_nobel	-	67b72568354b4de7bbed5db628f58777	826bfc13-584d-4223-91aa-4d271ea9c8ef	nextflow run main.nf --run_mode_analysis all
+2025-07-09 10:40:56	22m 26s	festering_mclean	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all
+2025-07-09 11:07:45	14.1s	disturbed_hirsch	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:14:12	38.3s	zen_boyd	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:24:44	16.4s	fabulous_almeida	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:30:53	-	reverent_pasteur	-	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:31:04	-	shrivelled_linnaeus	-	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:31:52	16.3s	naughty_euclid	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:38:10	16.1s	pensive_poisson	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:45:45	16s	loving_elion	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:52:49	17s	nostalgic_turing	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 11:58:38	17s	nauseous_banach	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 12:07:22	34.9s	suspicious_leavitt	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 12:27:06	15.5s	gloomy_fourier	ERR	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_analysis all -resume
+2025-07-09 12:35:57	2m 16s	condescending_raman	OK	67b72568354b4de7bbed5db628f58777	161629e0-bbab-4c65-8cc7-d03132f5e49b	nextflow run main.nf --run_mode_epi2me sv -resume

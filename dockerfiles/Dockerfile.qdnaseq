@@ -1,0 +1,167 @@
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV R_VERSION=4.3.2
+ENV HOME=/home/rstudio
+ENV ANNOTATIONHUB_CACHE=/home/rstudio/.cache/AnnotationHub
+ENV PATH=/opt/custflow/epi2meuser/conda/bin:$PATH
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        wget \
+        ca-certificates \
+        gnupg \
+        lsb-release \
+        software-properties-common \
+        build-essential \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        libxml2-dev \
+        libgit2-dev \
+        libbz2-dev \
+        liblzma-dev \
+        libz-dev \
+        libncurses5-dev \
+        libreadline-dev \
+        libpcre3-dev \
+        libblas-dev \
+        liblapack-dev \
+        libjpeg-dev \
+        libpng-dev \
+        libtiff-dev \
+        libcairo2-dev \
+        libtcl8.6 \
+        libtk8.6 \
+        libxt-dev \
+        samtools \
+        git \
+        curl \
+        pkg-config \
+        libharfbuzz-dev \
+        libfribidi-dev \
+        libfreetype6-dev \
+        libpng-dev \
+        libtiff5-dev \
+        libjpeg-dev \
+        libicu-dev \
+        libgdal-dev \
+        libproj-dev \
+        libgeos-dev \
+        libudunits2-dev \
+        libgsl-dev \
+        libhdf5-dev \
+        libnetcdf-dev \
+        libfftw3-dev \
+        libgmp3-dev \
+        libmpfr-dev \
+        libxml2-dev \
+        libxslt-dev \
+        libssl-dev \
+        libssh2-1-dev \
+        libcurl4-openssl-dev \
+        libgit2-dev \
+        libfontconfig1-dev \
+        libmagick++-dev \
+        libpoppler-cpp-dev \
+        libtesseract-dev \
+        libavfilter-dev \
+        libavformat-dev \
+        libavcodec-dev \
+        libswscale-dev \
+        libswresample-dev \
+        libpostproc-dev \
+        libx264-dev \
+        libx265-dev \
+        libvpx-dev \
+        libwebp-dev \
+        libopenjp2-7-dev \
+        libgif-dev \
+        libcairo2-dev \
+        libpango1.0-dev \
+        libglib2.0-dev \
+        libgtk-3-dev \
+        libatk1.0-dev \
+        libgdk-pixbuf2.0-dev \
+        libx11-dev \
+        libxext-dev \
+        libxrender-dev \
+        libxinerama-dev \
+        libxi-dev \
+        libxrandr-dev \
+        libxcursor-dev \
+        libxcomposite-dev \
+        libxdamage-dev \
+        libxfixes-dev \
+        libxss-dev \
+        libxtst-dev \
+        libxrandr-dev \
+        libasound2-dev \
+        libpulse-dev \
+        libdbus-1-dev \
+        libudev-dev \
+        libusb-1.0-0-dev \
+        libusb-dev \
+        libusbmuxd-dev \
+        libimobiledevice-dev \
+        libplist-dev \
+        libzip-dev \
+        libbz2-dev \
+        liblzma-dev \
+        libzstd-dev \
+        libsnappy-dev \
+        liblzo2-dev \
+        liblz4-dev \
+        libarchive-dev \
+        libarchive13 \
+        libarchive-tools \
+        libarchive-zip-perl \
+        libarchive-dev \
+        libarchive13 \
+        libarchive-tools \
+        libarchive-zip-perl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install R
+RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_debian_key.asc && \
+    echo "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" | tee -a /etc/apt/sources.list.d/cran.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends r-base r-base-dev r-base-core && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create rstudio user
+RUN useradd -m -s /bin/bash rstudio && \
+    mkdir -p /home/rstudio/.cache && \
+    chown -R rstudio:rstudio /home/rstudio
+
+# Install R packages as rstudio user
+USER rstudio
+WORKDIR /home/rstudio
+
+# Test R installation first
+RUN R --version
+
+# Install packages one by one with error checking
+RUN R -e "install.packages('argparser', repos='https://cloud.r-project.org', dependencies=TRUE)" || echo "argparser installation failed"
+
+RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org', dependencies=TRUE)" || echo "BiocManager installation failed"
+
+# Install Bioconductor
+RUN R -e "BiocManager::install(version = '3.18')" || echo "BiocManager version installation failed"
+
+# Install Bioconductor packages one by one
+RUN R -e "BiocManager::install('QDNAseq', dependencies=TRUE)" || echo "QDNAseq installation failed"
+RUN R -e "BiocManager::install('QDNAseq.hg38', dependencies=TRUE)" || echo "QDNAseq.hg38 installation failed"
+RUN R -e "BiocManager::install('QDNAseq.hg19', dependencies=TRUE)" || echo "QDNAseq.hg19 installation failed"
+RUN R -e "BiocManager::install('AnnotationHub', dependencies=TRUE)" || echo "AnnotationHub installation failed"
+
+# Create work directory
+USER root
+RUN mkdir -p /work && chown rstudio:rstudio /work
+
+USER rstudio
+WORKDIR /work
+
+# Default command
+CMD ["R"] 

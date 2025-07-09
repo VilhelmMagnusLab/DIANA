@@ -1,0 +1,79 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+%labels
+    Author chbope
+    Version v1.0
+    Description QDNAseq container with R and Bioconductor packages
+
+%environment
+    export DEBIAN_FRONTEND=noninteractive
+    export R_VERSION=4.3.2
+    export HOME=/home/rstudio
+    export ANNOTATIONHUB_CACHE=/home/rstudio/.cache/AnnotationHub
+    export PATH=/opt/custflow/epi2meuser/conda/bin:$PATH
+
+%post
+    # Install system dependencies
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        wget \
+        ca-certificates \
+        gnupg \
+        lsb-release \
+        software-properties-common \
+        build-essential \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        libxml2-dev \
+        libgit2-dev \
+        libbz2-dev \
+        liblzma-dev \
+        libz-dev \
+        libncurses5-dev \
+        libreadline-dev \
+        libpcre3-dev \
+        libblas-dev \
+        liblapack-dev \
+        libjpeg-dev \
+        libpng-dev \
+        libtiff-dev \
+        libcairo2-dev \
+        libtcl8.6 \
+        libtk8.6 \
+        libxt-dev \
+        samtools \
+        git \
+        curl
+
+    # Install R
+    wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_debian_key.asc
+    echo "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" | tee -a /etc/apt/sources.list.d/cran.list
+    apt-get update
+    apt-get install -y --no-install-recommends r-base r-base-dev
+
+    # Create rstudio user
+    useradd -m -s /bin/bash rstudio
+    mkdir -p /home/rstudio/.cache
+    chown -R rstudio:rstudio /home/rstudio
+
+    # Clean up
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Install R packages as rstudio user
+    su - rstudio -c "R --version"
+    su - rstudio -c "R -e \"install.packages('argparser', repos='https://cloud.r-project.org', dependencies=TRUE)\""
+    su - rstudio -c "R -e \"install.packages('BiocManager', repos='https://cloud.r-project.org', dependencies=TRUE)\""
+    su - rstudio -c "R -e \"BiocManager::install(version = '3.18')\""
+    su - rstudio -c "R -e \"BiocManager::install(c('QDNAseq', 'QDNAseq.hg38', 'QDNAseq.hg19', 'AnnotationHub'), dependencies=TRUE)\""
+
+    # Create work directory
+    mkdir -p /work
+    chown rstudio:rstudio /work
+
+%runscript
+    exec R "$@"
+
+%startscript
+    exec R "$@" 

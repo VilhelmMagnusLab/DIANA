@@ -24,7 +24,6 @@ file(params.bam_sample_id_file).splitEachLine('\t') { fields ->
     if (fields.size() == 2) {
         if (fields[1] != '') { // Check if Flow Cell ID is not empty
             sample_info[fields[0]] = fields[1] // Map Sample_ID to Flow_cell_ID
-            println "Sample_id ${fields[0]} with Flow Cell ID: ${fields[1]}" 
         } else {
             println "Skipping ${fields[0]}: Flow Cell ID is empty"
         }
@@ -78,6 +77,11 @@ workflow mergebam {
     main:
         // Store start time
         start_time = new Date()
+
+        // Print sample information when workflow is executed
+        sample_info.each { sample_id, flow_cell_id ->
+            println "Sample_id ${sample_id} with Flow Cell ID: ${flow_cell_id}"
+        }
 
         // Process all samples listed in sample_info.txt
         bam_files = Channel.fromPath("${params.input_dir}/**/bam_pass/*.bam")
