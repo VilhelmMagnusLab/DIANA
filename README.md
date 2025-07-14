@@ -275,13 +275,13 @@ apptainer {
 
 Before running the pipeline, ensure you have:
 
-- ✅ **Base path** updated in all config files
-- ✅ **Container paths** updated to your container directory
-- ✅ **Container bind paths** configured correctly
-- ✅ **Reference files** in the reference/ directory
-- ✅ **Annotation files** in the humandb/ directory
-- ✅ **Input data** in the testdata/ directory
-- ✅ **Container images** downloaded and accessible
+- **Base path** updated in all config files
+- **Container paths** updated to your container directory
+- **Container bind paths** configured correctly
+- **Reference files** in the reference/ directory
+- **Annotation files** in the humandb/ directory
+- **Input data** in the testdata/ directory
+- **Container images** downloaded and accessible
 
 ### 6. Advanced Configuration
 
@@ -496,11 +496,6 @@ The pipeline includes intelligent tumor content handling using ACE (Allele-speci
 - **Automatic Selection**: ACE automatically selects the best fit from the multiple estimates
 - **Robust Estimation**: Handles various tumor types and copy number profiles
 - **Result Storage**: Saves calculated values in `${sample_id}_ace_results/threshold_value.txt`
-
-#### **Error Handling for ACE**
-- **Missing RDS Files**: Validates that QDNAseq RDS files exist before ACE calculation
-- **Calculation Failures**: Provides detailed error messages if ACE calculation fails
-- **Fallback Options**: Allows manual tumor content specification if automatic calculation fails
 
 ## Acknowledgment and General Information
 
