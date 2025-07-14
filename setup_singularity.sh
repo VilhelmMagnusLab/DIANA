@@ -39,23 +39,23 @@ echo "   This may take several minutes on first run..."
 
 # Core analysis images
 echo "Pulling core analysis images..."
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/nwgs_default_images:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/ace_1.24.0:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/annotcnv_images_27feb1025:latest
-$SINGULARITY_CMD pull --dir containers/ hkubal/clairs-to:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/clair3_amd64:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/igv_report_amd64:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/vcf2circos:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/nanodx_images_3feb25:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/markdown_images_28feb2025:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/gviz_amd64:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/nwgs_default_images:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/ace_1.24.0:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/annotcnv_images_27feb1025:latest
+$SINGULARITY_CMD pull --dir containers/ docker://hkubal/clairs-to:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/clair3_amd64:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/igv_report_amd64:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/vcf2circos:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/nanodx_images_3feb25:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/markdown_images_28feb2025:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/gviz_amd64:latest
 
 # Epi2me images
 echo "Pulling Epi2me analysis images..."
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/snifflesv252_update_latest:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/qdnaseq_amd64_latest:latest
-$SINGULARITY_CMD pull --dir containers/ vilhelmmagnuslab/modkit_latest:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/snifflesv252_update_latest:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/qdnaseq_amd64_latest:latest
+$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/modkit_latest:latest
 
 echo "✓ All Singularity/Apptainer images pulled successfully"
 

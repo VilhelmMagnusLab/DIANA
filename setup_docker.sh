@@ -41,13 +41,12 @@ docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 docker pull hkubal/clairs-to:latest
 docker pull vilhelmmagnuslab/clair3_amd64:latest
-docker pull vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
 docker pull vilhelmmagnuslab/igv_report_amd64:latest
 docker pull vilhelmmagnuslab/vcf2circos:latest
 docker pull vilhelmmagnuslab/nanodx_env:latest
 docker pull vilhelmmagnuslab/markdown_images_28feb2025:latest
 docker pull vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-docker pull vilhelmmagnuslab/gviz_amd64_latest:latest
+docker pull vilhelmmagnuslab/gviz_amd64:latest
 
 # Epi2me images
 docker pull vilhelmmagnuslab/snifflesv252_update_latest:latest

@@ -54,13 +54,12 @@ docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 docker pull hkubal/clairs-to:latest
 docker pull vilhelmmagnuslab/clair3_amd64:latest
-docker pull vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
 docker pull vilhelmmagnuslab/igv_report_amd64:latest
 docker pull vilhelmmagnuslab/vcf2circos:latest
 docker pull vilhelmmagnuslab/nanodx_env:latest
 docker pull vilhelmmagnuslab/markdown_images_28feb2025:latest
 docker pull vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-docker pull vilhelmmagnuslab/gviz_amd64_latest:latest
+docker pull vilhelmmagnuslab/gviz_amd64:latest
 
 # Epi2me images
 docker pull vilhelmmagnuslab/snifflesv252_update_latest:latest
@@ -106,13 +105,12 @@ docker {
 | AnnotateCNV | `vilhelmmagnuslab/annotcnv_images_27feb1025` | CNV annotation |
 | ClairS-TO | `hkubal/clairs-to` | Structural variant calling |
 | Clair3 | `vilhelmmagnuslab/clair3_amd64` | Variant calling |
-| Sturgeon | `vilhelmmagnuslab/sturgeon_amd64_21jan_latest` | Methylation analysis |
 | IGV Tools | `vilhelmmagnuslab/igv_report_amd64` | IGV report generation |
 | Circos Plot | `vilhelmmagnuslab/vcf2circos` | Circos visualization |
 | NanoDx | `vilhelmmagnuslab/nanodx_env` | NanoDx classification |
 | Markdown | `vilhelmmagnuslab/markdown_images_28feb2025` | Report generation |
 | Cramino | `vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni` | Quality assessment |
-| Gviz | `vilhelmmagnuslab/gviz_amd64_latest` | Genomic visualization |
+| Gviz | `vilhelmmagnuslab/gviz_amd64` | Genomic visualization |
 | Sniffles2 | `vilhelmmagnuslab/snifflesv252_update_latest` | SV calling (Epi2me) |
 | QDNAseq | `vilhelmmagnuslab/qdnaseq_amd64_latest` | CNV analysis (Epi2me) |
 | Modkit | `vilhelmmagnuslab/modkit_latest` | Modified base calling |
