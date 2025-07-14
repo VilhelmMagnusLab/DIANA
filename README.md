@@ -152,16 +152,25 @@ These files are essential for:
 
 ```bash
 # NanoDx Model Setup
-# The pipeline includes a modified version of NanoDx in the nanoDx/ folder.
+# The pipeline includes a modified version of NanoDx in the nanoDx/ folder as part of the download.
 # Users only need to:
-# 1. Download the required .pkl model files separately (due to file size limitations)
-# 2. Place the .pkl files in the nanoDx/static/ folder
+# 1. Download the required large model files separately (due to file size limitations)
+# 2. Place the model files in the nanoDx/static/ folder
 
-# Required .pkl files to download and place in nanoDx/static/:
-# - Capper_et_al_NN.pkl (and any other required model files)
+# Required large model files to download and place in nanoDx/static/:
+# - Capper_et_al.h5 (large model file)
+# - Capper_et_al.h5.md5 (checksum file)
+# - Capper_et_al_NN.pkl (neural network model file)
 
-# The path to the nanoDx folder should be specified in conf/analysis.config:
-# nanodx_workflow_dir = "/path/to/nanoDx"
+# The nanoDx folder is already included in the pipeline download and contains:
+# - All scripts and workflow files
+# - Configuration files
+# - Dictionary files (Capper_et_al_dictionary.txt, pancan_devel_v5i_dictionary.txt)
+# - Reference bed files (hg19_450model.bed, 450K_hg19.bed)
+# - Other supporting files
+
+# The path to the nanoDx folder is automatically configured in conf/analysis.config:
+# nanodx_workflow_dir = "${params.ref_dir}/nanoDx/workflow"
 ```
 
 ## Quick Start

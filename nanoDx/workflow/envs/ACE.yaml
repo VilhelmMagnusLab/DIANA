@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - default
+dependencies:
+  - bioconductor-ace=1.12.0
+  - bioconductor-qdnaseq.hg19 
+

@@ -1,0 +1,20 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-rtsne
+  - r-uwot=0.1.16
+  - r-irlba
+  - r-ggplot2 
+  - r-ggtext
+  - r-data.table
+  - r-dplyr
+  - r-matrixstats
+  - r-plotly
+  - r-rmarkdown
+  - r-r.utils
+  - bioconductor-rhdf5
+  - r-reticulate
+  - pandas
+  - numpy
+  - scipy

@@ -1,0 +1,123 @@
+---
+output:
+  pdf_document:
+    fig_height: 3
+    latex_engine: pdflatex
+header-includes:
+   - \usepackage{helvet}
+   - \renewcommand*\familydefault{\sfdefault}
+   - \usepackage[T1]{fontenc}
+
+geometry: margin=0.5in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(scales)
+library(data.table)
+library(rmarkdown)
+library(dplyr)
+
+votes <- fread(normalizePath(snakemake@input[["votes"]]))
+dict <- fread(normalizePath(snakemake@input[["DICT_FILE"]]), check.names = T)
+
+mc <- votes %>% 
+ left_join(dict, by=c("class"="Methylation.Class.Name.Abbreviated"))
+
+mcf <- mc %>%
+ group_by(Methylation.Class.Family) %>%
+ summarise(score_MCF = sum(score))
+```
+
+```{r, out.height= "50px", echo=FALSE, fig.align="right"}
+knitr::include_graphics(file.path(snakemake@scriptdir, "header_PDFreport.pdf"))
+```
+
+## `r snakemake@params[["title"]]`
+
+# Sample ID: `r snakemake@wildcards[["sample"]]`
+
+## Quality control metrics
+
+#### Barcode statistics
+
+Demultiplexing statistics are shown for quality control only using a maximum of randomly subsampled 100,000 reads. All reads are considered for downstream analysis.
+
+```{r comment='', echo=FALSE}
+cat(readLines(normalizePath(snakemake@input[["demux"]])), sep = '\n')
+```
+
+#### Read statistics
+
+```{r comment='', echo=FALSE}
+cat(readLines(normalizePath(snakemake@input[["nanostat"]]), n=15), sep = '\n') # Read general summary (first 15 lines) of NanoStat statistics
+```
+
+Mean genome coverage is `r system(paste("awk 'END{print $4}' ", normalizePath(snakemake@input[["mosdepth"]]), sep=""), intern=T)`X.
+
+```{r, out.height= "150px", echo=FALSE}
+knitr::include_graphics(normalizePath(snakemake@input[["RL"]]))
+knitr::include_graphics(normalizePath(snakemake@input[["GC"]]))
+```
+
+## Copy number profile
+
+```{r, out.height = "180px", echo=FALSE}
+knitr::include_graphics(normalizePath(snakemake@input[["CN"]]))
+```
+
+## Methylation-based classification
+
+Methylation-based classification is based on **`r as.integer(votes$num_features[1])`** CpG sites (overlap of sites covered in this sample and the model).
+At the methylation class (MC) level, the sample has been classified as **`r ifelse(mc$score[1] >= 0.2, mc$Methylation.Class.Name[1], "not classifiable (score < 0.2)")`**. 
+This prediction has a confidence score of **`r round(mc$score[1], digits=3)`**.
+At the methylation class **family** (MCF) level, the sample has been classified as **`r ifelse(max(mcf$score_MCF)>=0.2, mcf[which.max(mcf$score_MCF),]$Methylation.Class.Family, "not classifiable (score < 0.2)")`**.
+The MCF prediction has a confidence score of **`r round(max(mcf$score_MCF), digits=3)`**.
+
+Scores for the Top 5 entities on MC and MCF level are given below.
+Vertical dashed lines indicate the recommended >0.2 cut-off for classification.
+
+```{r, out.height = "150px", fig.align = 'center', echo=FALSE, warning=FALSE}
+library(ggplot2)
+
+ggplot(data=mc, aes(x=Methylation.Class.Name, y=score)) +
+  geom_bar(stat="identity", fill="#1f78b4") +
+  geom_hline(yintercept=0.2, linetype="dashed") + # indicate recommended cut-off
+  coord_flip() +
+  scale_x_discrete(limits=mc[order(mc$score,decreasing=T),]$Methylation.Class.Name[5:1]) +
+  scale_y_continuous(breaks=c(0,0.2,0.4,0.6,0.8,1), limits=c(0,1)) +
+  ylab("score") + xlab("") +
+  ggtitle("Methylation class (MC)") +
+  theme_classic() + theme(aspect.ratio=1)
+```
+
+```{r, out.height = "150px", fig.align = 'center', echo=FALSE, warning=FALSE}
+ggplot(mcf, aes(x=Methylation.Class.Family, y=score_MCF)) +
+  geom_bar(stat="identity", fill="#4daf4a") +
+  geom_hline(yintercept=0.2, linetype="dashed") + # indicate recommended cut-off
+  coord_flip() +
+  scale_x_discrete(limits=mcf[order(mcf$score_MCF,decreasing=T),]$Methylation.Class.Family[5:1]) +
+  scale_y_continuous(breaks=c(0,0.2,0.4,0.6,0.8,1), limits=c(0,1)) +
+  ylab("score") + xlab("") +
+  ggtitle("Methylation class family (MCF)") +
+  theme_classic() + theme(aspect.ratio=1)
+```
+
+```{r dimensionality_reduction_plot, eval=snakemake@config[["dim_reduction_report"]], results='asis', echo=FALSE}
+cat("## Dimensionality reduction plot\n\n")
+
+cat("Dimensionality reduction plots are only intended for visual quality control, not classification, and must be interpreted with caution.\n\n")
+
+knitr::include_graphics(normalizePath(snakemake@input[["tSNE"]]))
+```
+
+#### Disclaimer
+
+Methylation-based classification using nanopore whole genome sequening is a research tool currently under development. It has not been clinically validated in sufficiently large cohorts. Interpretation and implementation of the results in a clinical setting is in the sole responsibility of the treating physician.
+
+  
+  
+
+(Report generated on `r Sys.time()`. Pipeline version: `r system("git describe --tags", intern = T)`, `r system("git log --pretty=format:'%h' -n 1", intern=T)`)

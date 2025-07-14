@@ -1,0 +1,16 @@
+rule all:
+    input:
+        "T001_nanodx_classifier.txt",
+        "T001_nanodx_classifier.tsv"
+
+rule NN_classifier:
+    input:
+        bed = "T001_nanodx_bedmethyl.bed",
+        model = "Capper_et_al_NN.pkl"
+    output:
+        txt = "T001_nanodx_classifier.txt",
+        votes = "T001_nanodx_classifier.tsv"
+    threads: 2
+    resources: 
+        mem_mb = 2048
+    script: "/home/ubuntu/data/reference/nanoDx/workflow/scripts/classify_NN_bedMethyl.py"

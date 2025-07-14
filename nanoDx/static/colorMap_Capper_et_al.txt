@@ -1,0 +1,92 @@
+group	methylationClass	color
+Embryonal	ETMR	#309bd6
+Embryonal	MB, WNT	#5cabdc
+Embryonal	MB, G3	#2489c9
+Embryonal	MB, G4	#8bc3e7
+Embryonal	MB, SHH CHL AD	#2f85c9
+Embryonal	MB, SHH INF	#7fbee5
+Embryonal	ATRT, MYC	#1d74ba
+Embryonal	ATRT, SHH	#38a0d8
+Embryonal	ATRT, TYR	#51acde
+Embryonal	CNS NB, FOXR2	#4491ce
+Embryonal	HGNET, BCOR	#5e9ed2
+Glioblastoma	DMG, K27	#96d48b
+Glioblastoma	GBM, G34	#55c16b
+Glioblastoma	GBM, MES	#4c8d42
+Glioblastoma	GBM, RTK I	#66c255
+Glioblastoma	GBM, RTK II	#7ccb73
+Glioblastoma	GBM, RTK III	#76c54f
+Glioblastoma	GBM, MID	#35823a
+Glioblastoma	GBM, MYCN	#63c258
+Glio-neuronal	CN	#c25621
+Glio-neuronal	DLGNT	#dd7140
+Glio-neuronal	LIPN	#ef7934
+Glio-neuronal	LGG, DIG/DIA	#e05220
+Glio-neuronal	LGG, DNT	#dc5520
+Glio-neuronal	LGG, RGNT	#ff8d4e
+Glio-neuronal	RETB	#ff915e
+Glio-neuronal	ENB, A	#b14a1f
+Glio-neuronal	ENB, B	#ff7d45
+Glio-neuronal	PGG, nC	#ff7e31
+Glio-neuronal	LGG, GG	#fb703f
+Sella	CPH, ADM	#6ad1c7
+Sella	CPH, PAP	#56cdce
+Sella	PITAD, ACTH	#29857d
+Sella	PITAD, FSH LH	#41ada1
+Sella	PITAD, PRL	#35c2b3
+Sella	PITAD, STH SPA	#51cabd
+Sella	PITAD, TSH	#4bc9be
+Sella	PITAD, STH DNS A	#3dc5be
+Sella	PITAD, STH DNS B	#41c8c8
+Sella	PITUI	#5ed0d4
+Ependymal	EPN, RELA	#ee5350
+Ependymal	EPN, YAP	#ff5e75
+Ependymal	EPN, PF A	#fe3350
+Ependymal	EPN, PF B	#f8455b
+Ependymal	EPN, SPINE	#ff3c58
+Ependymal	EPN, MPE	#c8283e
+Ependymal	SUBEPN, PF	#f9302e
+Ependymal	SUBEPN, SPINE	#ff4c4d
+Ependymal	SUBEPN, ST	#ff5060
+Other glioma	CHGL	#8b7fc1
+Other glioma	LGG, SEGA	#7d73bb
+Other glioma	LGG, PA PF	#8374bb
+Other glioma	LGG, PA MID	#9f8dc7
+Other glioma	ANA PA	#5750a9
+Other glioma	HGNET, MN1	#9892c9
+Other glioma	IHG	#c6b7da
+Other glioma	LGG, MYB	#645eb1
+Other glioma	LGG, PA/GG ST	#6252a2
+Other glioma	PXA	#534fa9
+Nerve	SCHW	#ffdbaf
+Nerve	SCHW, MEL	#ffc689
+Pineal	PTPR, A	#9ed792
+Pineal	PTPR, B	#b3dd99
+Pineal	PIN T,  PB B	#a4d99c
+Pineal	PIN T,  PB A	#bfe2ae
+Pineal	PIN T, PPT	#a5d999
+Mesenchymal	CHORDM	#ca90c6
+Mesenchymal	EWS	#9a72b9
+Mesenchymal	HMB	#ac70b7
+Mesenchymal	MNG	#ab70b7
+Mesenchymal	SFT HMPC	#c47cbc
+Mesenchymal	EFT, CIC	#845eaf
+Melanocytic	MELAN	#184270
+Melanocytic	MELCYT	#152947
+Plexus	PLEX, AD	#773c1a
+Plexus	PLEX, PED A	#9e5525
+Plexus	PLEX, PED B	#703c26
+Glioma IDH	A IDH	#f1ba3a
+Glioma IDH	A IDH, HG	#d9c845
+Glioma IDH	O IDH	#ffe05a
+Haematopoetic	LYMPHO	#321846
+Haematopoetic	PLASMA	#56306d
+Control	CONTR, ADENOPIT	#c9d0d1
+Control	CONTR, WM	#97a6a9
+Control	CONTR, CEBM	#afbbbd
+Control	CONTR, HEMI	#849397
+Control	CONTR, HYPTHAL	#6f7f82
+Control	CONTR, INFLAM	#d3d9da
+Control	CONTR, PINEAL	#5d686d
+Control	CONTR, PONS	#485356
+Control	CONTR, REACT	#ced5d6

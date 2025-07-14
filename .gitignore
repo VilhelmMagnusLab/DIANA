@@ -80,6 +80,11 @@ humandb/
 testdata/
 data/
 
+# nanoDx large model files (excluded due to size)
+nanoDx/static/Capper_et_al.h5
+nanoDx/static/Capper_et_al.h5.md5
+nanoDx/static/Capper_et_al_NN.pkl
+
 # Environment files
 .env
 .conda/

@@ -1,0 +1,13 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - default
+dependencies:
+  - bioconductor-qdnaseq
+  - bioconductor-qdnaseq.hg19 
+  - r-pscbs
+  - r-dplyr
+  - r-matrixstats
+  - r-catools
+  - r-ggplot2

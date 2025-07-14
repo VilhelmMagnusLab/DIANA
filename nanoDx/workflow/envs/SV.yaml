@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - sniffles=1.0.11
+  - samtools=1.9
+  - r-circlize
+  - r-data.table

@@ -1,0 +1,45 @@
+ref_genome: /home/vml/Reference_Genomes/hg19.fa # https://hgdownload.cse.ucsc.edu/goldenpath/hg19/bigZips/hg19.fa.gz
+#FAST5_basedir: /home/vml/IntraOp
+#FAST5_basedir: /home/vml/P24_pilot/Prospective/Subsample_bam
+#FAST5_basedir: /home/vml/P24_pilot/P24_subsample_bam
+#FAST5_basedir: /home/vml/200_GBMs/Rapid/26082024/unmapped
+FAST5_basedir: /media/vml/Ghibli/200GBMs/Rapidseq_18102024
+
+trainingset_dir: /home/vml/Reference_Genomes/NanoDx_Trainingsets
+chr_sizes: static/hg19.chrom.sizes
+email: "info@mail.com"
+max_CpG: 50000
+
+### basecalling
+
+# basecalling mode (valid options: dorado, dorado_posthoc, guppy_cpu, guppy_gpu, none_fastq, none_bam)
+#basecalling_mode: dorado
+basecalling_mode: none_bam
+
+# guppy parameters
+guppy_model: dna_r9.4.1_450bps_modbases_5hmc_5mc_cg_fast.cfg
+#guppy_model: dna_r10.4.1_e8.2_400bps_modbases_5mc_cg_fast.cfg # default model for R10.4.1 flow cells
+guppy_options:
+
+# dorado parameters
+dorado_model: dna_r10.4.1_e8.2_400bps_hac@v4.1.0
+#dorado_model: dna_r9.4.1_e8.2_450bps_fast@v4.2.0
+#dorado_options: "--modified-bases 5mCG_5hmCG"
+dorado_options: "--modified-bases 5mCG"
+
+### dimensionality reduction plot options
+
+# dimensionality reduction method (valid options: umap, tsne; default: tsne)
+dim_reduction_method: tsne
+
+# include dimensionality reduction in report
+dim_reduction_report: yes
+
+# tSNE parameters
+tsne_perplexity: 30
+tsne_pca_dim: 94
+tsne_max_iter: 2500 # changed to 1000 to save time
+
+# UMAP parameters
+umap_n_neighbours: 10
+umap_min_dist: 0.5
