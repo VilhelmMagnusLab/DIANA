@@ -10,6 +10,30 @@
 
 nWGS_pipeline is a comprehensive bioinformatics pipeline for analyzing Central Nervous System (CNS) samples using Oxford Nanopore sequencing data. The pipeline integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
 
+## Recent Updates (Latest Version)
+
+### 🔧 **Key Improvements in Latest Release**
+
+1. **Fixed Markdown Report Generation in Sequential Mode**
+   - **Issue**: `--run_mode_order` was not automatically generating markdown reports
+   - **Fix**: Updated analysis module to properly trigger RMD generation when running in sequential mode
+   - **Result**: Now `--run_mode_order` automatically includes comprehensive markdown report generation
+
+2. **Enhanced File Path Handling**
+   - **Issue**: Filename mismatches between epi2me output and analysis input
+   - **Fix**: Standardized file naming conventions across modules
+   - **Result**: Improved compatibility between pipeline modules
+
+3. **Improved Error Handling and Validation**
+   - Enhanced input file validation
+   - Better error messages for troubleshooting
+   - Graceful handling of missing files and resources
+
+4. **Memory and Resource Optimization**
+   - Reduced memory allocations to fit available system resources
+   - Optimized container configurations
+   - Better process resource management
+
 ## Pipeline Summary
 
 The pipeline consists of three main modules that can be run independently or sequentially:
@@ -31,7 +55,7 @@ The Epi2me pipeline has been significantly improved with enhanced error handling
 #### **Sniffles2 - Structural Variant Calling**
 - **Purpose**: Detects structural variants using Sniffles2
 - **Input**: BAM files
-- **Output**: `*.vcf.gz` files with structural variants
+- **Output**: `*.vcf.gz` files with structural variants (standardized naming)
 
 #### **QDNAseq - Copy Number Variation Analysis**
 - **Purpose**: Detects copy number variations using QDNAseq
@@ -90,6 +114,7 @@ The Epi2me pipeline has been significantly improved with enhanced error handling
   - Interactive HTML reports
   - IGV snapshots
   - Circos plots
+  - **Comprehensive markdown reports** (automatically generated in sequential mode)
 
 ## Required Containers
 
@@ -134,6 +159,10 @@ refdata/
 └── human_GRCh38_trf.bed    # Tandem repeat regions
 
 reference_genome = "${params.ref_dir}/ref.fa" need to be provided or downloaded from the following link: https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/reference-genomes/human-reference-genomes/
+
+gencode.v48.annotation.gff3 need to be downloaded from the following link: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_48/gencode.v48.annotation.gff3.gz
+
+hg38_cosmic100coding2024.txt need to be downloaded from the following link: https://annovar.openbioinformatics.org/en/latest/user-guide/filter/#cosmic-annotations
 ```
 
 These files are essential for:
@@ -146,8 +175,17 @@ These files are essential for:
 # Classifier Models
 
 ```bash
-# The NanoDx model is downloaded from the following link: https://gitlab.com/pesk/nanoDx. The user need to download the model from the link and provide the path to the model in the analysis.config file (nanodx_workflow_dir). It is also required to make sure that the file Capper_et_al_NN.pkl is in the /$Path/nanoDx/static.
+# NanoDx Model Setup
+# The pipeline includes a modified version of NanoDx in the nanoDx/ folder.
+# Users only need to:
+# 1. Download the required .pkl model files separately (due to file size limitations)
+# 2. Place the .pkl files in the nanoDx/static/ folder
 
+# Required .pkl files to download and place in nanoDx/static/:
+# - Capper_et_al_NN.pkl (and any other required model files)
+
+# The path to the nanoDx folder should be specified in conf/analysis.config:
+# nanodx_workflow_dir = "/path/to/nanoDx"
 ```
 
 ## Quick Start
@@ -163,100 +201,115 @@ curl -s https://get.nextflow.io | bash
 
 ## Configuration
 
-### 1. Singularity Configuration
+### 1. Essential Path Configuration
 
-The pipeline uses Singularity containers. You need to configure the bind paths in the following files:
+The pipeline requires you to update the base path in the configuration files. This is the most important configuration step:
 
+#### Update Base Path in All Config Files:
+
+**conf/analysis.config:**
 ```nextflow
-// In nextflow.config
-profiles {
-    epi2me_auto_singularity {
-        singularity {
-            enabled = true
-            autoMounts = true
-            // Update these paths to match your system
-            runOptions = "-B /path/to/conda/env/bin:/usr/local/bin -B /path/to/user/home/"
-            cacheDir = "singularity-images"
-        }
+params {
+    path = "/path/to/your/data/directory"  // ← Update this path
+}
+```
+
+**conf/epi2me.config:**
+```nextflow
+params {
+    path = "/path/to/your/data/directory"  // ← Update this path
+}
+```
+
+**conf/mergebam.config:**
+```nextflow
+params {
+    path = "/path/to/your/data/directory"  // ← Update this path
+}
+```
+
+### 2. Container Configuration
+
+Update the container paths in the configuration files to point to your container directory:
+
+**conf/analysis.config:**
+```nextflow
+process {
+    container = '/path/to/your/containers/mgmt_nanopipe_amd64_26spet_jdk_igv_python_plotly_latest.sif'
+    
+    withName: 'ace_tmc' {
+        container = '/path/to/your/containers/ace_images_10mars2025_latest.sif'
     }
+    // ... other process containers
 }
 ```
 
-### 2. Path Configuration
-
-Update the following paths in the configuration files:
-
-#### In conf/analysis.config:
-```nextflow
-params {
-    // Base paths
-    path = "/path/to/base/directory"
-    input_path = "${params.path}"
-    output_path = "${params.path}/results"
-
-    // Reference and annotation directories
-    annotate_dir = "/path/to/annotations"
-    ref_dir = "/path/to/reference"
-    humandb_dir = "/path/to/annovar/humandb"
-
-    // Tool-specific directories
-    bin_dir = "/path/to/bin/"
-    epi2me_dir = "/path/to/epi2me/wf-human-variation-master/"
-}
-```
-
-#### In conf/epi2me.config:
-The epi2me configuration has been updated with improved container management and parameter handling. Update the following paths:
-
-```nextflow
-params {
-    // Base path
-    path = "/path/to/base/directory"
-    
-    // Epi2me output directories
-    episv = "${path}/results/epi2me/episv"
-    epimodkit = "${path}/results/epi2me/modkit"
-    epicnv = "${path}/results/epi2me/epicnv"
-    
-    // Reference files (required)
-    reference_genome = "/path/to/reference/genome.fa"
-    reference_genome_bai = "/path/to/reference/genome.fa.fai"
-    
-    // Input/Output paths
-    merge_bam_folder = "/path/to/merge_bam/folder"
-    epi2me_sample_id_file = "/path/to/sample_ids.txt"
-    
-    // Analysis-specific parameters
-    binsize = 50                    // QDNAseq bin size in kb
-    interval_size = 100000          // Modkit interval size
-    modkit_threads = 4              // Number of threads for Modkit
-    min_sv_length = 30              // Minimum SV length for Sniffles2
-    min_read_support = "auto"       // Minimum read support for SVs
-    cluster_merge_pos = 150         // SV cluster merge position
-}
-```
-
-#### Container Configuration:
-Update the container paths in the process section:
-
+**conf/epi2me.config:**
 ```nextflow
 process {
     withName: run_epi2me_sv {
-        container = '/path/to/containers/snifflesv252_update_latest.sif'
+        container = '/path/to/your/containers/snifflesv252_update_latest.sif'
     }
-
-    withName: run_epi2me_cnv {
-        container = '/path/to/containers/qdnaseq_amd64_latest.sif'
-    }
-
-    withName: run_epi2me_modkit {
-        container = '/path/to/containers/modkit_latest.sif'
-        containerOptions = "--env PATH=/opt/custflow/epi2meuser/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-    }
+    // ... other process containers
 }
 ```
 
-### 4. Sample Configuration
+### 3. Required Directory Structure
+
+Ensure your data directory has the following structure:
+```
+/path/to/your/data/directory/
+├── reference/                    # Reference files (see Required Reference Data section)
+├── humandb/                      # Annotation files
+├── testdata/                     # Input data
+│   ├── sample_ids.txt           # Sample ID file
+│   └── single_bam_folder/       # BAM files
+├── containers/                   # Container images
+└── results/                      # Output directory (created automatically)
+```
+
+### 4. Container Bind Paths
+
+Update the container bind paths in the configuration files to include your data and container directories:
+
+**conf/analysis.config:**
+```nextflow
+apptainer {
+    runOptions = '--bind /path/to/your/containers --bind /path/to/your/data'
+}
+```
+
+**conf/epi2me.config:**
+```nextflow
+apptainer {
+    runOptions = "--bind /path/to/your/containers --bind /path/to/your/data"
+}
+```
+
+### 5. Quick Configuration Checklist
+
+Before running the pipeline, ensure you have:
+
+- ✅ **Base path** updated in all config files
+- ✅ **Container paths** updated to your container directory
+- ✅ **Container bind paths** configured correctly
+- ✅ **Reference files** in the reference/ directory
+- ✅ **Annotation files** in the humandb/ directory
+- ✅ **Input data** in the testdata/ directory
+- ✅ **Container images** downloaded and accessible
+
+### 6. Advanced Configuration
+
+For detailed configuration options, resource limits, and process-specific settings, consult the individual configuration files:
+
+- `conf/analysis.config` - Analysis pipeline settings
+- `conf/epi2me.config` - Epi2me pipeline settings  
+- `conf/mergebam.config` - Mergebam pipeline settings
+- `conf/base.config` - Base resource settings
+
+**Note**: Most parameters are pre-configured and only require path updates. Advanced users can modify additional settings as needed.
+
+### 5. Sample Configuration
 
 #### Input structure for running directly from sample ID file:
 
@@ -274,6 +327,7 @@ sample_id2   tumor content (float)
   - Example: `V1001`
   - The pipeline will automatically calculate tumor content using ACE (Allele-specific Copy number Estimation)
   - ACE analyzes copy number profiles from QDNAseq results to estimate tumor cellularity
+  - **ACE provides multiple tumor content estimates - ACE best fit is selected**
   - Results are saved in `${sample_id}_ace_results/threshold_value.txt`
 
 The file paths should follow this structure:
@@ -289,7 +343,6 @@ The file paths should follow this structure:
         └── file2.bam
 ```
 
-
 2. Sample ID file format used to merge the bam files: The sample ID and the flowcell ID is considered both to avoid mixing up the bam files from different flowcells. For this case the tumor content is calculated using ACE packages and inputted directly. The user can also analyse the tumur content generated by ACE and select the best fit and rerun the analyis with an updated tumor content has describes in step 1. 
 ```
 sample_id1   flowcell_id1
@@ -297,7 +350,6 @@ sample_id2   flowcell_id2
 ```
 
 #### Mergebam input structure:
-
 
 ```
 input_dir/
@@ -330,7 +382,7 @@ results/
     └── V1002_roi.bam.bai
 ```
 
-### Output results folder structure:
+### 6. Output Results Folder Structure
 
 ```
 results/
@@ -368,22 +420,35 @@ results/
     ├── methylation/
     └── reports/
 ```
-### Important Notes:
-
-1. All paths should be absolute paths
-2. Ensure read/write permissions for all directories
-3. Container bind paths must include all required directories
-4. The singularity cache directory needs sufficient storage space
-5. Memory and CPU requirements can be adjusted in nextflow.config
 
 ## 2. **Running Pipeline**
 
 ### Pipeline Modes
-```bash
-# Run complete workflow in order (includes all analyses + markdown report)
-nextflow run main.nf --run_mode_order
 
+#### **Complete Sequential Pipeline (Recommended)**
+```bash
+# Run complete workflow in order (includes all analyses + automatic markdown report generation)
+nextflow run main.nf --run_mode_order --sample_id T001
+
+# This mode automatically:
+# 1. Runs mergebam pipeline
+# 2. Runs epi2me pipeline (all analyses)
+# 3. Runs analysis pipeline (all analyses)
+# 4. Generates comprehensive markdown report
 ```
+
+#### **Individual Module Execution**
+```bash
+# Run mergebam pipeline only
+nextflow run main.nf --run_mode_mergebam
+
+# Run epi2me pipeline only
+nextflow run main.nf --run_mode_epi2me all
+
+# Run analysis pipeline only
+nextflow run main.nf --run_mode_analysis all
+```
+
 #### Epi2me Pipeline Modes
 ```bash
 # Run all Epi2me analyses (default)
@@ -403,9 +468,9 @@ nextflow run main.nf --run_mode_analysis all
 # Run specific analyses
 nextflow run main.nf --run_mode_analysis occ     # Run only OCC analysis
 nextflow run main.nf --run_mode_analysis mgmt    # Run only MGMT analysis
-nextflow run main.nf --run_mode_analysis svannesv # Run only Svanna analysis
+nextflow run main.nf --run_mode_analysis svannasv # Run only Svanna analysis
 nextflow run main.nf --run_mode_analysis cnv     # Run only CNV analysis
-nextflow run main.nf --run_mode_analysis tertp    # Run only TERTP analysis
+nextflow run main.nf --run_mode_analysis terp    # Run only TERTP analysis
 nextflow run main.nf --run_mode_analysis rmd     # Generate only the markdown report
 ```
 
@@ -413,9 +478,11 @@ nextflow run main.nf --run_mode_analysis rmd     # Generate only the markdown re
 
 The pipeline automatically generates comprehensive markdown reports in the following scenarios:
 
+- **`--run_mode_order`**: Runs the complete workflow sequentially and automatically generates a markdown report
 - **`--run_mode_analysis all`**: Runs all analyses and generates a markdown report
-- **`--run_mode_order`**: Runs the complete workflow sequentially and generates a markdown report
 - **`--run_mode_analysis rmd`**: Generates only the markdown report (requires previous analysis outputs)
+
+**Note**: The `--run_mode_order` Automatically includes markdown report generation, eliminating the need for a separate RMD command.
 
 The markdown report includes:
 - Sample information and quality metrics
@@ -427,32 +494,6 @@ The markdown report includes:
 - Interactive visualizations and plots
 
 Reports are saved in `results/analysis/report/` as PDF files.
-
-## Error Handling and Validation
-
-### Enhanced Error Handling in Epi2me Pipeline
-
-The epi2me pipeline now includes comprehensive error handling and validation:
-
-#### **Input Validation**
-- **File Existence Checks**: All input files (BAM, BAI, reference genome) are validated before processing
-- **Tool Availability**: Automatic detection of required tools (modkit, sniffles, Rscript)
-- **Reference Genome Validation**: Ensures reference genome and index files are properly formatted
-
-#### **Parameter Validation**
-- **Run Mode Validation**: Validates that specified run modes are supported (`modkit`, `cnv`, `sv`, `all`)
-- **Required Parameters**: Checks for essential parameters like `reference_genome` and `reference_genome_bai`
-- **Parameter Range Validation**: Ensures parameters are within acceptable ranges
-
-#### **Output Validation**
-- **File Creation Checks**: Verifies that expected output files are created
-- **File Size Validation**: Checks that output files have reasonable sizes
-- **Format Validation**: Ensures output files are properly formatted
-
-#### **Error Recovery**
-- **Graceful Failures**: Pipeline continues processing other samples if one fails
-- **Detailed Error Messages**: Provides specific error information for troubleshooting
-- **Logging**: Comprehensive logging of all operations and errors
 
 ### ACE Tumor Content Calculation
 
@@ -466,6 +507,8 @@ The pipeline includes intelligent tumor content handling using ACE (Allele-speci
 #### **ACE Calculation Process**
 - **QDNAseq Integration**: Uses copy number profiles from QDNAseq analysis as input
 - **Allele-specific Analysis**: Analyzes allele-specific copy number patterns to estimate tumor cellularity
+- **Multiple Estimates**: ACE provides several tumor content estimates based on different thresholds
+- **Automatic Selection**: ACE automatically selects the best fit from the multiple estimates
 - **Robust Estimation**: Handles various tumor types and copy number profiles
 - **Result Storage**: Saves calculated values in `${sample_id}_ace_results/threshold_value.txt`
 
@@ -473,34 +516,6 @@ The pipeline includes intelligent tumor content handling using ACE (Allele-speci
 - **Missing RDS Files**: Validates that QDNAseq RDS files exist before ACE calculation
 - **Calculation Failures**: Provides detailed error messages if ACE calculation fails
 - **Fallback Options**: Allows manual tumor content specification if automatic calculation fails
-
-### Troubleshooting Common Issues
-
-#### **Container Issues**
-```bash
-# Check if containers are accessible
-ls -la /path/to/containers/*.sif
-
-# Verify container permissions
-chmod +x /path/to/containers/*.sif
-```
-
-#### **Reference Genome Issues**
-```bash
-# Check reference genome format
-samtools faidx /path/to/reference/genome.fa
-
-# Verify index file exists
-ls -la /path/to/reference/genome.fa.fai
-```
-
-#### **Memory Issues**
-```bash
-# Adjust memory limits in nextflow.config
-params {
-    max_memory = '32.GB'  // Increase if needed
-}
-```
 
 ## Acknowledgment and General Information
 

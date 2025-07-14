@@ -1,243 +1,504 @@
-Jul-09 11:45:44.016 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --run_mode_analysis all -resume
-Jul-09 11:45:44.307 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.04.4
-Jul-09 11:45:44.334 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/chbope/.nextflow/plugins; core-plugins: nf-amazon@2.15.0,nf-azure@1.16.0,nf-cloudcache@0.4.3,nf-codecommit@0.2.3,nf-console@1.2.1,nf-google@1.21.0,nf-k8s@1.0.0,nf-tower@1.11.3,nf-wave@1.12.1
-Jul-09 11:45:44.376 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
-Jul-09 11:45:44.377 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
-Jul-09 11:45:44.380 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
-Jul-09 11:45:44.393 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
-Jul-09 11:45:44.422 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
-Jul-09 11:45:44.425 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
-Jul-09 11:45:44.462 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/chbope/.nextflow/secrets/store.json
-Jul-09 11:45:44.466 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@7cedfa63] - activable => nextflow.secret.LocalSecretsProvider@7cedfa63
-Jul-09 11:45:44.483 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
-Jul-09 11:45:45.321 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
-Jul-09 11:45:45.334 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [loving_elion] DSL2 - revision: 67b7256835
-Jul-09 11:45:45.336 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
-Jul-09 11:45:45.336 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
-Jul-09 11:45:45.396 [main] DEBUG nextflow.Session - Session UUID: 161629e0-bbab-4c65-8cc7-d03132f5e49b
-Jul-09 11:45:45.396 [main] DEBUG nextflow.Session - Run name: loving_elion
-Jul-09 11:45:45.396 [main] DEBUG nextflow.Session - Executor pool size: 12
-Jul-09 11:45:45.404 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
-Jul-09 11:45:45.410 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
-Jul-09 11:45:45.429 [main] DEBUG nextflow.cli.CmdRun - 
-  Version: 25.04.4 build 5950
-  Created: 16-06-2025 14:23 UTC (16:23 CEST)
-  System: Linux 6.11.0-29-generic
-  Runtime: Groovy 4.0.26 on OpenJDK 64-Bit Server VM 21.0.7+6-Ubuntu-0ubuntu124.04
+Jul-13 16:14:23.172 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --run_mode_order
+Jul-13 16:14:23.231 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.04.6
+Jul-13 16:14:23.250 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/ubuntu/.nextflow/plugins; core-plugins: nf-amazon@2.15.0,nf-azure@1.16.0,nf-cloudcache@0.4.3,nf-codecommit@0.2.3,nf-console@1.2.1,nf-google@1.21.1,nf-k8s@1.0.0,nf-tower@1.11.4,nf-wave@1.12.1
+Jul-13 16:14:23.272 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Jul-13 16:14:23.273 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Jul-13 16:14:23.275 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Jul-13 16:14:23.292 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Jul-13 16:14:23.308 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/ubuntu/nWGS_pipeline/nextflow.config
+Jul-13 16:14:23.310 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/ubuntu/nWGS_pipeline/nextflow.config
+Jul-13 16:14:23.332 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/ubuntu/.nextflow/secrets/store.json
+Jul-13 16:14:23.335 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@60723d6a] - activable => nextflow.secret.LocalSecretsProvider@60723d6a
+Jul-13 16:14:23.344 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Jul-13 16:14:24.034 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
+Jul-13 16:14:24.045 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [hopeful_wright] DSL2 - revision: fded277ebe
+Jul-13 16:14:24.046 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Jul-13 16:14:24.046 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Jul-13 16:14:24.085 [main] DEBUG nextflow.Session - Session UUID: 3fe64ff5-ea72-422b-806d-7c2fb8a0366a
+Jul-13 16:14:24.085 [main] DEBUG nextflow.Session - Run name: hopeful_wright
+Jul-13 16:14:24.085 [main] DEBUG nextflow.Session - Executor pool size: 4
+Jul-13 16:14:24.091 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Jul-13 16:14:24.094 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=12; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Jul-13 16:14:24.112 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 25.04.6 build 5954
+  Created: 01-07-2025 11:27 UTC 
+  System: Linux 5.15.0-143-generic
+  Runtime: Groovy 4.0.26 on OpenJDK 64-Bit Server VM 21.0.7+6-Ubuntu-0ubuntu122.04
   Encoding: UTF-8 (UTF-8)
-  Process: 784035@chbope [127.0.1.1]
-  CPUs: 12 - Mem: 78.2 GB (57.8 GB) - Swap: 8 GB (6.1 GB)
-Jul-09 11:45:45.506 [main] DEBUG nextflow.Session - Work-dir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work [ext2/ext3]
-Jul-09 11:45:45.541 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
-Jul-09 11:45:45.550 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
-Jul-09 11:45:45.555 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
-Jul-09 11:45:45.584 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
-Jul-09 11:45:45.594 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 13; maxThreads: 1000
-Jul-09 11:45:45.681 [main] DEBUG nextflow.Session - Session start
-Jul-09 11:45:45.690 [main] DEBUG nextflow.Session - Using default localLib path: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/lib
-Jul-09 11:45:45.692 [main] DEBUG nextflow.Session - Adding to the classpath library: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/lib
-Jul-09 11:45:45.934 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
-Jul-09 11:45:48.445 [main] INFO  nextflow.script.BaseScript - Analysis run mode: all
-Jul-09 11:45:48.453 [main] INFO  nextflow.script.BaseScript - Sample thresholds: [T001:0.5]
-Jul-09 11:45:48.508 [main] INFO  nextflow.script.BaseScript - Running MGMT Analysis...
-Jul-09 11:45:48.625 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.625 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.631 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
-Jul-09 11:45:48.638 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=12; memory=78.2 GB; capacity=12; pollInterval=100ms; dumpInterval=5m
-Jul-09 11:45:48.640 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
-Jul-09 11:45:48.663 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:extract_epic': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.698 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.698 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.699 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:mgmt_promoter': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.705 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.705 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.706 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:nanodx': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.715 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_nn_classifier` matches process analysis:run_nn_classifier
-Jul-09 11:45:48.717 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.717 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.718 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:run_nn_classifier': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.720 [main] INFO  nextflow.script.BaseScript - Running AnnotSV Analysis...
-Jul-09 11:45:48.784 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.784 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.785 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:svannasv': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.798 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:circosplot` matches process analysis:circosplot
-Jul-09 11:45:48.801 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.801 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.802 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:circosplot': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.811 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.811 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.812 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:svannasv_fusion_events': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.814 [main] INFO  nextflow.script.BaseScript - Running OCC Analysis...
-Jul-09 11:45:48.824 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:clair3` matches process analysis:clair3
-Jul-09 11:45:48.827 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.827 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.828 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:clair3': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.849 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:clairs_to` matches process analysis:clairs_to
-Jul-09 11:45:48.851 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.851 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.851 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:clairs_to': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.873 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.873 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.874 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:merge_annotation': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.876 [main] INFO  nextflow.script.BaseScript - Running TERP Analysis...
-Jul-09 11:45:48.881 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:igv_tools` matches process analysis:igv_tools
-Jul-09 11:45:48.883 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.883 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.883 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:igv_tools': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.889 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:plot_genomic_regions` matches process analysis:plot_genomic_regions
-Jul-09 11:45:48.891 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.891 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.892 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:plot_genomic_regions': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.894 [main] INFO  nextflow.script.BaseScript - Running CNV Analysis...
-Jul-09 11:45:48.896 [main] INFO  nextflow.script.BaseScript - Samples needing ACE calculation: []
-Jul-09 11:45:48.896 [main] INFO  nextflow.script.BaseScript - Samples with provided thresholds: [T001:0.5]
-Jul-09 11:45:48.898 [main] INFO  nextflow.script.BaseScript - Using provided threshold for T001: 0.5
-Jul-09 11:45:48.898 [main] INFO  nextflow.script.BaseScript - Final threshold mapping: [T001:0.5]
-Jul-09 11:45:48.928 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:annotatecnv` matches process analysis:annotatecnv
-Jul-09 11:45:48.931 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.931 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.932 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:annotatecnv': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.936 [main] INFO  nextflow.script.BaseScript - Running RMD Report Generation...
-Jul-09 11:45:48.937 [main] INFO  nextflow.script.BaseScript - Reusing MGMT outputs from earlier analysis
-Jul-09 11:45:48.937 [main] INFO  nextflow.script.BaseScript - Reusing SV outputs from earlier analysis
-Jul-09 11:45:48.938 [main] INFO  nextflow.script.BaseScript - Reusing OCC outputs from earlier analysis
-Jul-09 11:45:48.938 [main] INFO  nextflow.script.BaseScript - Reusing TERP outputs from earlier analysis
-Jul-09 11:45:48.938 [main] INFO  nextflow.script.BaseScript - Running Cramino Statistics...
-Jul-09 11:45:48.943 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:cramino_report` matches process analysis:cramino_report
-Jul-09 11:45:48.945 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.945 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.946 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:cramino_report': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.976 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:markdown_report` matches process analysis:markdown_report
-Jul-09 11:45:48.978 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:45:48.978 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:45:48.979 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:markdown_report': maxForks=0; fair=false; array=0
-Jul-09 11:45:48.983 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: extract_epic, plot_genomic_regions, mgmt_promoter, analysis:clairs_to, igv_tools, analysis:cramino_report, markdown_report, merge_bam_files, analysis:svannasv, run_nn_classifier, analysis:igv_tools, clairs_to, analysis:nanodx, analysis:extract_epic, svannasv_fusion_events, clair3, run_epi2me_cnv, run_epi2me_sv, markdown_report_old, extract_roi, analysis:mgmt_promoter, circosplot, ace_tmc, svannasv, analysis:svannasv_fusion_events, analysis:circosplot, sturgeon, analysis:run_nn_classifier, annotatecnv, analysis:merge_annotation, nanodx, cramino_report, analysis:plot_genomic_regions, analysis:annotatecnv, merge_annotation, run_epi2me_modkit, analysis:markdown_report, analysis:clair3
-Jul-09 11:45:49.006 [main] WARN  nextflow.Session - There's no process matching config selector: annotesv -- Did you mean: annotatecnv?
-Jul-09 11:45:49.011 [main] DEBUG nextflow.Session - Igniting dataflow network (36)
-Jul-09 11:45:49.012 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:extract_epic
-Jul-09 11:45:49.013 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:mgmt_promoter
-Jul-09 11:45:49.013 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:nanodx
-Jul-09 11:45:49.013 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:run_nn_classifier
-Jul-09 11:45:49.013 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:svannasv
-Jul-09 11:45:49.014 [Actor Thread 11] INFO  nextflow.Nextflow - Creating AnnotSV input for sample: T001 (standalone mode)
-Jul-09 11:45:49.014 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:circosplot
-Jul-09 11:45:49.015 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:svannasv_fusion_events
-Jul-09 11:45:49.016 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:clair3
-Jul-09 11:45:49.016 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:clairs_to
-Jul-09 11:45:49.016 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:merge_annotation
-Jul-09 11:45:49.016 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:igv_tools
-Jul-09 11:45:49.016 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:plot_genomic_regions
-Jul-09 11:45:49.016 [Actor Thread 13] INFO  nextflow.Nextflow - Creating Svanna input for sample: T001 (standalone mode)
-Jul-09 11:45:49.016 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:annotatecnv
-Jul-09 11:45:49.017 [Actor Thread 14] INFO  nextflow.script.BaseScript - Processing sample: T001 from configured folders
-Jul-09 11:45:49.018 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:cramino_report
-Jul-09 11:45:49.018 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:markdown_report
-Jul-09 11:45:49.019 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
-  Script_5ff96b1b1f7896ee: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/main.nf
-  Script_19f71b1e943f871f: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/modules/mergebam.nf
-  Script_3eb0534c4454e552: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/modules/epi2me.nf
-  Script_147a364aa36aec0b: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/modules/analysis.nf
-Jul-09 11:45:49.019 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
-Jul-09 11:45:49.019 [main] DEBUG nextflow.Session - Session await
-Jul-09 11:45:49.029 [Actor Thread 16] INFO  nextflow.script.BaseScript - Preparing annotatecnv input for T001 with provided tumor content 0.5
-Jul-09 11:45:49.200 [Actor Thread 13] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/chbope/extension/results/epi2me/episv/T001.wf_sv.vcf.gz.tbi -- Cause: java.nio.file.NoSuchFileException: /home/chbope/extension/results/epi2me/episv/T001.wf_sv.vcf.gz.tbi
-Jul-09 11:45:49.372 [Actor Thread 5] INFO  nextflow.processor.TaskProcessor - [49/e86486] Cached process > analysis:cramino_report (1)
-Jul-09 11:45:49.372 [Actor Thread 7] INFO  nextflow.processor.TaskProcessor - [3e/a45e35] Cached process > analysis:clairs_to (1)
-Jul-09 11:45:49.372 [Actor Thread 13] INFO  nextflow.processor.TaskProcessor - [65/ae9509] Cached process > analysis:svannasv (1)
-Jul-09 11:45:49.372 [Actor Thread 3] INFO  nextflow.processor.TaskProcessor - [91/3f8364] Cached process > analysis:plot_genomic_regions (1)
-Jul-09 11:45:49.372 [Actor Thread 10] INFO  nextflow.processor.TaskProcessor - [f5/e40bc1] Cached process > analysis:clair3 (1)
-Jul-09 11:45:49.372 [Actor Thread 17] INFO  nextflow.processor.TaskProcessor - [54/e0af8e] Cached process > analysis:igv_tools (1)
-Jul-09 11:45:49.373 [Actor Thread 9] INFO  nextflow.processor.TaskProcessor - [a7/4aa511] Cached process > analysis:extract_epic (T001)
-Jul-09 11:45:49.379 [Actor Thread 16] INFO  nextflow.processor.TaskProcessor - [d6/339fc9] Cached process > analysis:annotatecnv (1)
-Jul-09 11:45:49.398 [Actor Thread 23] INFO  nextflow.script.BaseScript - Creating merge input for sample: T001
-Jul-09 11:45:49.408 [Actor Thread 22] INFO  nextflow.processor.TaskProcessor - [b8/d6efd3] Cached process > analysis:circosplot (1)
-Jul-09 11:45:49.408 [Actor Thread 30] INFO  nextflow.processor.TaskProcessor - [b1/e8552f] Cached process > analysis:mgmt_promoter (1)
-Jul-09 11:45:49.409 [Actor Thread 28] INFO  nextflow.processor.TaskProcessor - [cb/6ccee7] Cached process > analysis:nanodx (1)
-Jul-09 11:45:49.409 [Actor Thread 20] INFO  nextflow.processor.TaskProcessor - [0e/62a7ba] Cached process > analysis:svannasv_fusion_events (1)
-Jul-09 11:45:49.416 [Actor Thread 20] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
-Jul-09 11:45:49.501 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Jul-09 11:45:49.503 [Task submitter] INFO  nextflow.Session - [f1/3c68c3] Submitted process > analysis:merge_annotation (1)
-Jul-09 11:45:49.517 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Jul-09 11:45:49.517 [Task submitter] INFO  nextflow.Session - [2b/657d18] Submitted process > analysis:run_nn_classifier (1)
-Jul-09 11:45:51.197 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 13; name: analysis:merge_annotation (1); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/f1/3c68c30e399b02d1c8aeb11db5c748]
-Jul-09 11:45:51.199 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
-Jul-09 11:45:58.299 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 14; name: analysis:run_nn_classifier (1); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/2b/657d189884b20707fc6be48b5cce9f]
-Jul-09 11:45:58.377 [Actor Thread 4] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/chbope/extension/testdata/log_update.pdf -- Cause: java.nio.file.NoSuchFileException: /home/chbope/extension/testdata/log_update.pdf
-Jul-09 11:45:58.391 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Jul-09 11:45:58.392 [Task submitter] INFO  nextflow.Session - [ec/31b3ca] Submitted process > analysis:markdown_report (1)
-Jul-09 11:46:00.902 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 15; name: analysis:markdown_report (1); status: COMPLETED; exit: 1; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/ec/31b3cade33a38ef25698ad0cbf4a7e]
-Jul-09 11:46:00.913 [TaskFinalizer-3] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
-  task: name=analysis:markdown_report (1); work-dir=/home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/ec/31b3cade33a38ef25698ad0cbf4a7e
-  error [nextflow.exception.ProcessFailedException]: Process `analysis:markdown_report (1)` terminated with an error exit status (1)
-Jul-09 11:46:00.936 [TaskFinalizer-3] ERROR nextflow.processor.TaskProcessor - Error executing process > 'analysis:markdown_report (1)'
-
-Caused by:
-  Process `analysis:markdown_report (1)` terminated with an error exit status (1)
-
-
-Command executed:
-
-  # Output PDF path
-  output_file="T001_markdown_pipeline_report.pdf"
-  
-  # Now call the Rscript with the updated Rmd file
-  Rscript -e "rmarkdown::render('/home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])"       "T001"       "T001_cramino_statistics.txt"       "/home/chbope/extension/data/testdata/sample_ids.txt"       "T001_nanodx_classifier.tsv"       "Capper_et_al_dictionary.txt"       "log_update.pdf"       "T001_cnv_plot_full.pdf"       "T001_tumor_copy_number.txt"       "T001_annotatedcnv_filter_header.csv"       "T001_cnv_chr9.pdf"       "T001_cnv_chr7.pdf"       "T001_MGMT_results.csv"       "T001_merge_annotation_filter_snvs_allcall_filter.csv"       "T001_filter_fusion_event.tsv"       "T001_tertp_id1.html"       "T001_occ_svanna_annotation.html"       "T001_egfr_coverage.pdf"       "T001_idh1_coverage.pdf"       "T001_tertp_coverage.pdf"       "${PWD}/${output_file}"
-
-Command exit status:
-  1
-
-Command output:
-  1/36                   
-  2/36 [setup]           
-
-Command error:
-  INFO:    Environment variable SINGULARITYENV_NXF_TASK_WORKDIR is set, but APPTAINERENV_NXF_TASK_WORKDIR is preferred
-  
-  
-  processing file: nextflow_markdown_pipeline_update_final.Rmd
-  1/36                   
-  2/36 [setup]           
-  Error:
-  ! Votes file not found: T001_nanodx_classifier.tsv
-  
-  Quitting from lines 19-82 [setup] (nextflow_markdown_pipeline_update_final.Rmd)
-  Execution halted
-
-Work dir:
-  /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/ec/31b3cade33a38ef25698ad0cbf4a7e
-
-Container:
-  /home/chbope/extension/images/markdown_images_28feb2025_latest.sif
-
-Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
-Jul-09 11:46:00.939 [main] DEBUG nextflow.Session - Session await > all processes finished
-Jul-09 11:46:00.940 [TaskFinalizer-3] DEBUG nextflow.Session - Session aborted -- Cause: Process `analysis:markdown_report (1)` terminated with an error exit status (1)
-Jul-09 11:46:00.967 [TaskFinalizer-3] ERROR nextflow.Nextflow - 
-        Pipeline execution failed
-        ---------------------------
-        Error message: INFO:    Environment variable SINGULARITYENV_NXF_TASK_WORKDIR is set, but APPTAINERENV_NXF_TASK_WORKDIR is preferred
-
-
-processing file: nextflow_markdown_pipeline_update_final.Rmd
-1/36                   
-2/36 [setup]           
-Error:
-! Votes file not found: T001_nanodx_classifier.tsv
-
-Quitting from lines 19-82 [setup] (nextflow_markdown_pipeline_update_final.Rmd)
-Execution halted
+  Process: 1443596@bope [127.0.1.1]
+  CPUs: 4 - Mem: 3.7 GB (2.6 GB) - Swap: 4 GB (3.7 GB)
+Jul-13 16:14:24.132 [main] DEBUG nextflow.Session - Work-dir: /home/ubuntu/nWGS_pipeline/work [ext2/ext3]
+Jul-13 16:14:24.155 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Jul-13 16:14:24.162 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Jul-13 16:14:24.165 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
+Jul-13 16:14:24.185 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Jul-13 16:14:24.193 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 5; maxThreads: 1000
+Jul-13 16:14:24.320 [main] DEBUG nextflow.Session - Session start
+Jul-13 16:14:24.456 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Jul-13 16:14:26.199 [main] INFO  nextflow.Nextflow - 
+        Running pipelines sequentially in strict order:
+        1. Mergebam Pipeline
+        2. Epi2me Pipeline
+        3. Analysis Pipeline
         
-Jul-09 11:46:00.968 [main] DEBUG nextflow.Session - Session await > all barriers passed
-Jul-09 11:46:00.968 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
-Jul-09 11:46:00.981 [main] ERROR nextflow.Nextflow - 
+Jul-13 16:14:26.200 [main] INFO  nextflow.Nextflow - === Starting Mergebam Pipeline ===
+Jul-13 16:14:26.203 [main] INFO  nextflow.script.BaseScript - Sample_id T001 with Flow Cell ID: PBC51775
+Jul-13 16:14:26.300 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:merge_bam_files` matches process mergebam:merge_bam_files
+Jul-13 16:14:26.310 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.311 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.315 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Jul-13 16:14:26.321 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=4; memory=3.7 GB; capacity=1; pollInterval=100ms; dumpInterval=5m
+Jul-13 16:14:26.324 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+Jul-13 16:14:26.346 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'mergebam:merge_bam_files': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.376 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:extract_roi` matches process mergebam:extract_roi
+Jul-13 16:14:26.378 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.379 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.379 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'mergebam:extract_roi': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.382 [main] INFO  nextflow.Nextflow - === Starting Epi2me Pipeline ===
+Jul-13 16:14:26.384 [main] INFO  nextflow.script.BaseScript - epi2me run mode: all
+Jul-13 16:14:26.392 [main] INFO  nextflow.script.BaseScript - Running modkit...
+Jul-13 16:14:26.406 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_epi2me_modkit` matches process epi2me:run_epi2me_modkit
+Jul-13 16:14:26.410 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.410 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.411 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'epi2me:run_epi2me_modkit': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.413 [main] INFO  nextflow.script.BaseScript - Running cnv...
+Jul-13 16:14:26.427 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_epi2me_cnv` matches process epi2me:run_epi2me_cnv
+Jul-13 16:14:26.431 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.431 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.432 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'epi2me:run_epi2me_cnv': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.434 [main] INFO  nextflow.script.BaseScript - Running sv...
+Jul-13 16:14:26.443 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_epi2me_sv` matches process epi2me:run_epi2me_sv
+Jul-13 16:14:26.445 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.445 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.446 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'epi2me:run_epi2me_sv': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.471 [main] INFO  nextflow.Nextflow - === Starting Analysis Pipeline ===
+Jul-13 16:14:26.472 [main] INFO  nextflow.script.BaseScript - Analysis run mode: all
+Jul-13 16:14:26.475 [main] INFO  nextflow.script.BaseScript - Sample thresholds: [:]
+Jul-13 16:14:26.484 [main] INFO  nextflow.script.BaseScript - Running MGMT Analysis...
+Jul-13 16:14:26.492 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.492 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.493 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:extract_epic': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.502 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.502 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.502 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:mgmt_promoter': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.507 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.507 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.507 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:nanodx': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.513 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_nn_classifier` matches process analysis:run_nn_classifier
+Jul-13 16:14:26.514 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.514 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.515 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:run_nn_classifier': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.516 [main] INFO  nextflow.script.BaseScript - Running Svanna Analysis...
+Jul-13 16:14:26.521 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.521 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.522 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:svannasv': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.527 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:circosplot` matches process analysis:circosplot
+Jul-13 16:14:26.528 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.528 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.529 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:circosplot': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.534 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:svannasv_fusion_events` matches process analysis:svannasv_fusion_events
+Jul-13 16:14:26.535 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.535 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.535 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:svannasv_fusion_events': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.537 [main] INFO  nextflow.script.BaseScript - Running OCC Analysis...
+Jul-13 16:14:26.547 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:clair3` matches process analysis:clair3
+Jul-13 16:14:26.549 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.549 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.550 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:clair3': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.563 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:clairs_to` matches process analysis:clairs_to
+Jul-13 16:14:26.564 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.565 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.565 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:clairs_to': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.581 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.581 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.582 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:merge_annotation': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.583 [main] INFO  nextflow.script.BaseScript - Running TERP Analysis...
+Jul-13 16:14:26.589 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:igv_tools` matches process analysis:igv_tools
+Jul-13 16:14:26.590 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.590 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.591 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:igv_tools': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.596 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:plot_genomic_regions` matches process analysis:plot_genomic_regions
+Jul-13 16:14:26.597 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.597 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.598 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:plot_genomic_regions': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.600 [main] INFO  nextflow.script.BaseScript - Running CNV Analysis...
+Jul-13 16:14:26.601 [main] INFO  nextflow.script.BaseScript - Samples needing ACE calculation: []
+Jul-13 16:14:26.601 [main] INFO  nextflow.script.BaseScript - Samples with provided thresholds: [:]
+Jul-13 16:14:26.602 [main] INFO  nextflow.script.BaseScript - Final threshold mapping: [:]
+Jul-13 16:14:26.619 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:annotatecnv` matches process analysis:annotatecnv
+Jul-13 16:14:26.622 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.623 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.623 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:annotatecnv': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.628 [main] INFO  nextflow.script.BaseScript - Running RMD Report Generation...
+Jul-13 16:14:26.628 [main] INFO  nextflow.script.BaseScript - Reusing MGMT outputs from earlier analysis
+Jul-13 16:14:26.628 [main] INFO  nextflow.script.BaseScript - Reusing Svanna outputs from earlier analysis
+Jul-13 16:14:26.629 [main] INFO  nextflow.script.BaseScript - Reusing OCC outputs from earlier analysis
+Jul-13 16:14:26.629 [main] INFO  nextflow.script.BaseScript - Reusing TERP outputs from earlier analysis
+Jul-13 16:14:26.629 [main] INFO  nextflow.script.BaseScript - Running Cramino Statistics...
+Jul-13 16:14:26.632 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:cramino_report` matches process analysis:cramino_report
+Jul-13 16:14:26.633 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.633 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.634 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:cramino_report': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.654 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:markdown_report` matches process analysis:markdown_report
+Jul-13 16:14:26.655 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 16:14:26.655 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 16:14:26.655 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:markdown_report': maxForks=0; fair=false; array=0
+Jul-13 16:14:26.658 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: extract_epic, plot_genomic_regions, epi2me:run_epi2me_sv, mgmt_promoter, analysis:clairs_to, igv_tools, analysis:cramino_report, markdown_report, merge_bam_files, analysis:svannasv, run_nn_classifier, analysis:igv_tools, clairs_to, mergebam:extract_roi, analysis:nanodx, analysis:extract_epic, svannasv_fusion_events, clair3, run_epi2me_cnv, run_epi2me_sv, epi2me:run_epi2me_modkit, extract_roi, mergebam:merge_bam_files, analysis:mgmt_promoter, circosplot, ace_tmc, svannasv, analysis:svannasv_fusion_events, analysis:circosplot, sturgeon, analysis:run_nn_classifier, annotatecnv, analysis:merge_annotation, epi2me:run_epi2me_cnv, nanodx, cramino_report, analysis:plot_genomic_regions, analysis:annotatecnv, run_epi2me_modkit, merge_annotation, analysis:markdown_report, analysis:clair3
+Jul-13 16:14:26.669 [main] WARN  nextflow.Session - There's no process matching config selector: epi2me
+Jul-13 16:14:26.670 [main] WARN  nextflow.Session - There's no process matching config selector: analysis
+Jul-13 16:14:26.672 [main] DEBUG nextflow.Session - Igniting dataflow network (35)
+Jul-13 16:14:26.676 [PathVisitor-1] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /home/ubuntu/data/testdata/; pattern: **/bam_pass/*.bam; options: [:]
+Jul-13 16:14:26.676 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > mergebam:merge_bam_files
+Jul-13 16:14:26.678 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > mergebam:extract_roi
+Jul-13 16:14:26.678 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > epi2me:run_epi2me_modkit
+Jul-13 16:14:26.678 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > epi2me:run_epi2me_cnv
+Jul-13 16:14:26.678 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > epi2me:run_epi2me_sv
+Jul-13 16:14:26.678 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:extract_epic
+Jul-13 16:14:26.679 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:mgmt_promoter
+Jul-13 16:14:26.679 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:nanodx
+Jul-13 16:14:26.679 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:run_nn_classifier
+Jul-13 16:14:26.679 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:svannasv
+Jul-13 16:14:26.679 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:circosplot
+Jul-13 16:14:26.679 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:svannasv_fusion_events
+Jul-13 16:14:26.679 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:clair3
+Jul-13 16:14:26.680 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:clairs_to
+Jul-13 16:14:26.680 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:merge_annotation
+Jul-13 16:14:26.680 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:igv_tools
+Jul-13 16:14:26.680 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:plot_genomic_regions
+Jul-13 16:14:26.681 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:annotatecnv
+Jul-13 16:14:26.681 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:cramino_report
+Jul-13 16:14:26.681 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:markdown_report
+Jul-13 16:14:26.682 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_05abbb79d5cc7ef4: /home/ubuntu/nWGS_pipeline/modules/epi2me.nf
+  Script_a8c0e35620593ac8: /home/ubuntu/nWGS_pipeline/modules/analysis.nf
+  Script_1e12986383a4d70c: /home/ubuntu/nWGS_pipeline/main.nf
+  Script_b7b72dfbfd1d8d35: /home/ubuntu/nWGS_pipeline/modules/mergebam.nf
+Jul-13 16:14:26.682 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Jul-13 16:14:26.682 [main] DEBUG nextflow.Session - Session await
+Jul-13 16:14:26.802 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:14:26.804 [Task submitter] INFO  nextflow.Session - [66/a0e607] Submitted process > mergebam:merge_bam_files (1)
+Jul-13 16:19:26.522 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 1; name: mergebam:merge_bam_files (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/66/a0e60752ee368c5d9cd2bec726d87d]
+Jul-13 16:20:37.970 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: mergebam:merge_bam_files (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/66/a0e60752ee368c5d9cd2bec726d87d]
+Jul-13 16:20:37.971 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=12; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Jul-13 16:20:37.996 [TaskFinalizer-1] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=12; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Jul-13 16:20:38.000 [Actor Thread 8] INFO  nextflow.Nextflow - Processing completed for sample: T001
+Jul-13 16:20:38.001 [Actor Thread 1] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/ubuntu/data/results/epi2me/modkit -- Cause: java.nio.file.NoSuchFileException: /home/ubuntu/data/results/epi2me/modkit
+Jul-13 16:20:38.001 [Actor Thread 9] INFO  nextflow.Nextflow - Epi2me processing completed for sample: T001
+Jul-13 16:20:38.011 [Actor Thread 10] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/ubuntu/data/results/epi2me/epicnv -- Cause: java.nio.file.NoSuchFileException: /home/ubuntu/data/results/epi2me/epicnv
+Jul-13 16:20:38.043 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:20:38.051 [Task submitter] INFO  nextflow.Session - [aa/f78ad4] Submitted process > mergebam:extract_roi (1)
+Jul-13 16:24:26.522 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 4; name: mergebam:extract_roi (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/aa/f78ad4d41479d9a3bc1c115d0f9184]
+Jul-13 16:25:05.288 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 4; name: mergebam:extract_roi (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/aa/f78ad4d41479d9a3bc1c115d0f9184]
+Jul-13 16:25:05.293 [Actor Thread 10] INFO  nextflow.script.BaseScript - DEBUG: joined: [T001, /home/ubuntu/data/results/epi2me/modkit/T001.wf_mods.bedmethyl.gz, /home/ubuntu/data/results/epi2me/epicnv/T001_segs.bed, /home/ubuntu/data/results/epi2me/epicnv/T001_bins.bed, /home/ubuntu/data/results/epi2me/epicnv/T001_segs.vcf, /home/ubuntu/data/results/epi2me/episv/T001.vcf.gz, /home/ubuntu/nWGS_pipeline/work/aa/f78ad4d41479d9a3bc1c115d0f9184/T001.occ.bam, /home/ubuntu/nWGS_pipeline/work/aa/f78ad4d41479d9a3bc1c115d0f9184/T001.occ.bam.bai]
+Jul-13 16:25:05.297 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:25:05.299 [Actor Thread 4] INFO  nextflow.script.BaseScript - Processing epi2me results for sample: T001 from epi2me output
+Jul-13 16:25:05.303 [Task submitter] INFO  nextflow.Session - [aa/8501f0] Submitted process > epi2me:run_epi2me_modkit (1)
+Jul-13 16:25:05.309 [Actor Thread 16] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/ubuntu/data/results/epi2me/modkit/T001.wf_mods.bedmethyl.gz -- Cause: java.nio.file.NoSuchFileException: /home/ubuntu/data/results/epi2me/modkit/T001.wf_mods.bedmethyl.gz
+Jul-13 16:25:05.338 [Actor Thread 22] INFO  nextflow.Nextflow - Creating Svanna input for sample: T001 (order mode)
+Jul-13 16:25:05.338 [Actor Thread 22] INFO  nextflow.Nextflow - SV file path: /home/ubuntu/data/results/epi2me/episv/T001.vcf.gz
+Jul-13 16:25:05.382 [Actor Thread 12] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/ubuntu/data/results/epi2me/episv/T001.vcf.gz -- Cause: java.nio.file.NoSuchFileException: /home/ubuntu/data/results/epi2me/episv/T001.vcf.gz
+Jul-13 16:25:05.383 [Actor Thread 12] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/ubuntu/data/results/epi2me/episv/T001.vcf.gz.tbi -- Cause: java.nio.file.NoSuchFileException: /home/ubuntu/data/results/epi2me/episv/T001.vcf.gz.tbi
+Jul-13 16:25:09.460 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 3; name: epi2me:run_epi2me_modkit (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/aa/8501f0ab92179a66e060c964f33067]
+Jul-13 16:25:09.465 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:25:09.466 [Task submitter] INFO  nextflow.Session - [1c/d23413] Submitted process > epi2me:run_epi2me_sv (1)
+Jul-13 16:25:38.487 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 8 -- tasks to be submitted are shown below
+~> TaskHandler[id: 5; name: epi2me:run_epi2me_cnv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/9b/103146cb834b6d144732234841215d]
+~> TaskHandler[id: 6; name: analysis:extract_epic (T001); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/03/87289a99504063e50026306728e720]
+~> TaskHandler[id: 7; name: analysis:plot_genomic_regions (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/6e/a8d9c4f0eaf313f83350726b2a9c00]
+~> TaskHandler[id: 9; name: analysis:cramino_report (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/95/ef9efe606c8f95c48ab33fba3048c9]
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+Jul-13 16:25:49.175 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: epi2me:run_epi2me_sv (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/1c/d234138f7b697789ea3c83136f97ac]
+Jul-13 16:25:49.183 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:25:49.183 [Task submitter] INFO  nextflow.Session - [9b/103146] Submitted process > epi2me:run_epi2me_cnv (1)
+Jul-13 16:27:14.290 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 5; name: epi2me:run_epi2me_cnv (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/9b/103146cb834b6d144732234841215d]
+Jul-13 16:27:14.295 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:27:14.295 [Task submitter] INFO  nextflow.Session - [03/87289a] Submitted process > analysis:extract_epic (T001)
+Jul-13 16:28:54.915 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 6; name: analysis:extract_epic (T001); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/03/87289a99504063e50026306728e720]
+Jul-13 16:28:54.946 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:28:54.946 [Task submitter] INFO  nextflow.Session - [6e/a8d9c4] Submitted process > analysis:plot_genomic_regions (1)
+Jul-13 16:29:26.549 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 7; name: analysis:plot_genomic_regions (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/6e/a8d9c4f0eaf313f83350726b2a9c00]
+Jul-13 16:30:39.162 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 7 -- tasks to be submitted are shown below
+~> TaskHandler[id: 9; name: analysis:cramino_report (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/95/ef9efe606c8f95c48ab33fba3048c9]
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 16:32:02.005 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 7; name: analysis:plot_genomic_regions (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/6e/a8d9c4f0eaf313f83350726b2a9c00]
+Jul-13 16:32:02.020 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:32:02.020 [Task submitter] INFO  nextflow.Session - [95/ef9efe] Submitted process > analysis:cramino_report (1)
+Jul-13 16:33:58.728 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 9; name: analysis:cramino_report (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/95/ef9efe606c8f95c48ab33fba3048c9]
+Jul-13 16:33:58.751 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 16:33:58.751 [Task submitter] INFO  nextflow.Session - [56/af054b] Submitted process > analysis:clairs_to (1)
+Jul-13 16:34:26.636 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 16:35:39.692 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 16:39:26.709 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 16:40:40.203 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 16:44:26.751 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 16:45:40.325 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 16:49:26.772 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 16:50:42.433 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 16:54:27.171 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 16:55:42.452 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 16:59:26.920 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:00:42.791 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:04:27.006 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:05:44.701 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:09:27.057 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:10:43.988 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:14:27.105 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:15:44.903 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:19:27.123 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:20:45.339 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:24:27.185 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:25:45.767 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:29:27.261 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:30:46.062 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:34:27.290 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:35:46.333 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:39:27.398 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:40:46.486 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:44:27.471 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:45:46.635 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:49:27.485 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:50:47.287 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:54:27.616 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 17:55:48.126 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 17:59:27.605 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:00:48.552 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:04:27.632 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:05:48.925 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:09:27.620 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:10:49.357 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:14:27.657 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:15:49.679 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:19:27.691 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:20:49.970 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:24:27.771 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:25:50.211 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:29:27.900 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:30:50.621 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:34:27.888 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:35:50.801 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 5 -- tasks to be submitted are shown below
+~> TaskHandler[id: 8; name: analysis:igv_tools (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:39:27.964 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 11; name: analysis:clairs_to (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:40:28.579 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 11; name: analysis:clairs_to (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/56/af054b02b0af9d2008cb9636719969]
+Jul-13 18:40:28.841 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:40:28.843 [Task submitter] INFO  nextflow.Session - [ee/d0c987] Submitted process > analysis:igv_tools (1)
+Jul-13 18:40:50.859 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 4 -- tasks to be submitted are shown below
+~> TaskHandler[id: 10; name: analysis:clair3 (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+~> TaskHandler[id: 12; name: analysis:svannasv (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+~> TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:41:02.589 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 8; name: analysis:igv_tools (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/ee/d0c98728fd2641fe88c733b0b178df]
+Jul-13 18:41:02.610 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:41:02.610 [Task submitter] INFO  nextflow.Session - [dc/c7e0ae] Submitted process > analysis:clair3 (1)
+Jul-13 18:41:57.194 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 10; name: analysis:clair3 (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/dc/c7e0ae73ae3236a932677b43133218]
+Jul-13 18:41:57.233 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:41:57.233 [Task submitter] INFO  nextflow.Session - [44/88d563] Submitted process > analysis:svannasv (1)
+Jul-13 18:41:57.263 [Actor Thread 38] INFO  nextflow.script.BaseScript - Creating merge input for sample: T001
+Jul-13 18:43:40.366 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 12; name: analysis:svannasv (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/44/88d563df819a462e4bf77fbc2aaac3]
+Jul-13 18:43:40.390 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:43:40.391 [Task submitter] INFO  nextflow.Session - [74/a057fa] Submitted process > analysis:nanodx (1)
+Jul-13 18:44:27.962 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 14; name: analysis:nanodx (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+Jul-13 18:45:14.983 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 14; name: analysis:nanodx (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/74/a057fa1b548480d2594d48d65da4d6]
+Jul-13 18:45:15.003 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:45:15.003 [Task submitter] INFO  nextflow.Session - [37/da06da] Submitted process > analysis:mgmt_promoter (1)
+Jul-13 18:45:51.124 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 4 -- tasks to be submitted are shown below
+~> TaskHandler[id: 15; name: analysis:merge_annotation (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/63/cc50642f60826734710c11aa9c06f1]
+~> TaskHandler[id: 16; name: analysis:circosplot (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/5c/e0c5b8a9cd0807fb30f991fb6ea4fd]
+~> TaskHandler[id: 17; name: analysis:svannasv_fusion_events (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/2d/bdb7c33f034fde2b4e35b894dc23c5]
+~> TaskHandler[id: 18; name: analysis:run_nn_classifier (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/e1/212d6af5d8dd953c30e2dd4fab73b6]
+Jul-13 18:46:56.234 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 13; name: analysis:mgmt_promoter (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/37/da06da3556d55e4e62b89d4389527c]
+Jul-13 18:46:56.248 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:46:56.249 [Task submitter] INFO  nextflow.Session - [63/cc5064] Submitted process > analysis:merge_annotation (1)
+Jul-13 18:48:29.625 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 15; name: analysis:merge_annotation (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/63/cc50642f60826734710c11aa9c06f1]
+Jul-13 18:48:29.879 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:48:29.879 [Task submitter] INFO  nextflow.Session - [5c/e0c5b8] Submitted process > analysis:circosplot (1)
+Jul-13 18:49:17.837 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 16; name: analysis:circosplot (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/5c/e0c5b8a9cd0807fb30f991fb6ea4fd]
+Jul-13 18:49:17.841 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:49:17.842 [Task submitter] INFO  nextflow.Session - [2d/bdb7c3] Submitted process > analysis:svannasv_fusion_events (1)
+Jul-13 18:49:28.048 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 17; name: analysis:svannasv_fusion_events (1); status: RUNNING; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/2d/bdb7c33f034fde2b4e35b894dc23c5]
+Jul-13 18:50:51.912 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor local > tasks in the submission queue: 1 -- tasks to be submitted are shown below
+~> TaskHandler[id: 18; name: analysis:run_nn_classifier (1); status: NEW; exit: -; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/e1/212d6af5d8dd953c30e2dd4fab73b6]
+Jul-13 18:50:58.502 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 17; name: analysis:svannasv_fusion_events (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/2d/bdb7c33f034fde2b4e35b894dc23c5]
+Jul-13 18:50:58.558 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 18:50:58.559 [Task submitter] INFO  nextflow.Session - [e1/212d6a] Submitted process > analysis:run_nn_classifier (1)
+Jul-13 18:52:48.434 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 18; name: analysis:run_nn_classifier (1); status: COMPLETED; exit: 0; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/e1/212d6af5d8dd953c30e2dd4fab73b6]
+Jul-13 18:52:48.470 [main] DEBUG nextflow.Session - Session await > all processes finished
+Jul-13 18:52:48.560 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+Jul-13 18:52:48.561 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Jul-13 18:52:48.655 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'TaskFinalizer' shutdown completed (hard=false)
+Jul-13 18:52:48.659 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'PublishDir' shutdown completed (hard=false)
+Jul-13 18:52:48.694 [main] INFO  nextflow.Nextflow - 
         Pipeline execution summary
         ---------------------------
-        Completed at : 2025-07-09T11:46:00.971582658+02:00
-        Duration    : 15.4s
-        Success     : false
-        workDir     : /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work
-        exit status : 1
+        Completed at : 2025-07-13T18:52:48.663168111Z
+        Duration    : 2h 38m 24s
+        Success     : true
+        workDir     : /home/ubuntu/nWGS_pipeline/work
+        exit status : 0
         
-Jul-09 11:46:00.988 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=2; failedCount=1; ignoredCount=0; cachedCount=12; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=15.3s; failedDuration=10s; cachedDuration=3h 48m 33s;loadCpus=0; loadMemory=0; peakRunning=2; peakCpus=5; peakMemory=2 GB; ]
-Jul-09 11:46:00.998 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
-Jul-09 11:46:01.052 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
+Jul-13 18:52:48.769 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=18; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=2h 51m 59s; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=4; peakMemory=3 GB; ]
+Jul-13 18:52:48.924 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Jul-13 18:52:49.123 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'FileTransfer' shutdown completed (hard=false)
+Jul-13 18:52:49.127 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

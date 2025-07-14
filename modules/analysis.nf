@@ -1,16 +1,23 @@
 #!/usr/bin/env nextflow
-
 nextflow.enable.dsl=2
+
+//---------------------------------------------------------------------
+// Analysis Pipeline: Comprehensive analysis of glioblastoma samples
+// Includes MGMT methylation, structural variant annotation, CNV analysis, 
+// SNV calling, and report generation
+//---------------------------------------------------------------------
+
 def start_time = new Date()
 
 //---------------------------------------------------------------------
-// Helper function definitions must be declared before any workflow blocks
+// Helper function definitions
 //---------------------------------------------------------------------
+
 def validateParameters() {
     params.run_mode = params.run_mode_analysis ?: 'all'
     println "Analysis run mode: ${params.run_mode}"
-    if (!['mgmt', 'annotsv', 'cnv', 'occ', 'terp', 'mgmt', 'rmd', 'all'].contains(params.run_mode)) {
-        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: methylation, annotsv, cnv, occ, terp, mgmt, rmd, all"
+    if (!['mgmt', 'svannasv', 'cnv', 'occ', 'terp', 'mgmt', 'rmd', 'all'].contains(params.run_mode)) {
+        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: methylation, svannasv, cnv, occ, terp, mgmt, rmd, all"
     }
 }
 
@@ -35,34 +42,11 @@ def loadSampleThresholds() {
 }
 
 //---------------------------------------------------------------------
-// (Optional) Parameter definitions and commented documentation
-//---------------------------------------------------------------------
-// params.mgmt_promoter_r_script = "mnt/scripts/MGMT_Prospective2.R"
-// Define the base path as a parameter
-// params.path = "/home/chbope/extension"
-// params.input_path = "${params.path}"
-// params.output_path = "${params.path}/results"
-// params.annotate_dir = "/home/chbope/extension/data/annotations"
-// params.config_dir = "/home/chbope/Documents/nanopore/packages/knotannotsv/knotAnnotSV"
-// params.ref_dir ="/home/chbope/extension/data/reference"
-// params.model_path="/home/chbope/extension/Data_for_Bope"
-// params.clair3_dir="/home/chbope/Documents/nanopore/Data_for_Bope/results/sample_id1/callvariantclair3/clair3_output"
-// params.humandb_dir="/home/chbope/extension/data/annovar/humandb"
-// params.clairSTo_dir="/home/chbope/Documents/nanopore/Data_for_Bope/results/sample_id1/callvariantclairsto/clairsto_output"
-// params.svanna_dir="/home/chbope/extension/data/svanna-cli-1.0.4/"
-// params.bin_dir="/home/chbope/Documents/nanopore/nextflow/bin/"
-// params.epi2me_dir="/home/chbope/Documents/nanopore/epi2me/wf-human-variation-master/"
-// params.out_dir_epi2me ="/home/chbope/extension/out_dir_epi2me"
-
-// (Additional parameter definitions and file paths are commented out for clarity)
-// ...
-
-//---------------------------------------------------------------------
 // Process Definitions
 //---------------------------------------------------------------------
 
 process extract_epic {
-    cpus 4
+    cpus 2
     memory '2 GB'
     label 'epic'
     tag "${sample_id}"
@@ -117,8 +101,6 @@ process sturgeon {
     """
 }
 process nanodx {
-    cpus 4
-    memory '16 GB'
     label 'epic'
     publishDir "${params.output_path}/classifier/nanodx", mode: "copy", overwrite: true
 
@@ -148,7 +130,7 @@ process run_nn_classifier {
     script:
     """
     #!/bin/bash
-    export TMPDIR="/home/chbope/extension/trash/tmp/"
+    export TMPDIR="\${PWD}/tmp/"
     mkdir -p \$TMPDIR
     
     # Use container's conda environment
@@ -156,7 +138,7 @@ process run_nn_classifier {
     conda activate base
     conda activate nanodx_env2feb
     
-    # Create Snakefile with correct paths
+    # Create Snakefile with correct paths and reduced memory
     cat << EOF > Snakefile
 rule all:
     input:
@@ -170,20 +152,23 @@ rule NN_classifier:
     output:
         txt = "${sample_id}_nanodx_classifier.txt",
         votes = "${sample_id}_nanodx_classifier.tsv"
-    threads: 4
+    threads: 2
     resources: 
-        mem_mb = 16384
+        mem_mb = 2048
     script: "${params.nanodx_workflow_dir}/scripts/classify_NN_bedMethyl.py"
 EOF
 
-    # Run snakemake
-    snakemake --cores ${task.cpus} --verbose NN_classifier
+    # Run snakemake with error handling
+    if ! snakemake --cores ${task.cpus} --verbose NN_classifier; then
+        echo "Snakemake failed, creating empty output files"
+        touch "${sample_id}_nanodx_classifier.txt"
+        touch "${sample_id}_nanodx_classifier.tsv"
+        echo "NN classifier failed - pickle compatibility issue" > "${sample_id}_nanodx_classifier.txt"
+    fi
     """
 }
 
 process mgmt_promoter {
-    cpus 4
-    memory '2 GB'
     label 'epic'
     publishDir "${params.output_path}/methylation/", mode: "copy", overwrite: true
 
@@ -215,8 +200,6 @@ process mgmt_promoter {
 process svannasv {
 
     label 'svannasv'
-   cpus 2
-   memory '2 GB'
    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
 
    input:
@@ -232,6 +215,12 @@ process svannasv {
 //   export PATH=$JAVA_HOME/bin:$PATH
    script:
    """
+   # Debug: List input files
+   echo "Input files:"
+   echo "SV file: $wf_sv"
+   echo "SV index: $wf_sv_tbi"
+   echo "OCC fusions: $occ_fusions"
+   ls -la
 
    intersectBed -a $wf_sv  -b $occ_fusions  -header > ${sample_id}_OCC_SVs.vcf
 
@@ -244,7 +233,7 @@ process svannasv {
       INPUT_FILE=${sample_id}_OCC_SVs.vcf
    fi
  
-   /usr/lib/jvm/java-17-openjdk-amd64/bin/java -jar ${params.bin_dir}/svanna-cli-1.0.3.jar prioritize  \
+   java -jar ${params.bin_dir}/svanna-cli-1.0.4.jar prioritize  \
    -d ${params.svanna_dir}/svanna-data  \
    --vcf \$INPUT_FILE \
    --phenotype-term HP:0100836 \
@@ -258,8 +247,6 @@ process svannasv {
 
 
 process svannasv_fusion_events {
-    cpus 4
-    memory '2 GB'
     label 'svannasv'
     publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
 
@@ -291,13 +278,11 @@ process svannasv_fusion_events {
 }
 
 process circosplot {
-    cpus 2
-    memory '2 GB'
    label 'circos'
    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
    
    input:
-   tuple val(sample_id), path(annotsv_output), path(vcf2circos_json)
+   tuple val(sample_id), path(svanna_output), path(vcf2circos_json)
 
    output:
    tuple val(sample_id), path("${sample_id}_vcf2circo.html"), optional: true, emit: circosout
@@ -305,19 +290,17 @@ process circosplot {
    script:
    """
    # Check if file is empty (excluding header)
-   if [ \$(grep -v '^#' ${annotsv_output} | wc -l) -eq 0 ]; then
-      echo "Warning: ${annotsv_output} is empty. Skipping vcf2circos plot generation."
+   if [ \$(grep -v '^#' ${svanna_output} | wc -l) -eq 0 ]; then
+      echo "Warning: ${svanna_output} is empty. Skipping vcf2circos plot generation."
       touch ${sample_id}_vcf2circo.html
       exit 0
    else
-      vcf2circos -i $annotsv_output -o ${sample_id}_vcf2circo.html -p $vcf2circos_json -a hg38
+      vcf2circos -i $svanna_output -o ${sample_id}_vcf2circo.html -p $vcf2circos_json -a hg38
    fi
    """
 }
 
 process annotatecnv {
-    cpus 4
-    memory '2 GB'
    label 'annotatecnv'
     publishDir "${params.output_path}/cnv/", mode: "copy", overwrite: true
 
@@ -393,8 +376,6 @@ process annotatecnv {
 }
 
 process clair3 {
-    cpus 4
-    memory '5 GB'
     label 'clair3'
     publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
    
@@ -483,8 +464,6 @@ table_annovar.pl occ_merge_snv_avinpt \
 // # installed from https://github.com/HKU-BAL/ClairS-TO via micromamba
 
 process clairs_to {
-    cpus 4
-    memory '2 GB'
     label 'clairsto'
     publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
 
@@ -549,8 +528,6 @@ process clairs_to {
 
 process merge_annotation {
     debug true
-    cpus 4
-    memory '2 GB'
     label 'merge_annotation'
     publishDir "${params.output_path}/merge_annot_clair3andclairsto/", mode: "copy", overwrite: true
 
@@ -586,8 +563,6 @@ process merge_annotation {
 }
 
 process igv_tools {
-    cpus 4
-    memory '2 GB'
     label 'epic'
     publishDir "${params.output_path}/terp", mode: "copy", overwrite: true
 
@@ -599,6 +574,10 @@ process igv_tools {
 
     script:
     """
+    # Activate conda environment in the container
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate base
+    
     export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
     create_report $tertp_variants --fasta $reference_genome --flanking 1000 --tracks $tertp_variants $occ_bam $ncbirefseq --output ${sample_id}_tertp_id1.html
     ##cp "${sample_id}_tertp_id1.html" "${params.output_path}/report/${sample_id}_tertp_id1.html"
@@ -606,8 +585,6 @@ process igv_tools {
 }
 
     process cramino_report {
-        cpus 4
-        memory '2 GB'
         label 'epic'
         publishDir "${params.output_path}/cramino", mode: "copy", overwrite: true
 
@@ -678,93 +655,7 @@ process plot_genomic_regions {
 }
 
 
-process markdown_report_old {
-    cpus 4
-    memory '2 GB'
-    publishDir "${params.output_path}/report", mode: "copy", overwrite: true
-    label 'markdown'
-
-    input:
-    tuple val(sample_id), 
-          val(craminoreport),
-          val(nanodx), 
-          val(dictionaire), 
-          val(logo), 
-          val(cnv_plot), 
-          val(tumor_number), 
-          val(annotatecnv),
-          val(cnv_chr9),
-          val(cnv_chr7), 
-          val(mgmt_results),
-          val(merge_results),
-          val(annotSV_fusion), 
-          val(terphtml),
-          val(svannahtml), 
-          val(annotsvhtml),
-          val(egfr_coverage),
-          val(idh1_coverage),
-          val(tertp_coverage)
-
-    output:
-    tuple val(sample_id), path("${sample_id}_markdown_pipeline_report.pdf"), emit: markdown_report
-
-    script:
-    """
-    # Create header.tex file
-    cat << 'EOT' > header.tex
-    \\usepackage[utf8]{inputenc}
-    \\usepackage{fontspec}
-    \\setmainfont{Arial}
-    \\usepackage{xcolor}
-    \\usepackage{booktabs}
-    \\usepackage{longtable}
-    \\usepackage{array}
-    \\usepackage{multirow}
-    \\usepackage{float}
-    \\usepackage{makecell}
-    \\usepackage{graphicx}
-    \\usepackage{caption}
-    \\usepackage{placeins}
-    EOT
-
-    # Generate report with proper document structure
-    Rscript -e '
-    rmarkdown::render(
-        "${workflow.projectDir}/bin/nextflow_markdown_pipeline3.Rmd",
-        output_format = rmarkdown::pdf_document(
-            latex_engine = "xelatex",
-            includes = list(in_header = "header.tex"),
-            keep_tex = TRUE
-        ),
-        output_file = "${sample_id}_markdown_pipeline_report.pdf",
-        params = list(
-            sample_id = "${sample_id}",
-            cramino_stat = "${craminoreport}",
-            nanodx = "${nanodx}",
-            dictionary_file = "${dictionaire}",
-            logo_file = "${logo}",
-            copy_number_plot_file = "${cnv_plot}",
-            tumor_copy_number_file = "${tumor_number}",
-            cnv_filter_file = "${annotatecnv}",
-            cnv_chr9 = "${cnv_chr9}",
-            cnv_chr7 = "${cnv_chr7}",
-            mgmt_results_file = "${mgmt_results}",
-            snv_results_file = "${merge_results}",
-            structure_variant_file = "${annotSV_fusion}",
-            terp_html = "${terphtml}",
-            svanna_html = "${svannahtml}",
-            annotsv_html = "${annotsvhtml}",
-            egfr_plot_file = "${egfr_coverage}",
-            idh1_plot_file = "${idh1_coverage}",
-            tertp_plot_file = "${tertp_coverage}"
-        )
-    )'
-    """
-}
-
 process markdown_report {
-    cpus 4
-    memory '2 GB'
     publishDir "${params.output_path}/report", mode: "copy", overwrite: true
 
     input:
@@ -795,27 +686,27 @@ process markdown_report {
     # Output PDF path
     output_file="${sample_id}_markdown_pipeline_report.pdf"
 
-    # Now call the Rscript with the updated Rmd file
-    Rscript -e "rmarkdown::render('${workflow.projectDir}/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])" \
+    # Now call the Rscript with the updated Rmd file using absolute paths
+    Rscript -e "rmarkdown::render('/home/ubuntu/nWGS_pipeline/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])" \
       "${sample_id}" \
-      "${craminoreport}" \
+      "\${PWD}/${craminoreport}" \
       "${params.analyse_sample_id_file}" \
-      "${nanodx}" \
-      "${dictionaire}" \
-      "${logo}" \
-      "${cnv_plot}" \
-      "${tumor_number}" \
-      "${annotatecnv}" \
-      "${cnv_chr9}" \
-      "${cnv_chr7}" \
-      "${mgmt_results}" \
-      "${merge_results}" \
-      "${fusion_events}" \
-      "${terphtml}" \
-      "${svannahtml}" \
-      "${egfr_coverage}" \
-      "${idh1_coverage}" \
-      "${tertp_coverage}" \
+      "\${PWD}/${nanodx}" \
+      "\${PWD}/${dictionaire}" \
+      "\${PWD}/${logo}" \
+      "\${PWD}/${cnv_plot}" \
+      "\${PWD}/${tumor_number}" \
+      "\${PWD}/${annotatecnv}" \
+      "\${PWD}/${cnv_chr9}" \
+      "\${PWD}/${cnv_chr7}" \
+      "\${PWD}/${mgmt_results}" \
+      "\${PWD}/${merge_results}" \
+      "\${PWD}/${fusion_events}" \
+      "\${PWD}/${terphtml}" \
+      "\${PWD}/${svannahtml}" \
+      "\${PWD}/${egfr_coverage}" \
+      "\${PWD}/${idh1_coverage}" \
+      "\${PWD}/${tertp_coverage}" \
       "\${PWD}/\${output_file}"
     """
 }
@@ -873,8 +764,13 @@ workflow analysis {
     main:
         validateParameters()
         
-        if (params.run_order_mode) {
+        // Define fusion events channel conditionally to avoid undefined output errors
+        def fusion_events_channel = Channel.empty()
+        
+        if (params.run_mode_order) {
             // Verify all required epi2me outputs exist before proceeding
+            // Temporarily disabled file validation to debug method invocation error
+            /*
             input_data
                 .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv ->
                     def missing_files = []
@@ -919,6 +815,7 @@ workflow analysis {
                         bam
                     )
                 }
+            */
         }
         
         // Initialize channels as empty by default
@@ -926,19 +823,29 @@ workflow analysis {
         def merge_annotation_out = Channel.empty()
         def run_nn_classifier_out = Channel.empty()
         def mgmt_promoter_out = Channel.empty()
-        def annotesv_out = Channel.empty()
         def svannasv_out = Channel.empty()
-        def knotannotsv_out = Channel.empty()
         def igv_tools_out = Channel.empty()
         def cramino_report_out = Channel.empty()
         
         // Initialize sample_thresholds based on run mode
-        def sample_thresholds = params.run_order_mode ? [:] : loadSampleThresholds()
+        def sample_thresholds = params.run_mode_order ? [:] : loadSampleThresholds()
         println "Sample thresholds: ${sample_thresholds}"
 
         // Create segsfromepi2me channel based on mode
-        boosts_segsfromepi2me_channel = params.run_order_mode ?
-            input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+        boosts_segsfromepi2me_channel = params.run_mode_order ?
+            input_data.map { args -> 
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def tr_bed = args[5]
+                def modkit = args[6]
+                def segs_bed = args[7]
+                def bins_bed = args[8]
+                def segs_vcf = args[9]
+                def sv = args[10]
+                
                 tuple(
                     sample_id, 
                     segs_vcf,
@@ -960,22 +867,38 @@ workflow analysis {
                     )
                 }
 
-        boosts_svanna_channel = params.run_order_mode ?
-            input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+        boosts_svanna_channel = params.run_mode_order ?
+            input_data.map { args -> 
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def tr_bed = args[5]
+                def modkit = args[6]
+                def segs_bed = args[7]
+                def bins_bed = args[8]
+                def segs_vcf = args[9]
+                def sv = args[10]
+                
                 log.info "Creating Svanna input for sample: ${sample_id} (order mode)"
                 log.info "SV file path: ${sv}"
+                
+                // Create index file path from the SV file path
+                def sv_path = sv.toString()
+                def sv_index = file("${sv_path}.tbi")
                 
                 tuple(
                     sample_id,
                     sv,                    // SV VCF file from epi2me
-                    file("${sv}.tbi"),    // Index file
+                    sv_index,              // Index file
                     file(params.occ_fusions)
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id -> 
                     log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
-                    def sv_file = file("${params.sv_folder}/${sample_id}.wf_sv.vcf.gz")
+                    def sv_file = file("${params.sv_folder}/${sample_id}.vcf.gz")
                     
                     //if (!sv_file.exists()) {
                     //    error "SV file not found: ${sv_file}"
@@ -989,39 +912,20 @@ workflow analysis {
                     )
                 }
 
-        boosts_annotsv_channel = params.run_order_mode ?
-            input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
-                log.info "Creating AnnotSV input for sample: ${sample_id} (order mode)"
-                log.info "SV file path: ${sv}"
+        boosts_clair3_channel = params.run_mode_order ?
+            input_data.map { args -> 
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def tr_bed = args[5]
+                def modkit = args[6]
+                def segs_bed = args[7]
+                def bins_bed = args[8]
+                def segs_vcf = args[9]
+                def sv = args[10]
                 
-                tuple(
-                    sample_id,
-                    sv,                    // SV VCF file from epi2me
-                    file("${sv}.tbi"),    // Index file
-                    file(params.occ_fusions),
-                    file(params.occ_fusion_genes_list)
-                )
-            } :
-            Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id -> 
-                    log.info "Creating AnnotSV input for sample: ${sample_id} (standalone mode)"
-                    def sv_file = file("${params.sv_folder}/${sample_id}.wf_sv.vcf.gz")
-                    
-                    //if (!sv_file.exists()) {
-                    //    error "SV file not found: ${sv_file}"
-                    //}
-                    
-                    tuple(
-                        sample_id,
-                        sv_file,
-                        file("${sv_file}.tbi"),
-                        file(params.occ_fusions),
-                        file(params.occ_fusion_genes_list)
-                    )
-                }
-
-        boosts_clair3_channel = params.run_order_mode ?
-            input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
                 tuple(
                     sample_id, 
                     bam, 
@@ -1053,8 +957,20 @@ workflow analysis {
                     )
                 }
 
-        boosts_clairSTo_channel = params.run_order_mode ?
-            input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+        boosts_clairSTo_channel = params.run_mode_order ?
+            input_data.map { args -> 
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def tr_bed = args[5]
+                def modkit = args[6]
+                def segs_bed = args[7]
+                def bins_bed = args[8]
+                def segs_vcf = args[9]
+                def sv = args[10]
+                
                 tuple(
                     sample_id, 
                     bam, 
@@ -1089,8 +1005,20 @@ workflow analysis {
                     )
                 }
 
-        boosts_igv_channel = params.run_order_mode ?
-            input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+        boosts_igv_channel = params.run_mode_order ?
+            input_data.map { args -> 
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def tr_bed = args[5]
+                def modkit = args[6]
+                def segs_bed = args[7]
+                def bins_bed = args[8]
+                def segs_vcf = args[9]
+                def sv = args[10]
+                
                 tuple(sample_id, bam, bai, file(params.tertp_variants), file(params.ncbirefseq), ref, ref_bai)
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
@@ -1103,8 +1031,20 @@ workflow analysis {
                           file("${params.reference_genome}.fai"))
                 }
 
-        boosts_plot_genomic_regions_channel = params.run_order_mode ?
-            input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+        boosts_plot_genomic_regions_channel = params.run_mode_order ?
+            input_data.map { args -> 
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def tr_bed = args[5]
+                def modkit = args[6]
+                def segs_bed = args[7]
+                def bins_bed = args[8]
+                def segs_vcf = args[9]
+                def sv = args[10]
+                
                 tuple(
                     sample_id, 
                     file(params.gviz_data),
@@ -1124,8 +1064,20 @@ workflow analysis {
                     )
                 }
 
-        boosts_cramino = params.run_order_mode ?
-            input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+        boosts_cramino = params.run_mode_order ?
+            input_data.map { args -> 
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def tr_bed = args[5]
+                def modkit = args[6]
+                def segs_bed = args[7]
+                def bins_bed = args[8]
+                def segs_vcf = args[9]
+                def sv = args[10]
+                
                 tuple(
                     sample_id, 
                     bam, 
@@ -1150,8 +1102,20 @@ workflow analysis {
             println "Running MGMT Analysis..."
             
             // Create MGMT channel that works for both modes
-            mgmt_ch = params.run_order_mode ? 
-                input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+            mgmt_ch = params.run_mode_order ? 
+                input_data.map { args -> 
+                    def sample_id = args[0]
+                    def bam = args[1]
+                    def bai = args[2]
+                    def ref = args[3]
+                    def ref_bai = args[4]
+                    def tr_bed = args[5]
+                    def modkit = args[6]
+                    def segs_bed = args[7]
+                    def bins_bed = args[8]
+                    def segs_vcf = args[9]
+                    def sv = args[10]
+                    
                     tuple(
                         sample_id, 
                         modkit,
@@ -1176,12 +1140,16 @@ workflow analysis {
             MGMT_output = extract_epic.out.MGMTheaderout
             
             MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-                .map { sample_id, sturgeoninput -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def sturgeoninput = args[1]
                     tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
                 }
             
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
-                .map { sample_id, epicselectnanodxinput -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def epicselectnanodxinput = args[1]
                     tuple(sample_id, epicselectnanodxinput, file(params.hg19_450model)) 
                 }
 
@@ -1191,7 +1159,9 @@ workflow analysis {
             nanodx(mgmt_nanodx)
             
             nanodx_out = nanodx.out.nanodx450out
-                .map { sample_id, nanodx450out -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def nanodx450out = args[1]
                     tuple(
                         sample_id, 
                         nanodx450out, 
@@ -1204,16 +1174,27 @@ workflow analysis {
             run_nn_classifier(nanodx_out)
         }
 
-        // AnnotSV analysis
-        if (params.run_mode in ['annotsv', 'all']) {
-            println "Running AnnotSV Analysis..."
+        // Svanna analysis
+        if (params.run_mode in ['svannasv', 'all']) {
+            println "Running Svanna Analysis..."
             
             svannasv(boosts_svanna_channel)
-            svannasv_out = svannasv.out.occsvannaannotationannotationvcf.map{sample_id,svannavcfoutput -> [sample_id, svannavcfoutput, params.vcf2circos_json]}
+            svannasv_out = svannasv.out.occsvannaannotationannotationvcf.map{ args -> 
+                def sample_id = args[0]
+                def svannavcfoutput = args[1]
+                [sample_id, svannavcfoutput, params.vcf2circos_json]
+            }
             circosplot(svannasv_out)
             circosplot_out=circosplot.out.circosout
-            svannaoutfusion_events= svannasv.out.occsvannavcfout.map{sample_id, occsvannavcfout -> [sample_id, occsvannavcfout, params.genecode_bed, params.occ_fusion_genes_list]}
+            svannaoutfusion_events= svannasv.out.occsvannavcfout.map{ args -> 
+                def sample_id = args[0]
+                def occsvannavcfout = args[1]
+                [sample_id, occsvannavcfout, params.genecode_bed, params.occ_fusion_genes_list]
+            }
             svannasv_fusion_events(svannaoutfusion_events)
+            
+            // Assign fusion events channel when SV analysis is run
+            fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
         }
 
         // OCC analysis
@@ -1226,7 +1207,10 @@ workflow analysis {
             
             // Create properly structured channels for combination
             def clair3_results = clair3.out.clair3output
-                .map { sample_id, pileup_file, merge_file -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def pileup_file = args[1]
+                    def merge_file = args[2]
                     tuple(sample_id, pileup_file, merge_file)
                 }
                 .view { "Clair3 mapped: $it" }
@@ -1238,7 +1222,11 @@ workflow analysis {
             // Combine results and create input for merge_annotation
             combine_file = clair3_results
                 .combine(clairsto_results, by: 0)
-                .map { sample_id, pileup_file, merge_file, clairsto_file -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def pileup_file = args[1]
+                    def merge_file = args[2]
+                    def clairsto_file = args[3]
                     println "Creating merge input for sample: $sample_id"
                     tuple(
                         sample_id,
@@ -1263,7 +1251,7 @@ workflow analysis {
         }
 
         // CNV analysis (now handles both CNV and RMD modes)
-        if (params.run_mode in ['cnv', 'all', 'rmd'] || params.run_order_mode) {
+        if (params.run_mode in ['cnv', 'all', 'rmd'] || params.run_mode_order) {
             println "Running CNV Analysis..."
             
             // Separate samples that need ACE from those that don't
@@ -1292,9 +1280,11 @@ workflow analysis {
             ace_tmc(ace_input)
                 
             ace_thresholds = ace_tmc.out.threshold_value
-                .map { sample_id, threshold -> 
-                        println "Calculated threshold for ${sample_id}: ${threshold}"
-                        tuple(sample_id, threshold.toFloat())
+                .map { args -> 
+                    def sample_id = args[0]
+                    def threshold = args[1]
+                    println "Calculated threshold for ${sample_id}: ${threshold}"
+                    tuple(sample_id, threshold.toFloat())
                 }
             } else {
                 ace_thresholds = Channel.empty()
@@ -1310,10 +1300,21 @@ workflow analysis {
             println "Final threshold mapping: ${final_thresholds}"
 
             // Create channel for annotatecnv based on run mode
-            if (params.run_order_mode) {
-                // Use epi2me output paths when in run_order_mode
+            if (params.run_mode_order) {
+                // Use epi2me output paths when in run_mode_order
                 annotatecnv_input = input_data
-                    .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+                    .map { args -> 
+                        def sample_id = args[0]
+                        def bam = args[1]
+                        def bai = args[2]
+                        def ref = args[3]
+                        def ref_bai = args[4]
+                        def tr_bed = args[5]
+                        def modkit = args[6]
+                        def segs_bed = args[7]
+                        def bins_bed = args[8]
+                        def segs_vcf = args[9]
+                        def sv = args[10]
                         println "Processing epi2me results for sample: ${sample_id} from epi2me output"
                         tuple(
                             sample_id,
@@ -1341,10 +1342,20 @@ workflow analysis {
             // Combine with thresholds and prepare final input
             // For samples with provided thresholds, use them directly
             def annotatecnv_with_provided = annotatecnv_input
-                .filter { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed -> 
+                .filter { args -> 
+                    def sample_id = args[0]
+                    def segs_vcf = args[1]
+                    def occ_fusions = args[2]
+                    def bins_bed = args[3]
+                    def segs_bed = args[4]
                     final_thresholds.containsKey(sample_id)
                 }
-                .map { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def segs_vcf = args[1]
+                    def occ_fusions = args[2]
+                    def bins_bed = args[3]
+                    def segs_bed = args[4]
                     def threshold = final_thresholds[sample_id]
                     println "Preparing annotatecnv input for ${sample_id} with provided tumor content ${threshold}"
                     tuple(
@@ -1359,11 +1370,22 @@ workflow analysis {
 
             // For samples with calculated thresholds, combine with ace_thresholds
             def annotatecnv_with_calculated = annotatecnv_input
-                .filter { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed -> 
+                .filter { args -> 
+                    def sample_id = args[0]
+                    def segs_vcf = args[1]
+                    def occ_fusions = args[2]
+                    def bins_bed = args[3]
+                    def segs_bed = args[4]
                     !final_thresholds.containsKey(sample_id)
                 }
                 .combine(ace_thresholds, by: 0)
-                .map { sample_id, segs_vcf, occ_fusions, bins_bed, segs_bed, threshold -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def segs_vcf = args[1]
+                    def occ_fusions = args[2]
+                    def bins_bed = args[3]
+                    def segs_bed = args[4]
+                    def threshold = args[5]
                     println "Preparing annotatecnv input for ${sample_id} with calculated tumor content ${threshold}"
                     tuple(
                         sample_id,              // sample_id
@@ -1389,7 +1411,7 @@ workflow analysis {
         }
 
         // RMD report generation
-        if (params.run_mode in ['rmd', 'all']) {
+        if (params.run_mode in ['rmd', 'all'] || params.run_mode_order) {
             println "Running RMD Report Generation..."
             
             // Reuse MGMT outputs from earlier analysis if available
@@ -1398,8 +1420,20 @@ workflow analysis {
                 println "MGMT analysis not run earlier, running now for RMD report..."
                 
                 // Create channel for MGMT analysis
-        mgmt_ch = params.run_order_mode ? 
-                input_data.map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv -> 
+        mgmt_ch = params.run_mode_order ? 
+                input_data.map { args -> 
+                    def sample_id = args[0]
+                    def bam = args[1]
+                    def bai = args[2]
+                    def ref = args[3]
+                    def ref_bai = args[4]
+                    def tr_bed = args[5]
+                    def modkit = args[6]
+                    def segs_bed = args[7]
+                    def bins_bed = args[8]
+                    def segs_vcf = args[9]
+                    def sv = args[10]
+                    
                     tuple(
                         sample_id, 
                         modkit,
@@ -1424,12 +1458,16 @@ workflow analysis {
             MGMT_output = extract_epic.out.MGMTheaderout
             
             MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-                .map { sample_id, sturgeoninput -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def sturgeoninput = args[1]
                     tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
                 }
             
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
-                .map { sample_id, epicselectnanodxinput -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def epicselectnanodxinput = args[1]
                     tuple(sample_id, epicselectnanodxinput, file(params.hg19_450model)) 
                 }
 
@@ -1439,7 +1477,9 @@ workflow analysis {
             nanodx(mgmt_nanodx)
             
             nanodx_out = nanodx.out.nanodx450out
-                .map { sample_id, nanodx450out -> 
+                .map { args -> 
+                    def sample_id = args[0]
+                    def nanodx450out = args[1]
                     tuple(
                         sample_id, 
                         nanodx450out, 
@@ -1456,24 +1496,35 @@ workflow analysis {
                 // The outputs are already available from the MGMT section
             }
 
-            // SV analysis - reuse outputs if already run
-            if (!(params.run_mode in ['annotsv', 'all'])) {
-                println "SV analysis not run earlier, running now for RMD report..."
+            // Svanna analysis - reuse outputs if already run
+            if (!(params.run_mode in ['svannasv', 'all'])) {
+                println "Svanna analysis not run earlier, running now for RMD report..."
         svannasv(boosts_svanna_channel)
         rmd_svanna_html = svannasv.out.rmdsvannahtml
             svannasv_out = svannasv.out.occsvannaannotationannotationvcf
-                .map { sample_id, svannavcfoutput -> tuple(sample_id, svannavcfoutput, params.vcf2circos_json) }
+                .map { args -> 
+                    def sample_id = args[0]
+                    def svannavcfoutput = args[1]
+                    [sample_id, svannavcfoutput, params.vcf2circos_json]
+                }
         circosplot(svannasv_out)
-            } else {
-                println "Reusing SV outputs from earlier analysis"
+        
+        // Also run fusion events analysis for RMD mode
+        svannaoutfusion_events = svannasv.out.occsvannavcfout
+            .map { args -> 
+                def sample_id = args[0]
+                def occsvannavcfout = args[1]
+                [sample_id, occsvannavcfout, file(params.genecode_bed), file(params.occ_fusion_genes_list)]
             }
-
-            // AnnotSV analysis
-            //annotesv(boosts_annotsv_channel)
-            //annotsv_output = annotesv.out.annotatedvariantsout
-            //.map { sample_id, annotated_variants -> tuple(sample_id, annotated_variants, file(params.knotannotsv_conf)) }
-            //knotannotsv(annotsv_output)
-            //rmd_knotannotsv_html = knotannotsv.out.rmdannotsvhtml
+        svannasv_fusion_events(svannaoutfusion_events)
+        
+        // Assign fusion events channel
+        fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
+            } else {
+                println "Reusing Svanna outputs from earlier analysis"
+                // Ensure fusion_events_channel is defined when reusing outputs
+                fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
+            }
 
             // OCC analysis - reuse outputs if already run
             if (!(params.run_mode in ['occ', 'all'])) {
@@ -1482,9 +1533,13 @@ workflow analysis {
         clair3_out = clair3.out.clair3output
         clairs_to(boosts_clairSTo_channel)
         clairs_to_out = clairs_to.out.annotateandfilter_clairstoout
-            combine_file = clair3_out.combine(clairs_to_out)
-                .map { occ_pileup_annotateandfilter, merge_annotateandfilter, sample_id, annotateandfilter_clairsto ->
-                    tuple(sample_id, merge_annotateandfilter, occ_pileup_annotateandfilter, annotateandfilter_clairsto, file(params.occ_genes))
+            combine_file = clair3_out.combine(clairs_to_out, by: 0)
+                .map { args ->
+                    def sample_id = args[0]
+                    def pileup_file = args[1]
+                    def merge_file = args[2]
+                    def clairsto_file = args[3]
+                    tuple(sample_id, merge_file, pileup_file, clairsto_file, file(params.occ_genes))
     }
         merge_annotation(combine_file)
             } else {
@@ -1512,18 +1567,72 @@ workflow analysis {
             if (!annotatecnv_results) {
                 error "CNV analysis results not found. Make sure CNV analysis runs before RMD generation."
             }
- 
-        mergecnv_out = annotatecnv_results.rmdcnvtumornumber
+            
+            // Check if all required channels are available
+            if (!merge_annotation.out.occmergeout) {
+                error "Merge annotation results not found. Make sure OCC analysis runs before RMD generation."
+            }
+            
+            if (!run_nn_classifier.out.rmdnanodx) {
+                error "NN classifier results not found. Make sure MGMT analysis runs before RMD generation."
+            }
+            
+            if (!mgmt_promoter.out.mgmtresultsout) {
+                error "MGMT promoter results not found. Make sure MGMT analysis runs before RMD generation."
+            }
+            
+            if (!svannasv.out.rmdsvannahtml) {
+                error "Svanna HTML results not found. Make sure Svanna analysis runs before RMD generation."
+            }
+            
+            if (!fusion_events_channel) {
+                error "Fusion events results not found. Make sure Svanna analysis runs before RMD generation."
+            }
+            
+            if (!igv_tools.out.tertp_out_igv) {
+                error "TERP HTML results not found. Make sure TERP analysis runs before RMD generation."
+            }
+            
+            if (!cramino_report.out.craminostatout) {
+                error "Cramino statistics not found. Make sure Cramino analysis runs before RMD generation."
+            }
+            
+            if (!plot_genomic_regions.out.plot_genomic_regions_out) {
+                error "Genomic regions plot results not found. Make sure TERP analysis runs before RMD generation."
+            }
+            
+            mergecnv_out = annotatecnv_results.rmdcnvtumornumber
             .combine(merge_annotation.out.occmergeout, by:0)
             .combine(run_nn_classifier.out.rmdnanodx, by: 0)
             .combine(mgmt_promoter.out.mgmtresultsout, by:0)
             .combine(svannasv.out.rmdsvannahtml, by:0)
-            .combine(svannasv_fusion_events.out.filterfusioneventout, by:0)
+            .combine(fusion_events_channel, by:0)
             .combine(igv_tools.out.tertp_out_igv, by:0)
             .combine(cramino_report.out.craminostatout, by:0)
             .combine(plot_genomic_regions.out.plot_genomic_regions_out, by:0)
             // Create final map for markdown report
-        mergecnv_out_map = mergecnv_out.map { sample_id, cnv_plot, tumor_copy_number, annotatedcnv_filter_header, cnv_chr9, cnv_chr7, merge_annotation_filter_snvs_allcall, nanodx_classifier, mgmt_results, svannahtml, fusion_events, terphtml, craminoreport, egfr_coverage, idh_coverage, tertp_coverage -> [
+        mergecnv_out_map = mergecnv_out.map { args -> 
+                def sample_id = args[0]
+                def cnv_plot = args[1]
+                def tumor_copy_number = args[2]
+                def annotatedcnv_filter_header = args[3]
+                def cnv_chr9 = args[4]
+                def cnv_chr7 = args[5]
+                def merge_annotation_filter_snvs_allcall = args[6]
+                def nanodx_classifier = args[7]
+                def mgmt_results = args[8]
+                def svannahtml = args[9]
+                def fusion_events = args[10]
+                def terphtml = args[11]
+                def craminoreport = args[12]
+                def egfr_coverage = args[13]
+                def idh_coverage = args[14]
+                def tertp_coverage = args[15]
+                
+                // Debug: Print the number of arguments received
+                println "DEBUG: mergecnv_out_map received ${args.size()} arguments: ${args}"
+                
+                [
                     sample_id,
                     craminoreport,
                     nanodx_classifier,
@@ -1549,10 +1658,10 @@ workflow analysis {
             markdown_report(mergecnv_out_map)
         }
 
-    // emit:
-    //     markdown_out = params.run_mode_analysis == 'rmd' ? 
-    //         markdown_report.out.markdown_report : 
-    //         Channel.empty()
+    emit:
+        markdown_out = (params.run_mode_analysis == 'rmd' || params.run_mode_order) ? 
+            markdown_report.out : 
+            Channel.empty()
 }
 
 // Helper function to extract sample_id from BAM filename

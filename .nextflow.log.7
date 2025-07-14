@@ -1,241 +1,328 @@
-Jul-09 11:52:48.237 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --run_mode_analysis all -resume
-Jul-09 11:52:48.520 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.04.4
-Jul-09 11:52:48.541 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/chbope/.nextflow/plugins; core-plugins: nf-amazon@2.15.0,nf-azure@1.16.0,nf-cloudcache@0.4.3,nf-codecommit@0.2.3,nf-console@1.2.1,nf-google@1.21.0,nf-k8s@1.0.0,nf-tower@1.11.3,nf-wave@1.12.1
-Jul-09 11:52:48.569 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
-Jul-09 11:52:48.571 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
-Jul-09 11:52:48.575 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
-Jul-09 11:52:48.590 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
-Jul-09 11:52:48.612 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
-Jul-09 11:52:48.614 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/nextflow.config
-Jul-09 11:52:48.643 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/chbope/.nextflow/secrets/store.json
-Jul-09 11:52:48.647 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@7cedfa63] - activable => nextflow.secret.LocalSecretsProvider@7cedfa63
-Jul-09 11:52:48.659 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
-Jul-09 11:52:49.492 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
-Jul-09 11:52:49.506 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [nostalgic_turing] DSL2 - revision: 67b7256835
-Jul-09 11:52:49.507 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
-Jul-09 11:52:49.507 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
-Jul-09 11:52:49.558 [main] DEBUG nextflow.Session - Session UUID: 161629e0-bbab-4c65-8cc7-d03132f5e49b
-Jul-09 11:52:49.558 [main] DEBUG nextflow.Session - Run name: nostalgic_turing
-Jul-09 11:52:49.559 [main] DEBUG nextflow.Session - Executor pool size: 12
-Jul-09 11:52:49.567 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
-Jul-09 11:52:49.573 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
-Jul-09 11:52:49.591 [main] DEBUG nextflow.cli.CmdRun - 
-  Version: 25.04.4 build 5950
-  Created: 16-06-2025 14:23 UTC (16:23 CEST)
-  System: Linux 6.11.0-29-generic
-  Runtime: Groovy 4.0.26 on OpenJDK 64-Bit Server VM 21.0.7+6-Ubuntu-0ubuntu124.04
+Jul-13 19:56:06.492 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --run_mode_order --sample_id T001
+Jul-13 19:56:06.554 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.04.6
+Jul-13 19:56:06.571 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/ubuntu/.nextflow/plugins; core-plugins: nf-amazon@2.15.0,nf-azure@1.16.0,nf-cloudcache@0.4.3,nf-codecommit@0.2.3,nf-console@1.2.1,nf-google@1.21.1,nf-k8s@1.0.0,nf-tower@1.11.4,nf-wave@1.12.1
+Jul-13 19:56:06.593 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Jul-13 19:56:06.594 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Jul-13 19:56:06.605 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Jul-13 19:56:06.615 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Jul-13 19:56:06.629 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/ubuntu/nWGS_pipeline/nextflow.config
+Jul-13 19:56:06.631 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/ubuntu/nWGS_pipeline/nextflow.config
+Jul-13 19:56:06.652 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/ubuntu/.nextflow/secrets/store.json
+Jul-13 19:56:06.655 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@5b5c0057] - activable => nextflow.secret.LocalSecretsProvider@5b5c0057
+Jul-13 19:56:06.664 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Jul-13 19:56:07.349 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
+Jul-13 19:56:07.360 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [lonely_stonebraker] DSL2 - revision: fded277ebe
+Jul-13 19:56:07.361 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Jul-13 19:56:07.361 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Jul-13 19:56:07.399 [main] DEBUG nextflow.Session - Session UUID: eddc04cd-7afa-44d9-811a-ede8c9a0d96e
+Jul-13 19:56:07.399 [main] DEBUG nextflow.Session - Run name: lonely_stonebraker
+Jul-13 19:56:07.399 [main] DEBUG nextflow.Session - Executor pool size: 4
+Jul-13 19:56:07.404 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Jul-13 19:56:07.408 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=12; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Jul-13 19:56:07.426 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 25.04.6 build 5954
+  Created: 01-07-2025 11:27 UTC 
+  System: Linux 5.15.0-143-generic
+  Runtime: Groovy 4.0.26 on OpenJDK 64-Bit Server VM 21.0.7+6-Ubuntu-0ubuntu122.04
   Encoding: UTF-8 (UTF-8)
-  Process: 785613@chbope [127.0.1.1]
-  CPUs: 12 - Mem: 78.2 GB (58.2 GB) - Swap: 8 GB (6.1 GB)
-Jul-09 11:52:49.674 [main] DEBUG nextflow.Session - Work-dir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work [ext2/ext3]
-Jul-09 11:52:49.709 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
-Jul-09 11:52:49.719 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
-Jul-09 11:52:49.724 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
-Jul-09 11:52:49.752 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
-Jul-09 11:52:49.772 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 13; maxThreads: 1000
-Jul-09 11:52:49.863 [main] DEBUG nextflow.Session - Session start
-Jul-09 11:52:49.872 [main] DEBUG nextflow.Session - Using default localLib path: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/lib
-Jul-09 11:52:49.873 [main] DEBUG nextflow.Session - Adding to the classpath library: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/lib
-Jul-09 11:52:50.106 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
-Jul-09 11:52:52.583 [main] INFO  nextflow.script.BaseScript - Analysis run mode: all
-Jul-09 11:52:52.590 [main] INFO  nextflow.script.BaseScript - Sample thresholds: [T001:0.5]
-Jul-09 11:52:52.649 [main] INFO  nextflow.script.BaseScript - Running MGMT Analysis...
-Jul-09 11:52:52.741 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.741 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.747 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
-Jul-09 11:52:52.754 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=12; memory=78.2 GB; capacity=12; pollInterval=100ms; dumpInterval=5m
-Jul-09 11:52:52.756 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
-Jul-09 11:52:52.781 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:extract_epic': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.820 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.820 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.821 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:mgmt_promoter': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.827 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.827 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.828 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:nanodx': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.836 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_nn_classifier` matches process analysis:run_nn_classifier
-Jul-09 11:52:52.838 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.839 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.839 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:run_nn_classifier': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.841 [main] INFO  nextflow.script.BaseScript - Running AnnotSV Analysis...
-Jul-09 11:52:52.850 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.850 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.851 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:svannasv': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.860 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:circosplot` matches process analysis:circosplot
-Jul-09 11:52:52.863 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.863 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.864 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:circosplot': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.872 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.872 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.873 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:svannasv_fusion_events': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.875 [main] INFO  nextflow.script.BaseScript - Running OCC Analysis...
-Jul-09 11:52:52.941 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:clair3` matches process analysis:clair3
-Jul-09 11:52:52.945 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.945 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.946 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:clair3': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.971 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:clairs_to` matches process analysis:clairs_to
-Jul-09 11:52:52.973 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.973 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.974 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:clairs_to': maxForks=0; fair=false; array=0
-Jul-09 11:52:52.997 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:52.998 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:52.998 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:merge_annotation': maxForks=0; fair=false; array=0
-Jul-09 11:52:53.000 [main] INFO  nextflow.script.BaseScript - Running TERP Analysis...
-Jul-09 11:52:53.006 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:igv_tools` matches process analysis:igv_tools
-Jul-09 11:52:53.009 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:53.009 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:53.009 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:igv_tools': maxForks=0; fair=false; array=0
-Jul-09 11:52:53.015 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:plot_genomic_regions` matches process analysis:plot_genomic_regions
-Jul-09 11:52:53.017 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:53.017 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:53.018 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:plot_genomic_regions': maxForks=0; fair=false; array=0
-Jul-09 11:52:53.020 [main] INFO  nextflow.script.BaseScript - Running CNV Analysis...
-Jul-09 11:52:53.021 [main] INFO  nextflow.script.BaseScript - Samples needing ACE calculation: []
-Jul-09 11:52:53.021 [main] INFO  nextflow.script.BaseScript - Samples with provided thresholds: [T001:0.5]
-Jul-09 11:52:53.023 [main] INFO  nextflow.script.BaseScript - Using provided threshold for T001: 0.5
-Jul-09 11:52:53.023 [main] INFO  nextflow.script.BaseScript - Final threshold mapping: [T001:0.5]
-Jul-09 11:52:53.051 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:annotatecnv` matches process analysis:annotatecnv
-Jul-09 11:52:53.054 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:53.054 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:53.055 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:annotatecnv': maxForks=0; fair=false; array=0
-Jul-09 11:52:53.059 [main] INFO  nextflow.script.BaseScript - Running RMD Report Generation...
-Jul-09 11:52:53.060 [main] INFO  nextflow.script.BaseScript - Reusing MGMT outputs from earlier analysis
-Jul-09 11:52:53.060 [main] INFO  nextflow.script.BaseScript - Reusing SV outputs from earlier analysis
-Jul-09 11:52:53.060 [main] INFO  nextflow.script.BaseScript - Reusing OCC outputs from earlier analysis
-Jul-09 11:52:53.060 [main] INFO  nextflow.script.BaseScript - Reusing TERP outputs from earlier analysis
-Jul-09 11:52:53.061 [main] INFO  nextflow.script.BaseScript - Running Cramino Statistics...
-Jul-09 11:52:53.065 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:cramino_report` matches process analysis:cramino_report
-Jul-09 11:52:53.067 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:53.067 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:53.067 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:cramino_report': maxForks=0; fair=false; array=0
-Jul-09 11:52:53.093 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:markdown_report` matches process analysis:markdown_report
-Jul-09 11:52:53.094 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
-Jul-09 11:52:53.094 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
-Jul-09 11:52:53.115 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:markdown_report': maxForks=0; fair=false; array=0
-Jul-09 11:52:53.118 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: extract_epic, plot_genomic_regions, mgmt_promoter, analysis:clairs_to, igv_tools, analysis:cramino_report, markdown_report, merge_bam_files, analysis:svannasv, run_nn_classifier, analysis:igv_tools, clairs_to, analysis:nanodx, analysis:extract_epic, svannasv_fusion_events, clair3, run_epi2me_cnv, run_epi2me_sv, markdown_report_old, extract_roi, analysis:mgmt_promoter, circosplot, ace_tmc, svannasv, analysis:svannasv_fusion_events, analysis:circosplot, sturgeon, analysis:run_nn_classifier, annotatecnv, analysis:merge_annotation, nanodx, cramino_report, analysis:plot_genomic_regions, analysis:annotatecnv, merge_annotation, run_epi2me_modkit, analysis:markdown_report, analysis:clair3
-Jul-09 11:52:53.134 [main] WARN  nextflow.Session - There's no process matching config selector: annotesv -- Did you mean: annotatecnv?
-Jul-09 11:52:53.137 [main] DEBUG nextflow.Session - Igniting dataflow network (36)
-Jul-09 11:52:53.139 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:extract_epic
-Jul-09 11:52:53.139 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:mgmt_promoter
-Jul-09 11:52:53.140 [Actor Thread 13] INFO  nextflow.Nextflow - Creating Svanna input for sample: T001 (standalone mode)
-Jul-09 11:52:53.140 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:nanodx
-Jul-09 11:52:53.140 [Actor Thread 11] INFO  nextflow.Nextflow - Creating AnnotSV input for sample: T001 (standalone mode)
-Jul-09 11:52:53.140 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:run_nn_classifier
-Jul-09 11:52:53.140 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:svannasv
-Jul-09 11:52:53.141 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:circosplot
-Jul-09 11:52:53.142 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:svannasv_fusion_events
-Jul-09 11:52:53.142 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:clair3
-Jul-09 11:52:53.142 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:clairs_to
-Jul-09 11:52:53.143 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:merge_annotation
-Jul-09 11:52:53.143 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:igv_tools
-Jul-09 11:52:53.143 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:plot_genomic_regions
-Jul-09 11:52:53.143 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:annotatecnv
-Jul-09 11:52:53.143 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:cramino_report
-Jul-09 11:52:53.143 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:markdown_report
-Jul-09 11:52:53.143 [Actor Thread 1] INFO  nextflow.script.BaseScript - Processing sample: T001 from configured folders
-Jul-09 11:52:53.147 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
-  Script_5ff96b1b1f7896ee: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/main.nf
-  Script_19f71b1e943f871f: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/modules/mergebam.nf
-  Script_3eb0534c4454e552: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/modules/epi2me.nf
-  Script_147a364aa36aec0b: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/modules/analysis.nf
-Jul-09 11:52:53.148 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
-Jul-09 11:52:53.148 [main] DEBUG nextflow.Session - Session await
-Jul-09 11:52:53.154 [Actor Thread 9] INFO  nextflow.script.BaseScript - Preparing annotatecnv input for T001 with provided tumor content 0.5
-Jul-09 11:52:53.319 [Actor Thread 1] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/chbope/extension/results/epi2me/episv/T001.wf_sv.vcf.gz.tbi -- Cause: java.nio.file.NoSuchFileException: /home/chbope/extension/results/epi2me/episv/T001.wf_sv.vcf.gz.tbi
-Jul-09 11:52:53.482 [Actor Thread 5] INFO  nextflow.processor.TaskProcessor - [49/e86486] Cached process > analysis:cramino_report (1)
-Jul-09 11:52:53.482 [Actor Thread 6] INFO  nextflow.processor.TaskProcessor - [a7/4aa511] Cached process > analysis:extract_epic (T001)
-Jul-09 11:52:53.482 [Actor Thread 1] INFO  nextflow.processor.TaskProcessor - [65/ae9509] Cached process > analysis:svannasv (1)
-Jul-09 11:52:53.482 [Actor Thread 13] INFO  nextflow.processor.TaskProcessor - [54/e0af8e] Cached process > analysis:igv_tools (1)
-Jul-09 11:52:53.482 [Actor Thread 14] INFO  nextflow.processor.TaskProcessor - [d6/339fc9] Cached process > analysis:annotatecnv (1)
-Jul-09 11:52:53.482 [Actor Thread 9] INFO  nextflow.processor.TaskProcessor - [91/3f8364] Cached process > analysis:plot_genomic_regions (1)
-Jul-09 11:52:53.482 [Actor Thread 11] INFO  nextflow.processor.TaskProcessor - [3e/a45e35] Cached process > analysis:clairs_to (1)
-Jul-09 11:52:53.482 [Actor Thread 8] INFO  nextflow.processor.TaskProcessor - [f5/e40bc1] Cached process > analysis:clair3 (1)
-Jul-09 11:52:53.507 [Actor Thread 20] INFO  nextflow.script.BaseScript - Creating merge input for sample: T001
-Jul-09 11:52:53.516 [Actor Thread 34] INFO  nextflow.processor.TaskProcessor - [cb/6ccee7] Cached process > analysis:nanodx (1)
-Jul-09 11:52:53.519 [Actor Thread 21] INFO  nextflow.processor.TaskProcessor - [b8/d6efd3] Cached process > analysis:circosplot (1)
-Jul-09 11:52:53.520 [Actor Thread 12] INFO  nextflow.processor.TaskProcessor - [0e/62a7ba] Cached process > analysis:svannasv_fusion_events (1)
-Jul-09 11:52:53.521 [Actor Thread 29] INFO  nextflow.processor.TaskProcessor - [b1/e8552f] Cached process > analysis:mgmt_promoter (1)
-Jul-09 11:52:53.525 [Actor Thread 12] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
-Jul-09 11:52:53.532 [Actor Thread 26] INFO  nextflow.processor.TaskProcessor - [f1/3c68c3] Cached process > analysis:merge_annotation (1)
-Jul-09 11:52:53.617 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Jul-09 11:52:53.619 [Task submitter] INFO  nextflow.Session - [91/2e9864] Submitted process > analysis:run_nn_classifier (1)
-Jul-09 11:53:03.178 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 14; name: analysis:run_nn_classifier (1); status: COMPLETED; exit: 0; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/91/2e9864b919c96ea54a01c21842af88]
-Jul-09 11:53:03.179 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=36; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
-Jul-09 11:53:03.232 [Actor Thread 13] DEBUG nextflow.util.HashBuilder - Unable to get file attributes file: /home/chbope/extension/testdata/log_update.pdf -- Cause: java.nio.file.NoSuchFileException: /home/chbope/extension/testdata/log_update.pdf
-Jul-09 11:53:03.245 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
-Jul-09 11:53:03.245 [Task submitter] INFO  nextflow.Session - [e7/0b8460] Submitted process > analysis:markdown_report (1)
-Jul-09 11:53:05.885 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 15; name: analysis:markdown_report (1); status: COMPLETED; exit: 1; error: -; workDir: /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/e7/0b8460d0a394cb580b8999c7b12a6c]
-Jul-09 11:53:05.891 [TaskFinalizer-2] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
-  task: name=analysis:markdown_report (1); work-dir=/home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/e7/0b8460d0a394cb580b8999c7b12a6c
-  error [nextflow.exception.ProcessFailedException]: Process `analysis:markdown_report (1)` terminated with an error exit status (1)
-Jul-09 11:53:05.907 [TaskFinalizer-2] ERROR nextflow.processor.TaskProcessor - Error executing process > 'analysis:markdown_report (1)'
+  Process: 1501033@bope [127.0.1.1]
+  CPUs: 4 - Mem: 3.7 GB (116.4 MB) - Swap: 4 GB (3.7 GB)
+Jul-13 19:56:07.445 [main] DEBUG nextflow.Session - Work-dir: /home/ubuntu/nWGS_pipeline/work [ext2/ext3]
+Jul-13 19:56:07.469 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Jul-13 19:56:07.476 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Jul-13 19:56:07.490 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
+Jul-13 19:56:07.510 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Jul-13 19:56:07.517 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 5; maxThreads: 1000
+Jul-13 19:56:07.613 [main] DEBUG nextflow.Session - Session start
+Jul-13 19:56:07.776 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Jul-13 19:56:09.634 [main] INFO  nextflow.Nextflow - 
+        Running pipelines sequentially in strict order:
+        1. Mergebam Pipeline
+        2. Epi2me Pipeline
+        3. Analysis Pipeline
+        
+Jul-13 19:56:09.635 [main] INFO  nextflow.Nextflow - === Starting Mergebam Pipeline ===
+Jul-13 19:56:09.638 [main] INFO  nextflow.script.BaseScript - Sample_id T001 with Flow Cell ID: PBC51775
+Jul-13 19:56:09.734 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:merge_bam_files` matches process mergebam:merge_bam_files
+Jul-13 19:56:09.743 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.744 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.748 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Jul-13 19:56:09.753 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=4; memory=3.7 GB; capacity=1; pollInterval=100ms; dumpInterval=5m
+Jul-13 19:56:09.755 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+Jul-13 19:56:09.771 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'mergebam:merge_bam_files': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.797 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:extract_roi` matches process mergebam:extract_roi
+Jul-13 19:56:09.799 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.799 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.800 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'mergebam:extract_roi': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.802 [main] INFO  nextflow.Nextflow - === Starting Epi2me Pipeline ===
+Jul-13 19:56:09.804 [main] INFO  nextflow.script.BaseScript - epi2me run mode: all
+Jul-13 19:56:09.810 [main] INFO  nextflow.script.BaseScript - Running modkit...
+Jul-13 19:56:09.816 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_epi2me_modkit` matches process epi2me:run_epi2me_modkit
+Jul-13 19:56:09.817 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.817 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.818 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'epi2me:run_epi2me_modkit': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.820 [main] INFO  nextflow.script.BaseScript - Running cnv...
+Jul-13 19:56:09.852 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_epi2me_cnv` matches process epi2me:run_epi2me_cnv
+Jul-13 19:56:09.855 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.855 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.856 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'epi2me:run_epi2me_cnv': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.858 [main] INFO  nextflow.script.BaseScript - Running sv...
+Jul-13 19:56:09.867 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_epi2me_sv` matches process epi2me:run_epi2me_sv
+Jul-13 19:56:09.868 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.869 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.869 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'epi2me:run_epi2me_sv': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.887 [main] INFO  nextflow.Nextflow - === Starting Analysis Pipeline ===
+Jul-13 19:56:09.889 [main] INFO  nextflow.script.BaseScript - Analysis run mode: all
+Jul-13 19:56:09.892 [main] INFO  nextflow.script.BaseScript - Sample thresholds: [:]
+Jul-13 19:56:09.901 [main] INFO  nextflow.script.BaseScript - Running MGMT Analysis...
+Jul-13 19:56:09.910 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.911 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.911 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:extract_epic': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.921 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.921 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.921 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:mgmt_promoter': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.926 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.926 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.927 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:nanodx': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.933 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:run_nn_classifier` matches process analysis:run_nn_classifier
+Jul-13 19:56:09.934 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.934 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.935 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:run_nn_classifier': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.936 [main] INFO  nextflow.script.BaseScript - Running Svanna Analysis...
+Jul-13 19:56:09.943 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.943 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.943 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:svannasv': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.949 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:circosplot` matches process analysis:circosplot
+Jul-13 19:56:09.950 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.950 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.951 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:circosplot': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.956 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:svannasv_fusion_events` matches process analysis:svannasv_fusion_events
+Jul-13 19:56:09.957 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.957 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.958 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:svannasv_fusion_events': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.959 [main] INFO  nextflow.script.BaseScript - Running OCC Analysis...
+Jul-13 19:56:09.966 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:clair3` matches process analysis:clair3
+Jul-13 19:56:09.968 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.968 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.968 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:clair3': maxForks=0; fair=false; array=0
+Jul-13 19:56:09.982 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:clairs_to` matches process analysis:clairs_to
+Jul-13 19:56:09.984 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:09.984 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:09.984 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:clairs_to': maxForks=0; fair=false; array=0
+Jul-13 19:56:10.002 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:10.002 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:10.002 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:merge_annotation': maxForks=0; fair=false; array=0
+Jul-13 19:56:10.004 [main] INFO  nextflow.script.BaseScript - Running TERP Analysis...
+Jul-13 19:56:10.010 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:igv_tools` matches process analysis:igv_tools
+Jul-13 19:56:10.011 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:10.011 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:10.012 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:igv_tools': maxForks=0; fair=false; array=0
+Jul-13 19:56:10.017 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:plot_genomic_regions` matches process analysis:plot_genomic_regions
+Jul-13 19:56:10.018 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:10.018 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:10.018 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:plot_genomic_regions': maxForks=0; fair=false; array=0
+Jul-13 19:56:10.020 [main] INFO  nextflow.script.BaseScript - Running CNV Analysis...
+Jul-13 19:56:10.021 [main] INFO  nextflow.script.BaseScript - Samples needing ACE calculation: []
+Jul-13 19:56:10.021 [main] INFO  nextflow.script.BaseScript - Samples with provided thresholds: [:]
+Jul-13 19:56:10.022 [main] INFO  nextflow.script.BaseScript - Final threshold mapping: [:]
+Jul-13 19:56:10.042 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:annotatecnv` matches process analysis:annotatecnv
+Jul-13 19:56:10.045 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:10.046 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:10.046 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:annotatecnv': maxForks=0; fair=false; array=0
+Jul-13 19:56:10.051 [main] INFO  nextflow.script.BaseScript - Running RMD Report Generation...
+Jul-13 19:56:10.052 [main] INFO  nextflow.script.BaseScript - Reusing MGMT outputs from earlier analysis
+Jul-13 19:56:10.052 [main] INFO  nextflow.script.BaseScript - Reusing Svanna outputs from earlier analysis
+Jul-13 19:56:10.052 [main] INFO  nextflow.script.BaseScript - Reusing OCC outputs from earlier analysis
+Jul-13 19:56:10.052 [main] INFO  nextflow.script.BaseScript - Reusing TERP outputs from earlier analysis
+Jul-13 19:56:10.053 [main] INFO  nextflow.script.BaseScript - Running Cramino Statistics...
+Jul-13 19:56:10.056 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:cramino_report` matches process analysis:cramino_report
+Jul-13 19:56:10.057 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:10.057 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:10.057 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:cramino_report': maxForks=0; fair=false; array=0
+Jul-13 19:56:10.083 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:markdown_report` matches process analysis:markdown_report
+Jul-13 19:56:10.084 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Jul-13 19:56:10.084 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jul-13 19:56:10.085 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'analysis:markdown_report': maxForks=0; fair=false; array=0
+Jul-13 19:56:10.087 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: extract_epic, plot_genomic_regions, epi2me:run_epi2me_sv, mgmt_promoter, analysis:clairs_to, igv_tools, analysis:cramino_report, markdown_report, merge_bam_files, analysis:svannasv, run_nn_classifier, analysis:igv_tools, clairs_to, mergebam:extract_roi, analysis:nanodx, analysis:extract_epic, svannasv_fusion_events, clair3, run_epi2me_cnv, run_epi2me_sv, epi2me:run_epi2me_modkit, extract_roi, mergebam:merge_bam_files, analysis:mgmt_promoter, circosplot, ace_tmc, svannasv, analysis:svannasv_fusion_events, analysis:circosplot, sturgeon, analysis:run_nn_classifier, annotatecnv, analysis:merge_annotation, epi2me:run_epi2me_cnv, nanodx, cramino_report, analysis:plot_genomic_regions, analysis:annotatecnv, merge_annotation, run_epi2me_modkit, analysis:markdown_report, analysis:clair3
+Jul-13 19:56:10.100 [main] WARN  nextflow.Session - There's no process matching config selector: epi2me
+Jul-13 19:56:10.101 [main] WARN  nextflow.Session - There's no process matching config selector: analysis
+Jul-13 19:56:10.103 [main] DEBUG nextflow.Session - Igniting dataflow network (34)
+Jul-13 19:56:10.107 [PathVisitor-1] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /home/ubuntu/data/testdata/; pattern: **/bam_pass/*.bam; options: [:]
+Jul-13 19:56:10.107 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > mergebam:merge_bam_files
+Jul-13 19:56:10.108 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > mergebam:extract_roi
+Jul-13 19:56:10.108 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > epi2me:run_epi2me_modkit
+Jul-13 19:56:10.108 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > epi2me:run_epi2me_cnv
+Jul-13 19:56:10.108 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > epi2me:run_epi2me_sv
+Jul-13 19:56:10.108 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:extract_epic
+Jul-13 19:56:10.110 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:mgmt_promoter
+Jul-13 19:56:10.110 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:nanodx
+Jul-13 19:56:10.110 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:run_nn_classifier
+Jul-13 19:56:10.111 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:svannasv
+Jul-13 19:56:10.111 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:circosplot
+Jul-13 19:56:10.111 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:svannasv_fusion_events
+Jul-13 19:56:10.111 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:clair3
+Jul-13 19:56:10.111 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:clairs_to
+Jul-13 19:56:10.111 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:merge_annotation
+Jul-13 19:56:10.111 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:igv_tools
+Jul-13 19:56:10.112 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:plot_genomic_regions
+Jul-13 19:56:10.112 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:annotatecnv
+Jul-13 19:56:10.112 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:cramino_report
+Jul-13 19:56:10.112 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > analysis:markdown_report
+Jul-13 19:56:10.113 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_75f4d4eb5fd0a0fb: /home/ubuntu/nWGS_pipeline/modules/analysis.nf
+  Script_05abbb79d5cc7ef4: /home/ubuntu/nWGS_pipeline/modules/epi2me.nf
+  Script_1e12986383a4d70c: /home/ubuntu/nWGS_pipeline/main.nf
+  Script_b7b72dfbfd1d8d35: /home/ubuntu/nWGS_pipeline/modules/mergebam.nf
+Jul-13 19:56:10.113 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Jul-13 19:56:10.113 [main] DEBUG nextflow.Session - Session await
+Jul-13 19:56:10.256 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jul-13 19:56:10.258 [Task submitter] INFO  nextflow.Session - [7f/b9bc63] Submitted process > mergebam:merge_bam_files (1)
+Jul-13 19:56:33.516 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: mergebam:merge_bam_files (1); status: COMPLETED; exit: 130; error: -; workDir: /home/ubuntu/nWGS_pipeline/work/7f/b9bc63e06805f6b4687861f01417ff]
+Jul-13 19:56:33.517 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=12; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Jul-13 19:56:33.524 [TaskFinalizer-1] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=mergebam:merge_bam_files (1); work-dir=/home/ubuntu/nWGS_pipeline/work/7f/b9bc63e06805f6b4687861f01417ff
+  error [nextflow.exception.ProcessFailedException]: Process `mergebam:merge_bam_files (1)` terminated with an error exit status (130)
+Jul-13 19:56:33.537 [TaskFinalizer-1] ERROR nextflow.processor.TaskProcessor - Error executing process > 'mergebam:merge_bam_files (1)'
 
 Caused by:
-  Process `analysis:markdown_report (1)` terminated with an error exit status (1)
+  Process `mergebam:merge_bam_files (1)` terminated with an error exit status (130)
 
 
 Command executed:
 
-  # Output PDF path
-  output_file="T001_markdown_pipeline_report.pdf"
-  
-  # Now call the Rscript with the updated Rmd file
-  Rscript -e "rmarkdown::render('/home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])"       "T001"       "T001_cramino_statistics.txt"       "/home/chbope/extension/data/testdata/sample_ids.txt"       "T001_nanodx_classifier.tsv"       "Capper_et_al_dictionary.txt"       "log_update.pdf"       "T001_cnv_plot_full.pdf"       "T001_tumor_copy_number.txt"       "T001_annotatedcnv_filter_header.csv"       "T001_cnv_chr9.pdf"       "T001_cnv_chr7.pdf"       "T001_MGMT_results.csv"       "T001_merge_annotation_filter_snvs_allcall_filter.csv"       "T001_filter_fusion_event.tsv"       "T001_tertp_id1.html"       "T001_occ_svanna_annotation.html"       "T001_egfr_coverage.pdf"       "T001_idh1_coverage.pdf"       "T001_tertp_coverage.pdf"       "${PWD}/${output_file}"
+  echo "Merging BAM files for sample: T001"
+  for bam in PBC51775_pass_9a6b2821_d20073fc_1.bam PBC51775_pass_9a6b2821_d20073fc_0.bam; do
+      echo "Processing file: ${bam}" # Print each BAM file being merged
+  done
+  samtools merge -@ 4 -f T001.merge.bam PBC51775_pass_9a6b2821_d20073fc_1.bam PBC51775_pass_9a6b2821_d20073fc_0.bam
+  samtools index -@ 4 T001.merge.bam
 
 Command exit status:
-  1
+  130
 
 Command output:
-  1/36                   
-  2/36 [setup]           
+  (empty)
 
 Command error:
-  INFO:    Environment variable SINGULARITYENV_NXF_TASK_WORKDIR is set, but APPTAINERENV_NXF_TASK_WORKDIR is preferred
-  
-  
-  processing file: nextflow_markdown_pipeline_update_final.Rmd
-  1/36                   
-  2/36 [setup]           
-  Error:
-  ! Votes file not found: T001_nanodx_classifier.tsv
-  
-  Quitting from lines 19-82 [setup] (nextflow_markdown_pipeline_update_final.Rmd)
-  Execution halted
+  INFO:    squashfuse not found, will not be able to mount SIF or other squashfs files
+  INFO:    fuse2fs not found, will not be able to mount EXT3 filesystems
+  INFO:    gocryptfs not found, will not be able to use gocryptfs
+  INFO:    Converting SIF file to temporary sandbox...
 
 Work dir:
-  /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work/e7/0b8460d0a394cb580b8999c7b12a6c
+  /home/ubuntu/nWGS_pipeline/work/7f/b9bc63e06805f6b4687861f01417ff
 
 Container:
-  /home/chbope/extension/images/markdown_images_28feb2025_latest.sif
+  /home/ubuntu/data/images2/mgmt_nanopipe_amd64_26spet_jdk_igv_python_plotly_latest.sif
 
-Tip: view the complete command output by changing to the process work dir and entering the command `cat .command.out`
-Jul-09 11:53:05.909 [main] DEBUG nextflow.Session - Session await > all processes finished
-Jul-09 11:53:05.911 [TaskFinalizer-2] DEBUG nextflow.Session - Session aborted -- Cause: Process `analysis:markdown_report (1)` terminated with an error exit status (1)
-Jul-09 11:53:05.937 [TaskFinalizer-2] ERROR nextflow.Nextflow - 
+Tip: you can try to figure out what's wrong by changing to the process work dir and showing the script file named `.command.sh`
+Jul-13 19:56:33.543 [TaskFinalizer-1] DEBUG nextflow.Session - Session aborted -- Cause: Process `mergebam:merge_bam_files (1)` terminated with an error exit status (130)
+Jul-13 19:56:33.558 [TaskFinalizer-1] DEBUG nextflow.Session - The following nodes are still active:
+[process] epi2me:run_epi2me_cnv
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] epi2me:run_epi2me_sv
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:extract_epic
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:mgmt_promoter
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:nanodx
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:run_nn_classifier
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:svannasv
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:circosplot
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:svannasv_fusion_events
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:clair3
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:clairs_to
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:merge_annotation
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:igv_tools
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:plot_genomic_regions
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:annotatecnv
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:cramino_report
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] analysis:markdown_report
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+Jul-13 19:56:33.561 [TaskFinalizer-1] ERROR nextflow.Nextflow - 
         Pipeline execution failed
         ---------------------------
-        Error message: INFO:    Environment variable SINGULARITYENV_NXF_TASK_WORKDIR is set, but APPTAINERENV_NXF_TASK_WORKDIR is preferred
-
-
-processing file: nextflow_markdown_pipeline_update_final.Rmd
-1/36                   
-2/36 [setup]           
-Error:
-! Votes file not found: T001_nanodx_classifier.tsv
-
-Quitting from lines 19-82 [setup] (nextflow_markdown_pipeline_update_final.Rmd)
-Execution halted
+        Error message: INFO:    squashfuse not found, will not be able to mount SIF or other squashfs files
+INFO:    fuse2fs not found, will not be able to mount EXT3 filesystems
+INFO:    gocryptfs not found, will not be able to use gocryptfs
+INFO:    Converting SIF file to temporary sandbox...
         
-Jul-09 11:53:05.937 [main] DEBUG nextflow.Session - Session await > all barriers passed
-Jul-09 11:53:05.938 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
-Jul-09 11:53:05.947 [main] ERROR nextflow.Nextflow - 
+Jul-13 19:56:33.563 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+Jul-13 19:56:33.565 [main] DEBUG nextflow.Session - Session await > all processes finished
+Jul-13 19:56:33.565 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Jul-13 19:56:33.569 [main] ERROR nextflow.Nextflow - 
         Pipeline execution summary
         ---------------------------
-        Completed at : 2025-07-09T11:53:05.941920678+02:00
-        Duration    : 16.2s
+        Completed at : 2025-07-13T19:56:33.566809417Z
+        Duration    : 26.1s
         Success     : false
-        workDir     : /home/chbope/Documents/nanopore/clone/nextflow/nWGS_pipeline/work
-        exit status : 1
+        workDir     : /home/ubuntu/nWGS_pipeline/work
+        exit status : 130
         
-Jul-09 11:53:05.953 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=1; failedCount=1; ignoredCount=0; cachedCount=13; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=9.5s; failedDuration=10.5s; cachedDuration=3h 48m 40s;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=4; peakMemory=2 GB; ]
-Jul-09 11:53:05.962 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
-Jul-09 11:53:06.023 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
+Jul-13 19:56:33.583 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=1; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=23.2s; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=1 GB; ]
+Jul-13 19:56:33.775 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Jul-13 19:56:33.786 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

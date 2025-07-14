@@ -1,13 +1,32 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-// Include pipeline modules
-include { mergebam } from './modules/mergebam.nf'
-include { epi2me }   from './modules/epi2me.nf'
-include { analysis } from './modules/analysis.nf'
+manifest {
+    name            = 'nWGS_pipeline'
+    author          = 'Vilhelm Magnus Laboratory'
+    homePage        = 'https://github.com/vilhelmmagnuslab/nWGS_pipeline'
+    description     = 'Nanopore Whole Genome Sequencing Pipeline for CNS samples including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.'
+    mainScript      = 'main.nf'
+    nextflowVersion = '>=23.04.2'
+    version         = '1.0.0'
+}
+
+// Include pipeline modules conditionally
+if (params.run_mode_mergebam || params.run_mode_order) {
+    include { mergebam } from './modules/mergebam.nf'
+}
+if (params.run_mode_epi2me || params.run_mode_order) {
+    include { epi2me }   from './modules/epi2me.nf'
+}
+if (params.run_mode_analysis || params.run_mode_order) {
+    include { analysis } from './modules/analysis.nf'
+}
 
 workflow {
-    if (params.run_order_mode) {
+    if (params.run_mode_order) {
+        // Set run_mode_analysis to 'all' when using run_mode_order to ensure all analyses run
+        params.run_mode_analysis = 'all'
+        
         log.info """
         Running pipelines sequentially in strict order:
         1. Mergebam Pipeline
@@ -23,40 +42,43 @@ workflow {
         log.info "=== Starting Epi2me Pipeline ==="
         def epi2me_results = epi2me(mergebam_results.merged_bams)
 
-        // Step 3: Prepare analysis input
-        def analysis_input = epi2me_results.results.map { result ->
-            def (sample_id, modkit, segs_bed, bins_bed, segs_vcf, sv) = result
-            
-            // Verify required files exist
-            def bam = file("${params.occ_bam_folder}/${sample_id}.occ.bam")
-            def bai = file("${params.occ_bam_folder}/${sample_id}.occ.bam.bai")
-            def ref = file(params.reference_genome)
-            def ref_bai = file(params.reference_genome_bai)
-            def tr_bed = file(params.tr_bed_file)
-            def bedmethyl = file("${params.bedmethyl_folder}/${sample_id}.wf_mods.bedmethyl.gz")
+        // Step 3: Prepare analysis input using epi2me outputs and mergebam outputs
+        def analysis_input = epi2me_results.results
+            .join(mergebam_results.occ_bams, by: 0)
+            .map { joined ->
+                println "DEBUG: joined: ${joined}"
+                def sample_id = joined[0]
+                def modkit = joined[1]
+                def segs_bed = joined[2]
+                def bins_bed = joined[3]
+                def segs_vcf = joined[4]
+                def sv = joined[5]
+                def occ_bam = joined[6]
+                def occ_bai = joined[7]
 
-            assert bam.exists() : "BAM file not found: ${bam}"
-            assert bai.exists() : "BAI file not found: ${bai}"
-            assert bedmethyl.exists() : "Bedmethyl file not found: ${bedmethyl}"
+                def ref = file(params.reference_genome)
+                def ref_bai = file(params.reference_genome_bai)
+                def tr_bed = file(params.tr_bed_file)
 
-            tuple(
-                sample_id, 
-                bam, 
-                bai, 
-                ref, 
-                ref_bai, 
-                tr_bed, 
-                modkit, 
-                segs_bed, 
-                bins_bed, 
-                segs_vcf, 
-                sv
-            )
-        }
+                tuple(
+                    sample_id, 
+                    occ_bam, 
+                    occ_bai, 
+                    ref, 
+                    ref_bai, 
+                    tr_bed, 
+                    modkit, 
+                    segs_bed, 
+                    bins_bed, 
+                    segs_vcf, 
+                    sv
+                )
+            }
 
         // Step 4: Run analysis
         log.info "=== Starting Analysis Pipeline ==="
-        analysis(analysis_input)
+        def analysis_results = analysis(analysis_input)
+        
     } else {
         if (params.run_mode_mergebam) mergebam()
         if (params.run_mode_epi2me) epi2me(Channel.empty())
@@ -77,7 +99,7 @@ workflow.onComplete {
         """
     if (workflow.success) {
         log.info msg
-        if (params.run_mode_analysis == 'rmd') {
+        if (params.run_mode_analysis == 'rmd' || params.run_mode_order) {
             log.info "RMD report generated successfully"
         }
     } else {
