@@ -1,15 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-manifest {
-    name            = 'nWGS_pipeline'
-    author          = 'Vilhelm Magnus Laboratory'
-    homePage        = 'https://github.com/vilhelmmagnuslab/nWGS_pipeline'
-    description     = 'Nanopore Whole Genome Sequencing Pipeline for CNS samples including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.'
-    mainScript      = 'main.nf'
-    nextflowVersion = '>=23.04.2'
-    version         = '1.0.0'
-}
 
 // Include pipeline modules conditionally
 if (params.run_mode_mergebam || params.run_mode_order) {

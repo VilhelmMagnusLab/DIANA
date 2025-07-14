@@ -25,10 +25,10 @@ chmod +x setup_docker.sh
 ```
 
 This will:
-- ✅ Check Docker installation
-- 📁 Create necessary directories  
-- 🐳 Pull all required Docker images
-- 🚀 Create convenient run scripts
+- Check Docker installation
+- Create necessary directories  
+- Pull all required Docker images
+- Create convenient run scripts
 
 ### Run the Pipeline
 ```bash
@@ -132,12 +132,12 @@ The nWGS pipeline uses Docker containers hosted at [https://hub.docker.com/repos
 ```
 
 This automatically downloads all required containers:
-- ✅ Core analysis containers
-- ✅ Epi2me analysis containers  
-- ✅ Creates convenient run scripts
-- ✅ Sets up directory structure
+- Core analysis containers
+- Epi2me analysis containers  
+- Creates convenient run scripts
+- Sets up directory structure
 
-### 📦 **Available Docker Images**
+### **Available Docker Images**
 
 #### **Core Analysis Containers:**
 - `vilhelmmagnuslab/nwgs_default_images_latest` - General analysis tools
@@ -158,7 +158,7 @@ This automatically downloads all required containers:
 - `vilhelmmagnuslab/qdnaseq_amd64_latest` - Copy number variation analysis
 - `vilhelmmagnuslab/modkit_latest` - Modified base calling
 
-### 🔄 **Manual Container Management (Advanced)**
+### **Manual Container Management (Advanced)**
 
 If you prefer manual control, you can use either Docker or Singularity/Apptainer:
 
@@ -206,7 +206,7 @@ singularity pull --dir containers/ vilhelmmagnuslab/modkit_latest:latest
 
 **Note:** If using Singularity/Apptainer, you'll need to update the configuration files to use local `.sif` files instead of Docker images. See the "Legacy Singularity Support" section below.
 
-### 📋 **Container Verification**
+### **Container Verification**
 
 #### **Docker Verification:**
 ```bash
@@ -226,7 +226,7 @@ ls -la containers/*.sif
 singularity exec containers/nwgs_default_images_latest_latest.sif --help
 ```
 
-### 🔧 **Legacy Singularity Support**
+### **Legacy Singularity Support**
 
 If you need to use Singularity/Apptainer containers instead of Docker, follow these steps:
 
@@ -642,7 +642,7 @@ results/
     └── reports/
 ```
 
-## 🚀 Running the Pipeline
+## Running the Pipeline
 
 ### Quick Start (Docker - Recommended)
 
@@ -678,10 +678,10 @@ nextflow run main.nf -with-docker --run_mode_order --sample_id T001
 ```
 
 **What this does:**
-1. ✅ Runs mergebam pipeline
-2. ✅ Runs epi2me pipeline (all analyses)
-3. ✅ Runs analysis pipeline (all analyses)
-4. ✅ Generates comprehensive markdown report
+1. Runs mergebam pipeline
+2. Runs epi2me pipeline (all analyses)
+3. Runs analysis pipeline (all analyses)
+4. Generates comprehensive markdown report
 
 #### **2. Individual Module Execution**
 
@@ -715,7 +715,7 @@ nextflow run main.nf -with-docker --run_mode_order --sample_id T001
 ./run_pipeline.sh --run_mode_analysis rmd      # Markdown report only
 ```
 
-### 🎯 **Common Usage Examples**
+### **Common Usage Examples**
 
 #### **First-time Setup and Run:**
 ```bash
@@ -754,7 +754,7 @@ nextflow run main.nf -with-docker --run_mode_order --sample_id T001
 ./run_pipeline.sh --run_mode_epi2me cnv
 ```
 
-### 📋 **Run Mode Reference**
+### **Run Mode Reference**
 
 | Mode | Command | Description |
 |------|---------|-------------|
@@ -772,7 +772,7 @@ nextflow run main.nf -with-docker --run_mode_order --sample_id T001
 | **Analysis TERTP** | `--run_mode_analysis terp` | TERT promoter analysis only |
 | **Report Only** | `--run_mode_analysis rmd` | Generate markdown report only |
 
-### 🔧 **Advanced Usage**
+### **Advanced Usage**
 
 #### **Adding Nextflow Options:**
 ```bash
@@ -794,7 +794,7 @@ If you need to use a custom configuration file:
 nextflow run main.nf -c conf/my_custom.config -with-docker --run_mode_order --sample_id T001
 ```
 
-### 📊 **Output and Reports**
+### **Output and Reports**
 
 #### **Automatic Report Generation:**
 - **`--run_mode_order`**: Automatically generates comprehensive markdown report
@@ -820,7 +820,7 @@ nextflow run main.nf -c conf/my_custom.config -with-docker --run_mode_order --sa
 - Volume mounting is handled automatically for data access
 - Configuration files are automatically selected based on run mode
 
-### ❓ **Need Help?**
+### **Need Help?**
 
 If you encounter issues:
 1. Check the [DOCKER_SETUP.md](DOCKER_SETUP.md) troubleshooting section
