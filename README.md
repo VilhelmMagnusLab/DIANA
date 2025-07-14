@@ -10,15 +10,19 @@
 
 nWGS_pipeline is a comprehensive bioinformatics pipeline for analyzing Central Nervous System (CNS) samples using Oxford Nanopore sequencing data. The pipeline integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
 
-## 🐳 Quick Start with Docker (Recommended)
+## Quick Start
 
-The easiest way to run the nWGS pipeline is using Docker containers. All required images are hosted at [https://hub.docker.com/repositories/vilhelmmagnuslab](https://hub.docker.com/repositories/vilhelmmagnuslab).
+The nWGS pipeline supports both Docker and Singularity/Apptainer containers, making it suitable for different environments:
 
-### Prerequisites
+### 🐳 Docker Setup (Recommended for Desktop/Local)
+
+**Best for:** Desktop computers, local development, and environments where Docker is available.
+
+#### Prerequisites
 - Docker installed on your system
 - Nextflow (will be auto-installed if missing)
 
-### One-Command Setup
+#### One-Command Setup
 ```bash
 chmod +x setup_docker.sh
 ./setup_docker.sh
@@ -30,13 +34,40 @@ This will:
 - Pull all required Docker images
 - Create convenient run scripts
 
-### Run the Pipeline
+#### Run the Pipeline
 ```bash
 ./run_pipeline.sh
 ```
 
-### For More Details
-See [DOCKER_SETUP.md](DOCKER_SETUP.md) for comprehensive Docker setup instructions.
+### Singularity/Apptainer Setup (Recommended for HPC)
+
+**Best for:** HPC clusters, shared computing environments, and systems where Docker is not available.
+
+#### Prerequisites
+- Singularity or Apptainer installed on your system
+- Nextflow (will be auto-installed if missing)
+
+#### One-Command Setup
+```bash
+chmod +x setup_singularity.sh
+./setup_singularity.sh
+```
+
+This will:
+- Check Singularity/Apptainer installation
+- Create necessary directories  
+- Pull all required Singularity/Apptainer images
+- Create convenient run scripts
+
+#### Run the Pipeline
+```bash
+./run_pipeline_singularity.sh
+```
+
+### Detailed Setup Guides
+
+- **Docker Setup**: See [DOCKER_SETUP.md](DOCKER_SETUP.md) for comprehensive Docker setup instructions
+- **Singularity/Apptainer Setup**: See [SINGULARITY_SETUP.md](SINGULARITY_SETUP.md) for comprehensive Singularity/Apptainer setup instructions
 
 ## Pipeline Summary
 
@@ -94,22 +125,23 @@ The Epi2me pipeline has been significantly improved with enhanced error handling
 
 ## Required Containers
 
-The nWGS pipeline uses Docker containers hosted at [https://hub.docker.com/repositories/vilhelmmagnuslab](https://hub.docker.com/repositories/vilhelmmagnuslab). All containers are automatically downloaded during setup.
+The nWGS pipeline uses containers hosted at [https://hub.docker.com/repositories/vilhelmmagnuslab](https://hub.docker.com/repositories/vilhelmmagnuslab). All containers are automatically downloaded during setup.
 
-### 🐳 **Docker Setup (Recommended)**
+### **Docker Setup (Recommended for Desktop)**
 
 **One-command setup:**
 ```bash
 ./setup_docker.sh
 ```
 
-This automatically downloads all required containers:
-- Core analysis containers
-- Epi2me analysis containers  
-- Creates convenient run scripts
-- Sets up directory structure
+### **Singularity/Apptainer Setup (Recommended for HPC)**
 
-### **Available Docker Images**
+**One-command setup:**
+```bash
+./setup_singularity.sh
+```
+
+### **Available Container Images**
 
 #### **Core Analysis Containers:**
 - `vilhelmmagnuslab/nwgs_default_images` - General analysis tools
@@ -117,24 +149,35 @@ This automatically downloads all required containers:
 - `vilhelmmagnuslab/annotcnv_images_27feb1025` - CNV annotation
 - `hkubal/clairs-to` - Structural variant calling
 - `vilhelmmagnuslab/clair3_amd64` - Variant calling
-- `vilhelmmagnuslab/sturgeon_amd64_21jan_latest` - Methylation analysis
 - `vilhelmmagnuslab/igv_report_amd64` - IGV report generation
 - `vilhelmmagnuslab/vcf2circos` - Circos visualization
 - `vilhelmmagnuslab/nanodx_images_3feb25` - NanoDx classification
 - `vilhelmmagnuslab/markdown_images_28feb2025` - Report generation
 - `vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni` - Quality assessment
-- `vilhelmmagnuslab/gviz_amd64_latest` - Genomic visualization
+- `vilhelmmagnuslab/gviz_amd64` - Genomic visualization
 
 #### **Epi2me Analysis Containers:**
 - `vilhelmmagnuslab/snifflesv252_update_latest` - Structural variant calling
 - `vilhelmmagnuslab/qdnaseq_amd64_latest` - Copy number variation analysis
 - `vilhelmmagnuslab/modkit_latest` - Modified base calling
 
+### **Container System Comparison**
+
+| Feature | Docker | Singularity/Apptainer |
+|---------|--------|----------------------|
+| **Best for** | Desktop/Local | HPC/Shared systems |
+| **Installation** | Easy | Moderate |
+| **Permissions** | Requires sudo/admin | User-level |
+| **Performance** | Good | Excellent |
+| **HPC Support** | Limited | Native |
+| **Setup Script** | `setup_docker.sh` | `setup_singularity.sh` |
+| **Run Script** | `run_pipeline.sh` | `run_pipeline_singularity.sh` |
+
 ### **Manual Container Management (Advanced)**
 
 If you prefer manual control, you can use either Docker or Singularity/Apptainer:
 
-#### **Option 1: Docker (Recommended)**
+#### **Option 1: Docker (Desktop)**
 
 ```bash
 # Pull all containers manually
@@ -143,19 +186,18 @@ docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 docker pull hkubal/clairs-to:latest
 docker pull vilhelmmagnuslab/clair3_amd64:latest
-docker pull vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
 docker pull vilhelmmagnuslab/igv_report_amd64:latest
 docker pull vilhelmmagnuslab/vcf2circos:latest
 docker pull vilhelmmagnuslab/nanodx_images_3feb25:latest
 docker pull vilhelmmagnuslab/markdown_images_28feb2025:latest
 docker pull vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-docker pull vilhelmmagnuslab/gviz_amd64_latest:latest
+docker pull vilhelmmagnuslab/gviz_amd64:latest
 docker pull vilhelmmagnuslab/snifflesv252_update_latest:latest
 docker pull vilhelmmagnuslab/qdnaseq_amd64_latest:latest
 docker pull vilhelmmagnuslab/modkit_latest:latest
 ```
 
-#### **Option 2: Singularity/Apptainer**
+#### **Option 2: Singularity/Apptainer (HPC)**
 
 ```bash
 # Pull containers using Singularity/Apptainer
@@ -164,13 +206,12 @@ singularity pull --dir containers/ vilhelmmagnuslab/ace_1.24.0:latest
 singularity pull --dir containers/ vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 singularity pull --dir containers/ hkubal/clairs-to:latest
 singularity pull --dir containers/ vilhelmmagnuslab/clair3_amd64:latest
-singularity pull --dir containers/ vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
 singularity pull --dir containers/ vilhelmmagnuslab/igv_report_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/vcf2circos:latest
 singularity pull --dir containers/ vilhelmmagnuslab/nanodx_images_3feb25:latest
 singularity pull --dir containers/ vilhelmmagnuslab/markdown_images_28feb2025:latest
 singularity pull --dir containers/ vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-singularity pull --dir containers/ vilhelmmagnuslab/gviz_amd64_latest:latest
+singularity pull --dir containers/ vilhelmmagnuslab/gviz_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/snifflesv252_update_latest:latest
 singularity pull --dir containers/ vilhelmmagnuslab/qdnaseq_amd64_latest:latest
 singularity pull --dir containers/ vilhelmmagnuslab/modkit_latest:latest
@@ -213,13 +254,12 @@ singularity pull --dir containers/ vilhelmmagnuslab/ace_1.24.0:latest
 singularity pull --dir containers/ vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 singularity pull --dir containers/ hkubal/clairs-to:latest
 singularity pull --dir containers/ vilhelmmagnuslab/clair3_amd64:latest
-singularity pull --dir containers/ vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
 singularity pull --dir containers/ vilhelmmagnuslab/igv_report_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/vcf2circos:latest
 singularity pull --dir containers/ vilhelmmagnuslab/nanodx_images_3feb25:latest
 singularity pull --dir containers/ vilhelmmagnuslab/markdown_images_28feb2025:latest
 singularity pull --dir containers/ vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-singularity pull --dir containers/ vilhelmmagnuslab/gviz_amd64_latest:latest
+singularity pull --dir containers/ vilhelmmagnuslab/gviz_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/snifflesv252_update_latest:latest
 singularity pull --dir containers/ vilhelmmagnuslab/qdnaseq_amd64_latest:latest
 singularity pull --dir containers/ vilhelmmagnuslab/modkit_latest:latest
@@ -347,9 +387,9 @@ These files are essential for:
 
 ### Prerequisites
 
-1. **Docker**: Install Docker on your system
-   - [Docker Desktop](https://docs.docker.com/desktop/) (Windows/Mac)
-   - [Docker Engine](https://docs.docker.com/engine/install/) (Linux)
+1. **Choose your container system:**
+   - **Docker**: [Docker Desktop](https://docs.docker.com/desktop/) (Windows/Mac) or [Docker Engine](https://docs.docker.com/engine/install/) (Linux)
+   - **Singularity/Apptainer**: [Apptainer](https://apptainer.org/docs/admin/main/installation.html) (recommended) or [Singularity](https://sylabs.io/guides/latest/admin-guide/installation.html)
 
 2. **Nextflow**: Will be automatically installed by the setup script
 
@@ -360,9 +400,15 @@ These files are essential for:
 git clone https://github.com/VilhelmMagnusLab/nWGS_pipeline.git
 cd nWGS_pipeline
 
-# 2. Run the Docker setup script
+# 2. Choose your setup method:
+
+# For Docker (Desktop/Local):
 chmod +x setup_docker.sh
 ./setup_docker.sh
+
+# OR for Singularity/Apptainer (HPC):
+chmod +x setup_singularity.sh
+./setup_singularity.sh
 
 # 3. Configure your data paths
 # Edit conf/analysis.config and update the 'path' parameter
@@ -371,7 +417,12 @@ chmod +x setup_docker.sh
 # Place your input data in data/testdata/
 
 # 5. Run the pipeline (config file is auto-detected!)
+
+# For Docker:
 ./run_pipeline.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
+
+# OR for Singularity/Apptainer:
+./run_pipeline_singularity.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
 ```
 
 ### Alternative: Manual Setup
@@ -382,15 +433,26 @@ If you prefer manual setup:
 # Install Nextflow
 curl -s https://get.nextflow.io | bash
 
-# Pull Docker images manually
+# Pull containers manually (choose one):
+
+# Docker:
 docker pull vilhelmmagnuslab/nwgs_default_images:latest
 # ... (pull other images as needed)
 
+# OR Singularity/Apptainer:
+singularity pull --dir containers/ vilhelmmagnuslab/nwgs_default_images:latest
+# ... (pull other images as needed)
+
 # Run with Nextflow directly (config auto-detected)
+
+# Docker:
 nextflow run main.nf -with-docker --run_mode_order --sample_id T001
+
+# OR Singularity/Apptainer:
+nextflow run main.nf -with-singularity --run_mode_order --sample_id T001
 ```
 
-For detailed setup instructions, see [DOCKER_SETUP.md](DOCKER_SETUP.md).
+For detailed setup instructions, see [DOCKER_SETUP.md](DOCKER_SETUP.md) or [SINGULARITY_SETUP.md](SINGULARITY_SETUP.md).
 
 ## Configuration
 
@@ -616,7 +678,7 @@ results/
 
 ## Running the Pipeline
 
-### Quick Start (Docker - Recommended)
+### Quick Start (Docker - Recommended for Desktop)
 
 After running the setup script (`./setup_docker.sh`), you can run the pipeline using the convenient wrapper script:
 
@@ -632,11 +694,27 @@ After running the setup script (`./setup_docker.sh`), you can run the pipeline u
 ./run_pipeline.sh --run_mode_analysis all
 ```
 
-**Note:** The script automatically detects the appropriate configuration file based on your run mode - no need to specify config files manually!
+### Quick Start (Singularity/Apptainer - Recommended for HPC)
+
+After running the setup script (`./setup_singularity.sh`), you can run the pipeline using the convenient wrapper script:
+
+```bash
+# Basic run with default configuration
+./run_pipeline_singularity.sh
+
+# Run complete pipeline
+./run_pipeline_singularity.sh --run_mode_order --sample_id T001
+
+# Run specific modules
+./run_pipeline_singularity.sh --run_mode_epi2me all
+./run_pipeline_singularity.sh --run_mode_analysis all
+```
+
+**Note:** Both scripts automatically detect the appropriate configuration file based on your run mode - no need to specify config files manually!
 
 ### Pipeline Modes
 
-The nWGS pipeline supports multiple run modes that can be executed using the Docker setup:
+The nWGS pipeline supports multiple run modes that can be executed using either Docker or Singularity/Apptainer:
 
 #### **1. Complete Sequential Pipeline (Recommended)**
 Runs the entire workflow from start to finish automatically:
@@ -644,9 +722,13 @@ Runs the entire workflow from start to finish automatically:
 ```bash
 # Using the wrapper script (recommended)
 ./run_pipeline.sh --run_mode_order --sample_id T001
+# OR
+./run_pipeline_singularity.sh --run_mode_order --sample_id T001
 
 # Or directly with Nextflow
 nextflow run main.nf -with-docker --run_mode_order --sample_id T001
+# OR
+nextflow run main.nf -with-singularity --run_mode_order --sample_id T001
 ```
 
 **What this does:**
@@ -660,12 +742,16 @@ nextflow run main.nf -with-docker --run_mode_order --sample_id T001
 **Mergebam Pipeline Only:**
 ```bash
 ./run_pipeline.sh --run_mode_mergebam
+# OR
+./run_pipeline_singularity.sh --run_mode_mergebam
 ```
 
 **Epi2me Pipeline Only:**
 ```bash
 # Run all Epi2me analyses
 ./run_pipeline.sh --run_mode_epi2me all
+# OR
+./run_pipeline_singularity.sh --run_mode_epi2me all
 
 # Run specific Epi2me analyses
 ./run_pipeline.sh --run_mode_epi2me modkit  # Modified base calling only
@@ -677,6 +763,8 @@ nextflow run main.nf -with-docker --run_mode_order --sample_id T001
 ```bash
 # Run all analyses (includes markdown report)
 ./run_pipeline.sh --run_mode_analysis all
+# OR
+./run_pipeline_singularity.sh --run_mode_analysis all
 
 # Run specific analyses
 ./run_pipeline.sh --run_mode_analysis occ      # OCC analysis only
@@ -691,39 +779,53 @@ nextflow run main.nf -with-docker --run_mode_order --sample_id T001
 
 #### **First-time Setup and Run:**
 ```bash
-# 1. Setup Docker environment
-./setup_docker.sh
+# 1. Setup container environment (choose one):
+./setup_docker.sh          # For Docker
+# OR
+./setup_singularity.sh     # For Singularity/Apptainer
 
 # 2. Configure your data paths in conf/analysis.config
 # 3. Place your reference files in data/reference/
 # 4. Place your input data in data/testdata/
 
-# 5. Run complete analysis
-./run_pipeline.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
+# 5. Run complete analysis (choose one):
+./run_pipeline.sh --run_mode_order --sample_id YOUR_SAMPLE_ID          # Docker
+# OR
+./run_pipeline_singularity.sh --run_mode_order --sample_id YOUR_SAMPLE_ID  # Singularity/Apptainer
 ```
 
 #### **Testing the Setup:**
 ```bash
 # Run a quick test to verify everything works
-./test_pipeline.sh
+./test_pipeline.sh          # Docker
+# OR
+./test_pipeline_singularity.sh  # Singularity/Apptainer
 ```
 
 #### **Running with Resume:**
 ```bash
 # Resume a previous run
-./run_pipeline.sh --run_mode_order --sample_id T001 -resume
+./run_pipeline.sh --run_mode_order --sample_id T001 -resume          # Docker
+# OR
+./run_pipeline_singularity.sh --run_mode_order --sample_id T001 -resume  # Singularity/Apptainer
 ```
 
 #### **Running Specific Analyses:**
 ```bash
 # Only methylation analysis
-./run_pipeline.sh --run_mode_analysis mgmt
+./run_pipeline.sh --run_mode_analysis mgmt          # Docker
+# OR
+./run_pipeline_singularity.sh --run_mode_analysis mgmt  # Singularity/Apptainer
 
 # Only structural variant calling
-./run_pipeline.sh --run_mode_epi2me sv
+./run_pipeline.sh --run_mode_epi2me sv          # Docker
+# OR
+./run_pipeline_singularity.sh --run_mode_epi2me sv  # Singularity/Apptainer
 
 # Only copy number analysis
-./run_pipeline.sh --run_mode_epi2me cnv
+./run_pipeline.sh --run_mode_epi2me cnv          # Docker
+# OR
+./run_pipeline_singularity.sh --run_mode_epi2me cnv  # Singularity/Apptainer
 ```
 
 ### **Run Mode Reference**
@@ -749,13 +851,19 @@ nextflow run main.nf -with-docker --run_mode_order --sample_id T001
 #### **Adding Nextflow Options:**
 ```bash
 # Run with specific profile
-./run_pipeline.sh --run_mode_order --sample_id T001 -profile test
+./run_pipeline.sh --run_mode_order --sample_id T001 -profile test          # Docker
+# OR
+./run_pipeline_singularity.sh --run_mode_order --sample_id T001 -profile test  # Singularity/Apptainer
 
 # Run with resume capability
-./run_pipeline.sh --run_mode_order --sample_id T001 -resume
+./run_pipeline.sh --run_mode_order --sample_id T001 -resume          # Docker
+# OR
+./run_pipeline_singularity.sh --run_mode_order --sample_id T001 -resume  # Singularity/Apptainer
 
 # Run with specific executor
-./run_pipeline.sh --run_mode_order --sample_id T001 -executor slurm
+./run_pipeline.sh --run_mode_order --sample_id T001 -executor slurm          # Docker
+# OR
+./run_pipeline_singularity.sh --run_mode_order --sample_id T001 -executor slurm  # Singularity/Apptainer
 ```
 
 #### **Custom Configuration (Advanced):**
@@ -764,6 +872,8 @@ If you need to use a custom configuration file:
 ```bash
 # Direct Nextflow usage with custom config
 nextflow run main.nf -c conf/my_custom.config -with-docker --run_mode_order --sample_id T001
+# OR
+nextflow run main.nf -c conf/my_custom.config -with-singularity --run_mode_order --sample_id T001
 ```
 
 ### **Output and Reports**
@@ -792,13 +902,27 @@ nextflow run main.nf -c conf/my_custom.config -with-docker --run_mode_order --sa
 - Volume mounting is handled automatically for data access
 - Configuration files are automatically selected based on run mode
 
+### 📦 **Singularity/Apptainer-Specific Notes**
+
+- All containers are automatically pulled from Docker Hub and converted to Singularity format
+- Images are stored locally in `containers/` directory
+- No need for Docker daemon or root privileges
+- Perfect for HPC environments and shared computing systems
+- Configuration files are automatically selected based on run mode
+
 ### **Need Help?**
 
 If you encounter issues:
-1. Check the [DOCKER_SETUP.md](DOCKER_SETUP.md) troubleshooting section
-2. Verify Docker is running: `docker info`
-3. Check available images: `docker images | grep vilhelmmagnuslab`
-4. Run the test script: `./test_pipeline.sh`
+1. Check the [DOCKER_SETUP.md](DOCKER_SETUP.md) or [SINGULARITY_SETUP.md](SINGULARITY_SETUP.md) troubleshooting sections
+2. Verify container system is running:
+   - Docker: `docker info`
+   - Singularity/Apptainer: `singularity --version` or `apptainer --version`
+3. Check available images:
+   - Docker: `docker images | grep vilhelmmagnuslab`
+   - Singularity/Apptainer: `ls -la containers/*.sif`
+4. Run the test script:
+   - Docker: `./test_pipeline.sh`
+   - Singularity/Apptainer: `./test_pipeline_singularity.sh`
 
 ### ACE Tumor Content Calculation
 
