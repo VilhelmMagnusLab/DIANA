@@ -120,7 +120,7 @@ This automatically downloads all required containers:
 - `vilhelmmagnuslab/sturgeon_amd64_21jan_latest` - Methylation analysis
 - `vilhelmmagnuslab/igv_report_amd64` - IGV report generation
 - `vilhelmmagnuslab/vcf2circos` - Circos visualization
-- `vilhelmmagnuslab/nanodx_env` - NanoDx classification
+- `vilhelmmagnuslab/nanodx_images_3feb25` - NanoDx classification
 - `vilhelmmagnuslab/markdown_images_28feb2025` - Report generation
 - `vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni` - Quality assessment
 - `vilhelmmagnuslab/gviz_amd64_latest` - Genomic visualization
@@ -146,7 +146,7 @@ docker pull vilhelmmagnuslab/clair3_amd64:latest
 docker pull vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
 docker pull vilhelmmagnuslab/igv_report_amd64:latest
 docker pull vilhelmmagnuslab/vcf2circos:latest
-docker pull vilhelmmagnuslab/nanodx_env:latest
+docker pull vilhelmmagnuslab/nanodx_images_3feb25:latest
 docker pull vilhelmmagnuslab/markdown_images_28feb2025:latest
 docker pull vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
 docker pull vilhelmmagnuslab/gviz_amd64_latest:latest
@@ -167,7 +167,7 @@ singularity pull --dir containers/ vilhelmmagnuslab/clair3_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
 singularity pull --dir containers/ vilhelmmagnuslab/igv_report_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/vcf2circos:latest
-singularity pull --dir containers/ vilhelmmagnuslab/nanodx_env:latest
+singularity pull --dir containers/ vilhelmmagnuslab/nanodx_images_3feb25:latest
 singularity pull --dir containers/ vilhelmmagnuslab/markdown_images_28feb2025:latest
 singularity pull --dir containers/ vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
 singularity pull --dir containers/ vilhelmmagnuslab/gviz_amd64_latest:latest
@@ -216,7 +216,7 @@ singularity pull --dir containers/ vilhelmmagnuslab/clair3_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
 singularity pull --dir containers/ vilhelmmagnuslab/igv_report_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/vcf2circos:latest
-singularity pull --dir containers/ vilhelmmagnuslab/nanodx_env:latest
+singularity pull --dir containers/ vilhelmmagnuslab/nanodx_images_3feb25:latest
 singularity pull --dir containers/ vilhelmmagnuslab/markdown_images_28feb2025:latest
 singularity pull --dir containers/ vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
 singularity pull --dir containers/ vilhelmmagnuslab/gviz_amd64_latest:latest
