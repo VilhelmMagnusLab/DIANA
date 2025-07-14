@@ -10,30 +10,6 @@
 
 nWGS_pipeline is a comprehensive bioinformatics pipeline for analyzing Central Nervous System (CNS) samples using Oxford Nanopore sequencing data. The pipeline integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
 
-## Recent Updates (Latest Version)
-
-### 🔧 **Key Improvements in Latest Release**
-
-1. **Fixed Markdown Report Generation in Sequential Mode**
-   - **Issue**: `--run_mode_order` was not automatically generating markdown reports
-   - **Fix**: Updated analysis module to properly trigger RMD generation when running in sequential mode
-   - **Result**: Now `--run_mode_order` automatically includes comprehensive markdown report generation
-
-2. **Enhanced File Path Handling**
-   - **Issue**: Filename mismatches between epi2me output and analysis input
-   - **Fix**: Standardized file naming conventions across modules
-   - **Result**: Improved compatibility between pipeline modules
-
-3. **Improved Error Handling and Validation**
-   - Enhanced input file validation
-   - Better error messages for troubleshooting
-   - Graceful handling of missing files and resources
-
-4. **Memory and Resource Optimization**
-   - Reduced memory allocations to fit available system resources
-   - Optimized container configurations
-   - Better process resource management
-
 ## Pipeline Summary
 
 The pipeline consists of three main modules that can be run independently or sequentially:
