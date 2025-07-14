@@ -49,7 +49,7 @@ If you prefer manual setup:
 
 ```bash
 # Core analysis images
-docker pull vilhelmmagnuslab/nwgs_default_images_latest:latest
+docker pull vilhelmmagnuslab/nwgs_default_images:latest
 docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 docker pull hkubal/clairs-to:latest
@@ -101,7 +101,7 @@ docker {
 
 | Process | Docker Image | Description |
 |---------|-------------|-------------|
-| Default | `vilhelmmagnuslab/nwgs_default_images_latest` | General analysis tools |
+| Default | `vilhelmmagnuslab/nwgs_default_images` | General analysis tools |
 | ACE TMC | `vilhelmmagnuslab/ace_1.24.0` | ACE copy number analysis |
 | AnnotateCNV | `vilhelmmagnuslab/annotcnv_images_27feb1025` | CNV annotation |
 | ClairS-TO | `hkubal/clairs-to` | Structural variant calling |
@@ -178,7 +178,7 @@ nWGS_pipeline/
 
 - Check Docker logs: `docker logs <container_id>`
 - Verify image availability: `docker images | grep vilhelmmagnuslab`
-- Test individual containers: `docker run --rm vilhelmmagnuslab/nwgs_default_images_latest:latest --help`
+- Test individual containers: `docker run --rm vilhelmmagnuslab/nwgs_default_images:latest --help`
 
 ## 🚀 Performance Tips
 

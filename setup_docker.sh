@@ -36,7 +36,7 @@ echo "🐳 Pulling Docker images from vilhelmmagnuslab repository..."
 echo "   This may take several minutes on first run..."
 
 # Core analysis images
-docker pull vilhelmmagnuslab/nwgs_default_images_latest:latest
+docker pull vilhelmmagnuslab/nwgs_default_images:latest
 docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 docker pull hkubal/clairs-to:latest
