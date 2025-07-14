@@ -112,7 +112,7 @@ This automatically downloads all required containers:
 ### **Available Docker Images**
 
 #### **Core Analysis Containers:**
-- `vilhelmmagnuslab/nwgs_default_images_latest` - General analysis tools
+- `vilhelmmagnuslab/nwgs_default_images` - General analysis tools
 - `vilhelmmagnuslab/ace_1.24.0` - ACE copy number analysis
 - `vilhelmmagnuslab/annotcnv_images_27feb1025` - CNV annotation
 - `hkubal/clairs-to` - Structural variant calling
@@ -138,7 +138,7 @@ If you prefer manual control, you can use either Docker or Singularity/Apptainer
 
 ```bash
 # Pull all containers manually
-docker pull vilhelmmagnuslab/nwgs_default_images_latest:latest
+docker pull vilhelmmagnuslab/nwgs_default_images:latest
 docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 docker pull hkubal/clairs-to:latest
@@ -159,7 +159,7 @@ docker pull vilhelmmagnuslab/modkit_latest:latest
 
 ```bash
 # Pull containers using Singularity/Apptainer
-singularity pull --dir containers/ vilhelmmagnuslab/nwgs_default_images_latest:latest
+singularity pull --dir containers/ vilhelmmagnuslab/nwgs_default_images:latest
 singularity pull --dir containers/ vilhelmmagnuslab/ace_1.24.0:latest
 singularity pull --dir containers/ vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 singularity pull --dir containers/ hkubal/clairs-to:latest
@@ -186,7 +186,7 @@ singularity pull --dir containers/ vilhelmmagnuslab/modkit_latest:latest
 docker images | grep vilhelmmagnuslab
 
 # Test a specific container
-docker run --rm vilhelmmagnuslab/nwgs_default_images_latest:latest --help
+docker run --rm vilhelmmagnuslab/nwgs_default_images:latest --help
 ```
 
 #### **Singularity/Apptainer Verification:**
@@ -195,7 +195,7 @@ docker run --rm vilhelmmagnuslab/nwgs_default_images_latest:latest --help
 ls -la containers/*.sif
 
 # Test a specific container
-singularity exec containers/nwgs_default_images_latest_latest.sif --help
+singularity exec containers/nwgs_default_images_latest.sif --help
 ```
 
 ### **Legacy Singularity Support**
@@ -208,7 +208,7 @@ If you need to use Singularity/Apptainer containers instead of Docker, follow th
 mkdir -p containers/
 
 # Pull all required images
-singularity pull --dir containers/ vilhelmmagnuslab/nwgs_default_images_latest:latest
+singularity pull --dir containers/ vilhelmmagnuslab/nwgs_default_images:latest
 singularity pull --dir containers/ vilhelmmagnuslab/ace_1.24.0:latest
 singularity pull --dir containers/ vilhelmmagnuslab/annotcnv_images_27feb1025:latest
 singularity pull --dir containers/ hkubal/clairs-to:latest
@@ -231,7 +231,7 @@ singularity pull --dir containers/ vilhelmmagnuslab/modkit_latest:latest
 ```groovy
 process {
     // Change from Docker to Singularity
-    container = '/path/to/containers/nwgs_default_images_latest_latest.sif'
+    container = '/path/to/containers/nwgs_default_images_latest.sif'
     
     withName: 'ace_tmc' {
         container = '/path/to/containers/ace_1.24.0_latest.sif'
@@ -282,7 +282,7 @@ chmod +x run_pipeline_singularity.sh
 ls -la containers/*.sif
 
 # Test individual containers
-singularity exec containers/nwgs_default_images_latest_latest.sif --help
+singularity exec containers/nwgs_default_images_latest.sif --help
 ```
 
 **Note:** Docker is recommended for easier setup and maintenance, but Singularity/Apptainer is fully supported for HPC environments or when Docker is not available.
@@ -383,7 +383,7 @@ If you prefer manual setup:
 curl -s https://get.nextflow.io | bash
 
 # Pull Docker images manually
-docker pull vilhelmmagnuslab/nwgs_default_images_latest:latest
+docker pull vilhelmmagnuslab/nwgs_default_images:latest
 # ... (pull other images as needed)
 
 # Run with Nextflow directly (config auto-detected)
