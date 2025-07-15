@@ -146,7 +146,7 @@ sample_id2   flowcell_id2
 - **Gencode annotation**: [Gencode v48](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_48/gencode.v48.annotation.gff3.gz)
 - **Cosmic annotations**: [ANNOVAR Cosmic](https://annovar.openbioinformatics.org/en/latest/user-guide/filter/#cosmic-annotations)
 
-- **Other datasets** such as `hg38_refGene.txt`, `hg38_clinvar_20240611.txt`, `hg38_cosmic100coding2024.txt` and others can be found in [figshare](https://doi.org/10.6084/m9.figshare.29569931)
+- **Other datasets** such as `hg38_refGene.txt`, `hg38_clinvar_20240611.txt`, `hg38_cosmic100coding2024.txt` and others can be found in [Zenodo](https://doi.org/10.5281/zenodo.15916972)
 
 ## NanoDx Model Setup
 
