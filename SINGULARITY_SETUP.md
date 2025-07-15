@@ -50,7 +50,7 @@ mkdir -p containers/
 singularity pull --dir containers/ vilhelmmagnuslab/nwgs_default_images:latest
 singularity pull --dir containers/ vilhelmmagnuslab/ace_1.24.0:latest
 singularity pull --dir containers/ vilhelmmagnuslab/annotcnv_images_27feb1025:latest
-singularity pull --dir containers/ hkubal/clairs-to:latest
+singularity pull --dir containers/ vilhelmmagnuslab/clair3_amd64
 singularity pull --dir containers/ vilhelmmagnuslab/clair3_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/igv_report_amd64:latest
 singularity pull --dir containers/ vilhelmmagnuslab/vcf2circos:latest
@@ -60,9 +60,9 @@ singularity pull --dir containers/ vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb202
 singularity pull --dir containers/ vilhelmmagnuslab/gviz_amd64:latest
 
 # Epi2me images
-singularity pull --dir containers/ vilhelmmagnuslab/snifflesv252_update_latest:latest
-singularity pull --dir containers/ vilhelmmagnuslab/qdnaseq_amd64_latest:latest
-singularity pull --dir containers/ vilhelmmagnuslab/modkit_latest:latest
+singularity pull --dir containers/ vilhelmmagnuslab/snifflesv252_update:latest
+singularity pull --dir containers/ vilhelmmagnuslab/qdnaseq_amd64:latest
+singularity pull --dir containers/ vilhelmmagnuslab/modkit:latest
 ```
 
 ### 2. Create Directory Structure
@@ -214,7 +214,7 @@ If you need to switch between Docker and Singularity/Apptainer:
 ```bash
 # Use Docker setup
 ./setup_docker.sh
-./run_pipeline.sh
+./run_pipeline_docker.sh
 ```
 
 Both setups are compatible and use the same configuration files.

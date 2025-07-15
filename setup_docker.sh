@@ -39,7 +39,6 @@ echo "   This may take several minutes on first run..."
 docker pull vilhelmmagnuslab/nwgs_default_images:latest
 docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
-docker pull hkubal/clairs-to:latest
 docker pull vilhelmmagnuslab/clair3_amd64:latest
 docker pull vilhelmmagnuslab/igv_report_amd64:latest
 docker pull vilhelmmagnuslab/vcf2circos:latest
@@ -56,11 +55,11 @@ docker pull vilhelmmagnuslab/modkit_latest:latest
 echo " All Docker images pulled successfully"
 
 # Create a simple run script
-cat > run_pipeline.sh << 'EOF'
+cat > run_pipeline_docker.sh << 'EOF'
 #!/bin/bash
 
-# nWGS Pipeline Runner Script
-# Usage: ./run_pipeline.sh [run_mode] [other_nextflow_options]
+# nWGS Pipeline Runner Script for Docker
+# Usage: ./run_pipeline_docker.sh [run_mode] [other_nextflow_options]
 
 set -e
 
@@ -98,18 +97,18 @@ nextflow run main.nf \
 echo "Pipeline completed successfully!"
 EOF
 
-chmod +x run_pipeline.sh
+chmod +x run_pipeline_docker.sh
 
 # Create a quick test script
-cat > test_pipeline.sh << 'EOF'
+cat > test_pipeline_docker.sh << 'EOF'
 #!/bin/bash
 
-# Quick test script for the nWGS pipeline
+# Quick test script for the nWGS pipeline (Docker)
 # This will run a minimal test to verify everything is working
 
 set -e
 
-echo "🧪 Running quick pipeline test..."
+echo "🧪 Running quick pipeline test with Docker..."
 
 # Create a minimal test sample file
 mkdir -p data/testdata
@@ -117,16 +116,16 @@ echo "test_sample" > data/testdata/sample_ids.txt
 
 # Run with test profile (if available)
 if [ -f "conf/test.config" ]; then
-    ./run_pipeline.sh conf/test.config -profile test
+    ./run_pipeline_docker.sh conf/test.config -profile test
 else
     echo " No test configuration found. Running with default config..."
-    ./run_pipeline.sh conf/analysis.config -profile test
+    ./run_pipeline_docker.sh conf/analysis.config -profile test
 fi
 
 echo " Test completed!"
 EOF
 
-chmod +x test_pipeline.sh
+chmod +x test_pipeline_docker.sh
 
 echo ""
 echo "=========================================="
@@ -137,8 +136,8 @@ echo "Next steps:"
 echo "1. Place your reference files in: data/reference/"
 echo "2. Place your input data in: data/testdata/"
 echo "3. Update the configuration in: conf/analysis.config"
-echo "4. Run the pipeline with: ./run_pipeline.sh"
-echo "5. Test the setup with: ./test_pipeline.sh"
+echo "4. Run the pipeline with: ./run_pipeline_docker.sh"
+echo "5. Test the setup with: ./test_pipeline_docker.sh"
 echo ""
 echo "For more information, see the README.md file."
 echo ""

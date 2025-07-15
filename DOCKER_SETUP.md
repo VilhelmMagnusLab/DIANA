@@ -32,13 +32,13 @@ This script will:
 After setup, simply run:
 
 ```bash
-./run_pipeline.sh
+./run_pipeline_docker.sh
 ```
 
 Or with custom configuration:
 
 ```bash
-./run_pipeline.sh conf/analysis.config -profile your_profile
+./run_pipeline_docker.sh conf/analysis.config -profile your_profile
 ```
 
 ## 📋 Manual Setup (Alternative)
@@ -52,7 +52,6 @@ If you prefer manual setup:
 docker pull vilhelmmagnuslab/nwgs_default_images:latest
 docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
-docker pull hkubal/clairs-to:latest
 docker pull vilhelmmagnuslab/clair3_amd64:latest
 docker pull vilhelmmagnuslab/igv_report_amd64:latest
 docker pull vilhelmmagnuslab/vcf2circos:latest
@@ -103,7 +102,7 @@ docker {
 | Default | `vilhelmmagnuslab/nwgs_default_images` | General analysis tools |
 | ACE TMC | `vilhelmmagnuslab/ace_1.24.0` | ACE copy number analysis |
 | AnnotateCNV | `vilhelmmagnuslab/annotcnv_images_27feb1025` | CNV annotation |
-| ClairS-TO | `hkubal/clairs-to` | Structural variant calling |
+| ClairS-TO | `vilhelmmagnuslab/clair3_amd64` | Structural variant calling |
 | Clair3 | `vilhelmmagnuslab/clair3_amd64` | Variant calling |
 | IGV Tools | `vilhelmmagnuslab/igv_report_amd64` | IGV report generation |
 | Circos Plot | `vilhelmmagnuslab/vcf2circos` | Circos visualization |
@@ -140,8 +139,8 @@ nWGS_pipeline/
 │   ├── testdata/           # Input data
 │   └── results/            # Output results
 ├── setup_docker.sh         # Automated setup script
-├── run_pipeline.sh         # Pipeline runner script
-├── test_pipeline.sh        # Test script
+├── run_pipeline_docker.sh    # Pipeline runner script (Docker)
+├── test_pipeline_docker.sh   # Test script (Docker)
 └── DOCKER_SETUP.md         # This guide
 ```
 

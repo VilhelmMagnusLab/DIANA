@@ -21,7 +21,7 @@ elif command -v singularity &> /dev/null; then
     CONTAINER_SYSTEM="singularity"
     echo "Container System: Singularity"
 else
-    echo "❌ No container system found"
+    echo " No container system found"
     exit 1
 fi
 
@@ -29,7 +29,7 @@ fi
 if command -v nextflow &> /dev/null; then
     echo "✓ Nextflow: $(nextflow --version | head -n1)"
 else
-    echo "❌ Nextflow not found"
+    echo " Nextflow not found"
     exit 1
 fi
 
@@ -40,7 +40,7 @@ for config in conf/analysis.config conf/epi2me.config conf/mergebam.config; do
     if [ -f "$config" ]; then
         echo "  ✓ $(basename $config)"
     else
-        echo "  ❌ $(basename $config) missing"
+        echo " $(basename $config) missing"
     fi
 done
 
@@ -62,39 +62,37 @@ for dir in data/reference data/humandb data/testdata data/results; do
     if [ -d "$dir" ]; then
         echo "  ✓ $dir"
     else
-        echo "  ⚠️  $dir (will be created when needed)"
+        echo "  $dir (will be created when needed)"
     fi
 done
 
-# Check run scripts
-echo ""
-echo "Run Scripts:"
-if [ -f "run_pipeline.sh" ]; then
-    echo "  ✓ run_pipeline.sh"
+# Check for run scripts
+if [ -f "run_pipeline_docker.sh" ]; then
+    echo "  ✓ run_pipeline_docker.sh"
 else
-    echo "  ❌ run_pipeline.sh missing"
+    echo "  run_pipeline_docker.sh missing"
 fi
 
 if [ -f "run_pipeline_singularity.sh" ]; then
     echo "  ✓ run_pipeline_singularity.sh"
 else
-    echo "  ❌ run_pipeline_singularity.sh missing"
+    echo "  run_pipeline_singularity.sh missing"
 fi
 
-# Quick functionality test
+# Test run script functionality
 echo ""
-echo "Functionality Test:"
-if [ "$CONTAINER_SYSTEM" = "docker" ]; then
-    if ./run_pipeline.sh --help &> /dev/null; then
-        echo "  ✓ Docker pipeline script works"
-    else
-        echo "  ❌ Docker pipeline script failed"
-    fi
-elif [ "$CONTAINER_SYSTEM" = "apptainer" ] || [ "$CONTAINER_SYSTEM" = "singularity" ]; then
+echo "Testing run script functionality..."
+if ./run_pipeline_docker.sh --help &> /dev/null; then
+    echo "  ✓ Docker pipeline script works"
+else
+    echo "  Docker pipeline script failed"
+fi
+
+if [ "$CONTAINER_SYSTEM" = "apptainer" ] || [ "$CONTAINER_SYSTEM" = "singularity" ]; then
     if ./run_pipeline_singularity.sh --help &> /dev/null; then
         echo "  ✓ Singularity/Apptainer pipeline script works"
     else
-        echo "  ❌ Singularity/Apptainer pipeline script failed"
+        echo "  Singularity/Apptainer pipeline script failed"
     fi
 fi
 
@@ -104,7 +102,7 @@ echo "Validation Complete!"
 echo "=========================================="
 echo ""
 echo "If you see mostly ✓ marks, your setup is ready!"
-echo "If you see ❌ marks, please run the appropriate setup script:"
+echo "If you see marks, please run the appropriate setup script:"
 echo ""
 if [ "$CONTAINER_SYSTEM" = "docker" ]; then
     echo "  ./setup_docker.sh"
@@ -113,7 +111,7 @@ elif [ "$CONTAINER_SYSTEM" = "apptainer" ] || [ "$CONTAINER_SYSTEM" = "singulari
 fi
 echo ""
 echo "For detailed testing, run:"
-echo "  ./test_pipeline.sh (Docker)"
+echo "  ./test_pipeline_docker.sh (Docker)"
 echo "  ./test_pipeline_singularity.sh (Singularity/Apptainer)"
 echo ""
 echo "For comprehensive testing guide, see: TESTING_GUIDE.md" 

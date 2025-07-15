@@ -1,48 +1,51 @@
 #!/bin/bash
+
+# nWGS Pipeline Runner Script for Singularity/Apptainer
 set -e
 
-# Usage: ./run_pipeline_singularity.sh <run_mode> <other_nextflow_args>
-# Example: ./run_pipeline_singularity.sh analysis -profile singularity --input samplesheet.csv
-
-# Handle help and version flags
-if [[ "$1" == "--help" || "$1" == "-h" ]]; then
-    nextflow run main.nf --help
-    exit 0
+# Check if Nextflow is installed
+if ! command -v nextflow &> /dev/null; then
+    echo " Nextflow is not installed. Installing Nextflow..."
+    curl -s https://get.nextflow.io | bash
+    export PATH="$PWD:$PATH"
 fi
 
-if [[ "$1" == "--version" || "$1" == "-v" ]]; then
-    nextflow --version
-    exit 0
-fi
-
-if [ $# -lt 1 ]; then
-  echo "Usage: $0 <run_mode> [other nextflow args]"
-  echo "Run modes: analysis, epi2me, ..."
-  echo ""
-  echo "Examples:"
-  echo "  $0 analysis --input samplesheet.csv"
-  echo "  $0 epi2me --input samplesheet.csv"
-  echo "  $0 --help    # Show Nextflow help"
-  echo "  $0 --version # Show Nextflow version"
-  exit 1
-fi
-
-RUN_MODE="$1"
-shift
-
-CONFIG_FILE=""
-case "$RUN_MODE" in
-  analysis)
-    CONFIG_FILE="conf/analysis.config"
-    ;;
-  epi2me)
-    CONFIG_FILE="conf/epi2me.config"
-    ;;
-  *)
-    echo "Unknown run mode: $RUN_MODE"
+# Check if Singularity/Apptainer is available
+SINGULARITY_CMD=""
+if command -v apptainer &> /dev/null; then
+    SINGULARITY_CMD="apptainer"
+elif command -v singularity &> /dev/null; then
+    SINGULARITY_CMD="singularity"
+else
+    echo " Neither Singularity nor Apptainer is available."
+    echo "   Please run setup_singularity.sh first."
     exit 1
-    ;;
-esac
+fi
 
-# Run Nextflow with Singularity/Apptainer profile and selected config
-nextflow run main.nf -c "$CONFIG_FILE" -profile singularity "$@" 
+echo "Using: $SINGULARITY_CMD"
+
+# Auto-detect config file based on arguments
+CONFIG="conf/analysis.config"  # Default config
+
+# Check if epi2me mode is specified
+if echo "$*" | grep -q "--run_mode_epi2me"; then
+    CONFIG="conf/epi2me.config"
+    echo " Using Epi2me configuration: $CONFIG"
+elif echo "$*" | grep -q "--run_mode_mergebam"; then
+    CONFIG="conf/mergebam.config"
+    echo " Using Mergebam configuration: $CONFIG"
+else
+    echo " Using default analysis configuration: $CONFIG"
+fi
+
+echo " Starting nWGS pipeline with Singularity/Apptainer containers..."
+echo "   Configuration: $CONFIG"
+echo "   Arguments: $@"
+
+# Run the pipeline with Singularity/Apptainer
+nextflow run main.nf \
+    -c "$CONFIG" \
+    -with-apptainer \
+    "$@"
+
+echo " Pipeline completed successfully!"

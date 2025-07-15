@@ -70,6 +70,7 @@ logs/
 *.sif
 *.img
 *.tar.gz
+containers/
 
 # Reference data (usually large)
 refdata/

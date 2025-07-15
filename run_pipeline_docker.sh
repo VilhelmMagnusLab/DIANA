@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-# Usage: ./run_pipeline.sh <run_mode> <other_nextflow_args>
-# Example: ./run_pipeline.sh analysis -profile docker --input samplesheet.csv
+# Usage: ./run_pipeline_docker.sh <run_mode> <other_nextflow_args>
+# Example: ./run_pipeline_docker.sh analysis -profile docker --input samplesheet.csv
 
 # Handle help and version flags
-if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     nextflow run main.nf --help
     exit 0
 fi
 
-if [[ "$1" == "--version" || "$1" == "-v" ]]; then
+if [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
     nextflow --version
     exit 0
 fi

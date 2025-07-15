@@ -89,7 +89,7 @@ elif command -v apptainer &> /dev/null; then
     echo "   ✓ Apptainer found"
     apptainer --version
 else
-    echo "   ❌ No container system found"
+    echo "   No container system found"
     exit 1
 fi
 
@@ -97,7 +97,7 @@ if command -v nextflow &> /dev/null; then
     echo "   ✓ Nextflow found"
     nextflow --version
 else
-    echo "   ❌ Nextflow not found"
+    echo "  Nextflow not found"
     exit 1
 fi
 
@@ -107,19 +107,19 @@ echo "2. Testing Configuration Files..."
 if [ -f "conf/analysis.config" ]; then
     echo "   ✓ analysis.config found"
 else
-    echo "   ❌ analysis.config missing"
+    echo "  analysis.config missing"
 fi
 
 if [ -f "conf/epi2me.config" ]; then
     echo "   ✓ epi2me.config found"
 else
-    echo "   ❌ epi2me.config missing"
+    echo "  epi2me.config missing"
 fi
 
 if [ -f "conf/mergebam.config" ]; then
     echo "   ✓ mergebam.config found"
 else
-    echo "   ❌ mergebam.config missing"
+    echo "  mergebam.config missing"
 fi
 
 # Test 3: Container Images
@@ -150,7 +150,7 @@ echo "   ✓ Created test sample file"
 echo ""
 echo "6. Testing Pipeline Dry Run..."
 if command -v docker &> /dev/null; then
-    ./run_pipeline.sh --help
+    ./run_pipeline_docker.sh --help
 elif command -v singularity &> /dev/null || command -v apptainer &> /dev/null; then
     ./run_pipeline_singularity.sh --help
 fi
@@ -179,17 +179,17 @@ chmod +x comprehensive_test.sh
 echo "Testing config auto-detection..."
 
 # Test analysis mode
-./run_pipeline.sh --run_mode_analysis --help
+./run_pipeline_docker.sh --run_mode_analysis --help
 # OR
 ./run_pipeline_singularity.sh --run_mode_analysis --help
 
 # Test epi2me mode
-./run_pipeline.sh --run_mode_epi2me --help
+./run_pipeline_docker.sh --run_mode_epi2me --help
 # OR
 ./run_pipeline_singularity.sh --run_mode_epi2me --help
 
 # Test mergebam mode
-./run_pipeline.sh --run_mode_mergebam --help
+./run_pipeline_docker.sh --run_mode_mergebam --help
 # OR
 ./run_pipeline_singularity.sh --run_mode_mergebam --help
 ```
@@ -201,7 +201,7 @@ mkdir -p data/testdata/small_test
 echo "small_test_sample" > data/testdata/small_test/sample_ids.txt
 
 # Run a small test (this will fail but should show proper error handling)
-./run_pipeline.sh --run_mode_analysis --sample_id small_test_sample
+./run_pipeline_docker.sh --run_mode_analysis --sample_id small_test_sample
 # OR
 ./run_pipeline_singularity.sh --run_mode_analysis --sample_id small_test_sample
 ```
@@ -300,24 +300,24 @@ free -h
 nproc
 ```
 
-## 📊 Test Results Interpretation
+## Test Results Interpretation
 
-### **✅ All Tests Passed:**
+### **All Tests Passed:**
 - Your setup is ready for production use
 - You can proceed with your actual data analysis
 - Consider running a small real dataset first
 
-### **⚠️ Some Tests Failed:**
+### **Some Tests Failed:**
 - Check the specific error messages
 - Refer to the troubleshooting sections in setup guides
 - Verify your system meets the requirements
 
-### **❌ Many Tests Failed:**
+### **Many Tests Failed:**
 - Your setup needs attention
 - Review the setup guides completely
 - Check system requirements and dependencies
 
-## 🎯 Real-World Testing Scenarios
+## Real-World Testing Scenarios
 
 ### **Scenario 1: First-Time User**
 ```bash
@@ -361,13 +361,13 @@ docker info
 ./setup_docker.sh
 
 # 3. Test with GUI
-./run_pipeline.sh --run_mode_analysis --sample_id test_sample
+./run_pipeline_docker.sh --run_mode_analysis --sample_id test_sample
 
 # 4. Check results in file explorer
 open results/
 ```
 
-## 📝 Test Checklist
+## Test Checklist
 
 Use this checklist to ensure your setup is complete:
 
@@ -383,7 +383,7 @@ Use this checklist to ensure your setup is complete:
 - [ ] No permission errors
 - [ ] Sufficient disk space and memory
 
-## 🆘 Getting Help
+## Getting Help
 
 If tests fail:
 
@@ -392,13 +392,13 @@ If tests fail:
 3. **Check system requirements** in the main [README.md](README.md)
 4. **Contact maintainers** if issues persist
 
-## 🎉 Success!
+## Success!
 
 Once all tests pass, you're ready to run the nWGS pipeline with your actual data!
 
 ```bash
 # Run your analysis
-./run_pipeline.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
+./run_pipeline_docker.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
 # OR
 ./run_pipeline_singularity.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
 ```

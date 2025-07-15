@@ -11,3 +11,26 @@
 2025-07-14 09:25:33	-	distracted_lovelace	-	35f11a1a46fb7e56e06904c529af7665	eddc04cd-7afa-44d9-811a-ede8c9a0d96e	nextflow run main.nf --run_mode_order -resume
 2025-07-14 09:26:27	-	big_bohr	-	35f11a1a46fb7e56e06904c529af7665	eddc04cd-7afa-44d9-811a-ede8c9a0d96e	nextflow run main.nf --run_mode_order -resume
 2025-07-14 09:32:55	43.2s	fabulous_booth	ERR	3a66facccb8a8f71293ee497b801d686	eddc04cd-7afa-44d9-811a-ede8c9a0d96e	nextflow run main.nf --run_mode_order -resume
+2025-07-14 18:06:33	-	peaceful_ampere	-	3a66facccb8a8f71293ee497b801d686	58669b0d-369a-4a5f-aede-4d76db5bfbb9	nextflow run main.nf -c conf/analysis.config -with-singularity --run_mode_order
+2025-07-14 18:07:23	-	hopeful_payne	-	3a66facccb8a8f71293ee497b801d686	3897d486-53db-4316-b545-aa3c3cf6099c	nextflow run main.nf -c conf/analysis.config -with-singularity --run_mode_epi2me sv
+2025-07-14 18:07:39	-	romantic_rutherford	-	3a66facccb8a8f71293ee497b801d686	da4d0ecf-5974-474b-ac10-4b5e37679105	nextflow run main.nf -c conf/analysis.config -with-singularity --run_mode_mergebam
+2025-07-14 18:10:05	-	kickass_shaw	-	3a66facccb8a8f71293ee497b801d686	ff2a34f8-bf3d-4487-9632-809e5cd5a7d5	nextflow run main.nf -c conf/analysis.config -with-singularity
+2025-07-14 18:12:45	649ms	soggy_ardinghelli	OK	3a66facccb8a8f71293ee497b801d686	6a42f3c6-ad48-438b-a21d-c989e73f7a9d	nextflow run main.nf -c conf/analysis.config -with-apptainer
+2025-07-14 18:15:35	16m 30s	goofy_brown	ERR	3a66facccb8a8f71293ee497b801d686	c22586d3-d116-4c67-97b4-93674b12cc82	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order
+2025-07-14 19:35:29	9.2s	lonely_lichterman	ERR	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order
+2025-07-14 19:35:57	1h 4m 37s	determined_solvay	ERR	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-14 20:47:00	5m 29s	stoic_perlman	ERR	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-14 21:03:08	6m 46s	insane_hypatia	ERR	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-14 21:12:17	-	mighty_euler	-	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-14 21:18:01	-	chaotic_volta	-	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_analysis occ -resume
+2025-07-14 21:18:18	-	pensive_kimura	-	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_analysis occ -resume
+2025-07-14 21:35:54	-	nasty_laplace	-	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_analysis occ -resume
+2025-07-14 21:36:11	-	voluminous_venter	-	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_analysis occ -resume
+2025-07-14 21:36:54	-	nauseous_lagrange	-	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-14 21:37:09	6m 58s	sad_dalembert	ERR	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-14 21:58:12	4m 6s	hopeful_khorana	ERR	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-14 22:11:34	6m 36s	deadly_hypatia	ERR	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-14 22:25:43	1h 6m 31s	high_khorana	OK	3a66facccb8a8f71293ee497b801d686	8284b12c-3dc0-47b3-b560-d95ae150f068	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume
+2025-07-15 04:27:49	1h 27m 23s	friendly_brown	OK	3a66facccb8a8f71293ee497b801d686	1179cad3-a56c-48b5-90d2-0ad52119325e	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_analysis rmd --help
+2025-07-15 07:46:26	27.1s	serene_agnesi	ERR	3a66facccb8a8f71293ee497b801d686	1179cad3-a56c-48b5-90d2-0ad52119325e	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order --sample_id T001 -resume
+2025-07-15 07:47:35	1h 15m 39s	confident_spence	OK	3a66facccb8a8f71293ee497b801d686	1179cad3-a56c-48b5-90d2-0ad52119325e	nextflow run main.nf -c conf/analysis.config -with-apptainer --run_mode_order -resume

@@ -1457,12 +1457,12 @@ workflow analysis {
             // Create channels for downstream processes
             MGMT_output = extract_epic.out.MGMTheaderout
             
-            MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-                .map { args -> 
-                    def sample_id = args[0]
-                    def sturgeoninput = args[1]
-                    tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
-                }
+            // MGMT_sturgeon = extract_epic.out.sturgeonbedinput
+            //     .map { args -> 
+            //         def sample_id = args[0]
+            //         def sturgeoninput = args[1]
+            //         tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
+            //     }
             
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
                 .map { args -> 

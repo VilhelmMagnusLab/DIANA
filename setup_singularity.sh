@@ -37,25 +37,39 @@ mkdir -p containers
 echo "   Pulling Singularity/Apptainer images..."
 echo "   This may take several minutes on first run..."
 
+# Function to pull image if it doesn't exist
+pull_if_not_exists() {
+    local image_name=$1
+    # Extract just the image name from the repository path (e.g., "vilhelmmagnuslab/nwgs_default_images" -> "nwgs_default_images")
+    local image_basename=$(basename "$image_name")
+    local image_file="containers/${image_basename}_latest.sif"
+    
+    if [ -f "$image_file" ]; then
+        echo "   ✓ $image_name already exists, skipping..."
+    else
+        echo "   Pulling $image_name..."
+        $SINGULARITY_CMD pull --dir containers/ docker://$image_name:latest
+    fi
+}
+
 # Core analysis images
 echo "Pulling core analysis images..."
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/nwgs_default_images:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/ace_1.24.0:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/annotcnv_images_27feb1025:latest
-$SINGULARITY_CMD pull --dir containers/ docker://hkubal/clairs-to:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/clair3_amd64:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/igv_report_amd64:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/vcf2circos:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/nanodx_images_3feb25:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/markdown_images_28feb2025:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/gviz_amd64:latest
+pull_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
+pull_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
+pull_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
+pull_if_not_exists "vilhelmmagnuslab/clair3_amd64"
+pull_if_not_exists "vilhelmmagnuslab/igv_report_amd64"
+pull_if_not_exists "vilhelmmagnuslab/vcf2circos"
+pull_if_not_exists "vilhelmmagnuslab/nanodx_images_3feb25"
+pull_if_not_exists "vilhelmmagnuslab/markdown_images_28feb2025"
+pull_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
+pull_if_not_exists "vilhelmmagnuslab/gviz_amd64"
 
 # Epi2me images
 echo "Pulling Epi2me analysis images..."
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/snifflesv252_update_latest:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/qdnaseq_amd64_latest:latest
-$SINGULARITY_CMD pull --dir containers/ docker://vilhelmmagnuslab/modkit_latest:latest
+pull_if_not_exists "vilhelmmagnuslab/snifflesv252_update"
+pull_if_not_exists "vilhelmmagnuslab/qdnaseq_amd64"
+pull_if_not_exists "vilhelmmagnuslab/modkit"
 
 echo "✓ All Singularity/Apptainer images pulled successfully"
 

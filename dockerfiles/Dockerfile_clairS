@@ -31,8 +31,8 @@
 # Example command:
 # $ git clone https://github.com/HKU-BAL/ClairS-TO.git
 # $ cd ClairS-TO
-# $ docker build -f ./Dockerfile -t hkubal/clairs-to:latest .
-# $ docker run -it hkubal/clairs-to:latest /opt/bin/run_clairs_to --help
+# $ docker build -f ./Dockerfile -t vilhelmmagnuslab/clair3_amd64:latest .
+# $ docker run -it vilhelmmagnuslab/clair3_amd64:latest /opt/bin/run_clairs_to --help
 
 FROM ubuntu:16.04
 

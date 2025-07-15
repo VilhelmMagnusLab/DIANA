@@ -106,7 +106,7 @@ echo "   ✓ Test sample file created"
 # Test 7: Pipeline Help
 echo ""
 echo "7. Testing Pipeline Help..."
-if ./run_pipeline.sh --help &> /dev/null; then
+if ./run_pipeline_docker.sh --help &> /dev/null; then
     echo "   ✓ Pipeline help command works"
 else
     echo "   ❌ Pipeline help command failed"
@@ -144,7 +144,7 @@ echo "Next steps:"
 echo "1. Place your reference files in: data/reference/"
 echo "2. Place your input data in: data/testdata/"
 echo "3. Update the configuration in: conf/analysis.config"
-echo "4. Run the pipeline: ./run_pipeline.sh --run_mode_order --sample_id YOUR_SAMPLE_ID"
+echo "4. Run the pipeline: ./run_pipeline_docker.sh --run_mode_order --sample_id YOUR_SAMPLE_ID"
 echo ""
 echo "For more information, see:"
 echo "- README.md"
