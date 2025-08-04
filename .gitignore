@@ -46,6 +46,7 @@ Thumbs.db
 # Log files
 *.log
 logs/
+hs_err_pid*.log
 
 # Data files (large files that shouldn't be in git)
 *.bam

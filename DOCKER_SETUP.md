@@ -91,7 +91,7 @@ Key Docker settings:
 ```groovy
 docker {
     enabled = true
-    runOptions = '-v /home/ubuntu/data:/home/ubuntu/data'
+    runOptions = '-v /home/chbope/extension/nWGS_manuscript_data/data:/home/chbope/extension/nWGS_manuscript_data/data'
 }
 ```
 

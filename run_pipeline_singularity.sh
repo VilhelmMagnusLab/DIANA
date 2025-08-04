@@ -26,26 +26,42 @@ echo "Using: $SINGULARITY_CMD"
 
 # Auto-detect config file based on arguments
 CONFIG="conf/analysis.config"  # Default config
+USE_CONFIG_FILE=false
 
+# Check if run_mode_order is specified (highest priority)
+if echo "$*" | grep -q "--run_mode_order"; then
+    CONFIG="conf/analysis.config"
+    USE_CONFIG_FILE=true
+    echo " Using Analysis configuration for run_mode_order: $CONFIG"
 # Check if epi2me mode is specified
-if echo "$*" | grep -q "--run_mode_epi2me"; then
+elif echo "$*" | grep -q "--run_mode_epi2me"; then
     CONFIG="conf/epi2me.config"
-    echo " Using Epi2me configuration: $CONFIG"
+    USE_CONFIG_FILE=false
+    echo " Using Epi2me configuration (via nextflow.config): $CONFIG"
 elif echo "$*" | grep -q "--run_mode_mergebam"; then
     CONFIG="conf/mergebam.config"
-    echo " Using Mergebam configuration: $CONFIG"
+    USE_CONFIG_FILE=false
+    echo " Using Mergebam configuration (via nextflow.config): $CONFIG"
 else
     echo " Using default analysis configuration: $CONFIG"
 fi
 
 echo " Starting nWGS pipeline with Singularity/Apptainer containers..."
-echo "   Configuration: $CONFIG"
-echo "   Arguments: $@"
-
-# Run the pipeline with Singularity/Apptainer
-nextflow run main.nf \
-    -c "$CONFIG" \
-    -with-apptainer \
-    "$@"
+if [ "$USE_CONFIG_FILE" = true ]; then
+    echo "   Configuration: $CONFIG (explicit)"
+    echo "   Arguments: $@"
+    # Run the pipeline with explicit config file
+    nextflow run main.nf \
+        -c "$CONFIG" \
+        -with-apptainer \
+        "$@"
+else
+    echo "   Configuration: $CONFIG (via nextflow.config)"
+    echo "   Arguments: $@"
+    # Run the pipeline without explicit config file (let nextflow.config handle it)
+    nextflow run main.nf \
+        -with-apptainer \
+        "$@"
+fi
 
 echo " Pipeline completed successfully!"

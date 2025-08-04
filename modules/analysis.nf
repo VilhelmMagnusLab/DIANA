@@ -661,7 +661,7 @@ process markdown_report {
     input:
     tuple val(sample_id), 
           path(craminoreport),
-          path(nanodx), 
+          val(sample_id_file), 
           path(dictionaire), 
           path(logo), 
           path(cnv_plot), 
@@ -676,7 +676,8 @@ process markdown_report {
           path(terphtml),
           path(egfr_coverage),
           path(idh1_coverage),
-          path(tertp_coverage)
+          path(tertp_coverage),
+          path(nanodx_classifier)
 
     output:
     file("${sample_id}_markdown_pipeline_report.pdf")
@@ -686,12 +687,57 @@ process markdown_report {
     # Output PDF path
     output_file="${sample_id}_markdown_pipeline_report.pdf"
 
+    # Handle different run modes
+    if [ "${params.run_mode_order}" = "true" ]; then
+        # For run_mode_order: Create sample_file.txt with sample_id and threshold_value
+        THRESHOLD_VALUE=""
+        if [ -f "${params.output_path}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
+            THRESHOLD_VALUE=\$(cat "${params.output_path}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
+            # Create sample_file.txt
+            echo -e "${sample_id}\\t\${THRESHOLD_VALUE}" > sample_file.txt
+            echo "Created sample_file.txt for run_mode_order with: ${sample_id} \${THRESHOLD_VALUE}"
+            SAMPLE_FILE="\${PWD}/sample_file.txt"
+        else
+            echo "ERROR: ACE threshold file not found for ${sample_id}. Cannot proceed with markdown report."
+            exit 1
+        fi
+    else
+        # For run_mode_analysis: Use the original sample_id_file
+        SAMPLE_FILE="${sample_id_file}"
+        echo "Using original sample_id_file for run_mode_analysis: \${SAMPLE_FILE}"
+    fi
+
     # Now call the Rscript with the updated Rmd file using absolute paths
-    Rscript -e "rmarkdown::render('/home/ubuntu/nWGS_pipeline/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])" \
+    # Activate conda environment and find Rscript
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate markdown_env
+    
+    # Try to find Rscript
+    RSCRIPT_PATH=""
+    if command -v Rscript >/dev/null 2>&1; then
+        RSCRIPT_PATH="Rscript"
+    elif [ -f "/opt/conda/envs/markdown_env/bin/Rscript" ]; then
+        RSCRIPT_PATH="/opt/conda/envs/markdown_env/bin/Rscript"
+    elif [ -f "/opt/conda/bin/Rscript" ]; then
+        RSCRIPT_PATH="/opt/conda/bin/Rscript"
+    elif [ -f "/usr/local/bin/Rscript" ]; then
+        RSCRIPT_PATH="/usr/local/bin/Rscript"
+    elif [ -f "/usr/bin/Rscript" ]; then
+        RSCRIPT_PATH="/usr/bin/Rscript"
+    else
+        echo "ERROR: Rscript not found. Available R-related files:"
+        find /opt/conda -name "*R*" 2>/dev/null | head -10
+        find /usr -name "*Rscript*" 2>/dev/null | head -10
+        exit 1
+    fi
+    
+    echo "Using Rscript at: \$RSCRIPT_PATH"
+    
+    \$RSCRIPT_PATH -e "rmarkdown::render('/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])" \
       "${sample_id}" \
       "\${PWD}/${craminoreport}" \
-      "${params.analyse_sample_id_file}" \
-      "\${PWD}/${nanodx}" \
+      "\${SAMPLE_FILE}" \
+      "\${PWD}/${nanodx_classifier}" \
       "\${PWD}/${dictionaire}" \
       "\${PWD}/${logo}" \
       "\${PWD}/${cnv_plot}" \
@@ -1139,12 +1185,12 @@ workflow analysis {
             // Create channels for downstream processes
             MGMT_output = extract_epic.out.MGMTheaderout
             
-            MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-                .map { args -> 
-                    def sample_id = args[0]
-                    def sturgeoninput = args[1]
-                    tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
-                }
+            // MGMT_sturgeon = extract_epic.out.sturgeonbedinput
+            //     .map { args -> 
+            //         def sample_id = args[0]
+            //         def sturgeoninput = args[1]
+            //         tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
+            //     }
             
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
                 .map { args -> 
@@ -1254,9 +1300,26 @@ workflow analysis {
         if (params.run_mode in ['cnv', 'all', 'rmd'] || params.run_mode_order) {
             println "Running CNV Analysis..."
             
-            // Separate samples that need ACE from those that don't
-            def samples_needing_ace = sample_thresholds.findAll { k, v -> v == null }.keySet()
-            def samples_with_provided_threshold = sample_thresholds.findAll { k, v -> v != null }
+            // Handle sample_thresholds for different run modes
+            def samples_needing_ace = []
+            def samples_with_provided_threshold = [:]
+            
+            if (params.run_mode_order) {
+                // In run_mode_order, we always compute ACE to get thresholds
+                println "Using run_mode_order - computing ACE for all samples to get thresholds"
+                
+                // Load sample IDs from bam_sample_id_file for run_mode_order
+                def sample_ids = file(params.bam_sample_id_file).readLines().collect { line ->
+                    // Extract only the sample ID part (first column), removing flow cell ID
+                    line.trim().split(/\s+/)[0]
+                }
+                samples_needing_ace = sample_ids.toSet()
+                println "Samples for ACE calculation in run_mode_order: ${samples_needing_ace}"
+            } else {
+                // Separate samples that need ACE from those that don't
+                samples_needing_ace = sample_thresholds.findAll { k, v -> v == null }.keySet()
+                samples_with_provided_threshold = sample_thresholds.findAll { k, v -> v != null }
+            }
 
             println "Samples needing ACE calculation: ${samples_needing_ace}"
             println "Samples with provided thresholds: ${samples_with_provided_threshold}"
@@ -1264,7 +1327,7 @@ workflow analysis {
             // Run ACE only for samples that need calculation (have null threshold)
             if (samples_needing_ace.size() > 0) {
         ace_input = Channel
-            .fromPath("${params.cnv_rds}/*_*.rds")
+            .fromPath("${params.cnv_rds}/*_copyNumbersCalled.rds")
             .map { rds_file -> 
                 def sample_id = rds_file.name.toString().split("_")[0]
                         if (samples_needing_ace.contains(sample_id)) {
@@ -1316,12 +1379,23 @@ workflow analysis {
                         def segs_vcf = args[9]
                         def sv = args[10]
                         println "Processing epi2me results for sample: ${sample_id} from epi2me output"
+                        
+                        // Debug: Check if files exist
+                        def segs_vcf_path = "${params.path}/results/epi2me/epicnv/${sample_id}_segs.vcf"
+                        def bins_bed_path = "${params.path}/results/epi2me/epicnv/${sample_id}_bins.bed"
+                        def segs_bed_path = "${params.path}/results/epi2me/epicnv/${sample_id}_segs.bed"
+                        
+                        println "Checking file existence:"
+                        println "  segs_vcf_path: ${segs_vcf_path}"
+                        println "  bins_bed_path: ${bins_bed_path}"
+                        println "  segs_bed_path: ${segs_bed_path}"
+                        
                         tuple(
                             sample_id,
-                            file("${params.path}/results/epi2me/epicnv/${sample_id}_segs.vcf"),
+                            file(segs_vcf_path),
                             file(params.occ_fusions),
-                            file("${params.path}/results/epi2me/epicnv/${sample_id}_bins.bed"),
-                            file("${params.path}/results/epi2me/epicnv/${sample_id}_segs.bed")
+                            file(bins_bed_path),
+                            file(segs_bed_path)
                         )
                     }
             } else {
@@ -1340,62 +1414,87 @@ workflow analysis {
             }
 
             // Combine with thresholds and prepare final input
-            // For samples with provided thresholds, use them directly
-            def annotatecnv_with_provided = annotatecnv_input
-                .filter { args -> 
-                    def sample_id = args[0]
-                    def segs_vcf = args[1]
-                    def occ_fusions = args[2]
-                    def bins_bed = args[3]
-                    def segs_bed = args[4]
-                    final_thresholds.containsKey(sample_id)
-                }
-                .map { args -> 
-                    def sample_id = args[0]
-                    def segs_vcf = args[1]
-                    def occ_fusions = args[2]
-                    def bins_bed = args[3]
-                    def segs_bed = args[4]
-                    def threshold = final_thresholds[sample_id]
-                    println "Preparing annotatecnv input for ${sample_id} with provided tumor content ${threshold}"
-                    tuple(
-                        sample_id,              // sample_id
-                        segs_vcf,               // segs_vcf
-                        occ_fusions,            // occ_fusions
-                        bins_bed,               // bins_bed
-                        segs_bed,               // segs_bed
-                        threshold.toString()    // threshold value as string
-                    )
-                }
-
-            // For samples with calculated thresholds, combine with ace_thresholds
-            def annotatecnv_with_calculated = annotatecnv_input
-                .filter { args -> 
-                    def sample_id = args[0]
-                    def segs_vcf = args[1]
-                    def occ_fusions = args[2]
-                    def bins_bed = args[3]
-                    def segs_bed = args[4]
-                    !final_thresholds.containsKey(sample_id)
-                }
-                .combine(ace_thresholds, by: 0)
-                .map { args -> 
+            // For run_mode_order, we use calculated thresholds from ACE
+            def annotatecnv_with_provided = params.run_mode_order ? 
+                annotatecnv_input.combine(ace_thresholds, by: 0).map { args ->
                     def sample_id = args[0]
                     def segs_vcf = args[1]
                     def occ_fusions = args[2]
                     def bins_bed = args[3]
                     def segs_bed = args[4]
                     def threshold = args[5]
-                    println "Preparing annotatecnv input for ${sample_id} with calculated tumor content ${threshold}"
+                    
+                    println "Preparing annotatecnv input for ${sample_id} in run_mode_order with ACE threshold: ${threshold}"
                     tuple(
-                        sample_id,              // sample_id
-                        segs_vcf,               // segs_vcf
-                        occ_fusions,            // occ_fusions
-                        bins_bed,               // bins_bed
-                        segs_bed,               // segs_bed
-                        threshold.toString()    // threshold value as string
+                        sample_id,
+                        segs_vcf,
+                        occ_fusions,
+                        bins_bed,
+                        segs_bed,
+                        threshold.toString()
                     )
-                }
+                } :
+                annotatecnv_input
+                    .filter { args -> 
+                        def sample_id = args[0]
+                        def segs_vcf = args[1]
+                        def occ_fusions = args[2]
+                        def bins_bed = args[3]
+                        def segs_bed = args[4]
+                        
+                        // Check if this sample has a provided threshold
+                        def has_threshold = final_thresholds.containsKey(sample_id)
+                        println "Sample ${sample_id} has provided threshold: ${has_threshold}"
+                        has_threshold
+                    }
+                    .map { args -> 
+                        def sample_id = args[0]
+                        def segs_vcf = args[1]
+                        def occ_fusions = args[2]
+                        def bins_bed = args[3]
+                        def segs_bed = args[4]
+                        
+                        // Add the threshold to the tuple
+                        tuple(
+                            sample_id,
+                            segs_vcf,
+                            occ_fusions,
+                            bins_bed,
+                            segs_bed,
+                            final_thresholds[sample_id]
+                        )
+                    }
+
+            // For samples with calculated thresholds, combine with ace_thresholds
+            def annotatecnv_with_calculated = params.run_mode_order ? 
+                Channel.empty() :  // Skip this in run_mode_order since we handle it above
+                annotatecnv_input
+                    .filter { args -> 
+                        def sample_id = args[0]
+                        def segs_vcf = args[1]
+                        def occ_fusions = args[2]
+                        def bins_bed = args[3]
+                        def segs_bed = args[4]
+                        !final_thresholds.containsKey(sample_id)
+                    }
+                    .combine(ace_thresholds, by: 0)
+                    .map { args -> 
+                        def sample_id = args[0]
+                        def segs_vcf = args[1]
+                        def occ_fusions = args[2]
+                        def bins_bed = args[3]
+                        def segs_bed = args[4]
+                        def threshold = args[5]
+                        println "Preparing annotatecnv input for ${sample_id} with calculated tumor content ${threshold}"
+                        tuple(
+                            sample_id,              // sample_id
+                            segs_vcf,               // segs_vcf
+                            occ_fusions,            // occ_fusions
+                            bins_bed,               // bins_bed
+                            segs_bed,               // segs_bed
+                            threshold.toString()    // threshold value as string
+                        )
+                    }
 
             // Combine both channels
             annotatecnv_input = annotatecnv_with_provided.mix(annotatecnv_with_calculated)
@@ -1413,6 +1512,15 @@ workflow analysis {
         // RMD report generation
         if (params.run_mode in ['rmd', 'all'] || params.run_mode_order) {
             println "Running RMD Report Generation..."
+            
+            // Ensure annotatecnv_results is defined for run_mode_order
+            if (params.run_mode_order && !annotatecnv_results) {
+                println "WARNING: annotatecnv_results not found in run_mode_order. This may indicate an issue with CNV analysis."
+                println "Attempting to create fallback annotatecnv_results..."
+                
+                // Create a minimal fallback for run_mode_order
+                annotatecnv_results = Channel.empty()
+            }
             
             // Reuse MGMT outputs from earlier analysis if available
             // If MGMT analysis was not run, we need to run it here
@@ -1632,10 +1740,13 @@ workflow analysis {
                 // Debug: Print the number of arguments received
                 println "DEBUG: mergecnv_out_map received ${args.size()} arguments: ${args}"
                 
+                // Use correct sample ID file based on run mode
+                def sample_id_file = params.run_mode_order ? "placeholder" : params.analyse_sample_id_file
+                
                 [
                     sample_id,
                     craminoreport,
-                    nanodx_classifier,
+                    sample_id_file,
                     params.nanodx_dictinaire,
                     params.mardown_logo,
                     cnv_plot,
@@ -1650,7 +1761,8 @@ workflow analysis {
                     terphtml,
                     egfr_coverage,
                     idh_coverage,
-                    tertp_coverage
+                    tertp_coverage,
+                    nanodx_classifier
                 ]
             }.view()
 

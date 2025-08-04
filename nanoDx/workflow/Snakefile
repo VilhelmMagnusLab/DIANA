@@ -13,4 +13,4 @@ rule NN_classifier:
     threads: 2
     resources: 
         mem_mb = 2048
-    script: "/home/ubuntu/data/reference/nanoDx/workflow/scripts/classify_NN_bedMethyl.py"
+    script: "/home/chbope/extension/nWGS_manuscript_data/data/reference/nanoDx/workflow/scripts/classify_NN_bedMethyl.py"
