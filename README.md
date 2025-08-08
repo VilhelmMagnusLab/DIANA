@@ -161,7 +161,7 @@ The following reference files must be downloaded and placed in the `data/referen
 - `OCC.SNV.screening.bed` - SNV screening regions (region of interest bed file)
 - `TERTp_variants.bed` - TERT promoter variants
 - `human_GRCh38_trf.bed` - Tandem repeat regions
-- `Others` file downloaded from Zenado can be put into `data/reference/`
+- `Others` file downloaded from Zenado should be put into `data/reference/`
 
 **Annotation databases (place in `data/humandb/`):**
 - `hg38_refGene.txt` - RefGene annotation
@@ -257,67 +257,8 @@ The reports are automatically created in the `results/report/` directory with th
 The `generate_report.sh` script is provided for **additional report generation** in cases where:
 - You want to regenerate reports after re-running specific processes
 - You need to create reports for samples that were processed separately
-- You want to customize report generation parameters
 - You need to generate reports after the pipeline has already completed
 
-### Using generate_report.sh
-
-#### Prerequisites
-- R with required packages: `rmarkdown`, `data.table`, `kableExtra`, and others
-- All analysis results from the nWGS pipeline must be available
-- Sample IDs file with tumor content information
-
-#### Installation of Required R Packages
-```bash
-R -e "install.packages(c('rmarkdown', 'data.table', 'kableExtra'), repos='https://cran.rstudio.com/')"
-```
-
-#### Usage
-```bash
-# Navigate to the bin directory
-cd bin
-
-# Make the script executable (if not already)
-chmod +x generate_report.sh
-
-# Run the report generation
-./generate_report.sh
-```
-
-#### Input Requirements
-- **sample_ids.txt**: Two-column file with sample ID and tumor content (decimal format)
-- **Analysis results**: All pipeline outputs must be present in the expected directories
-- **R Markdown template**: `nextflow_markdown_pipeline_update_final.Rmd`
-
-#### Output
-- **PDF reports**: Generated for each sample in `results/report/` directory
-- **Report name**: `{sample_id}_markdown_pipeline_report_final.pdf`
-
-#### Customization
-The script uses base path variables for easy customization:
-```bash
-BASE_DATA_PATH="/home/chbope/extension/nWGS_manuscript_data/data"
-RESULTS_PATH="${BASE_DATA_PATH}/results"
-REFERENCE_PATH="${BASE_DATA_PATH}/reference"
-TESTDATA_PATH="${BASE_DATA_PATH}/testdata"
-```
-
-Update these variables to match your data directory structure.
-
-#### Report Contents
-Each generated PDF report includes:
-- **Quality assessment metrics** (Cramino statistics)
-- **Methylation analysis** (MGMT promoter status)
-- **Copy number variation** (CNV plots and annotations)
-- **Structural variant analysis** (Svanna annotations)
-- **SNV calling results** (Clair3/ClairS-TO)
-- **Coverage analysis** (EGFR, IDH1, TERTp regions)
-- **NanoDx classification** (Tumor type prediction)
-
-#### Troubleshooting
-- **Missing R packages**: Install using the provided installation command
-- **Path issues**: Update base path variables in the script
-- **Missing input files**: Ensure all pipeline analyses have completed successfully
 
 ## Configuration
 
