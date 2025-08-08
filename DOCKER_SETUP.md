@@ -52,7 +52,8 @@ If you prefer manual setup:
 docker pull vilhelmmagnuslab/nwgs_default_images:latest
 docker pull vilhelmmagnuslab/ace_1.24.0:latest
 docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
-docker pull vilhelmmagnuslab/clair3_amd64:latest
+docker pull vilhelmmagnuslab/clair3:latest
+docker pull vilhemmanguslab/clars-to:latest
 docker pull vilhelmmagnuslab/igv_report_amd64:latest
 docker pull vilhelmmagnuslab/vcf2circos:latest
 docker pull vilhelmmagnuslab/nanodx_env:latest
@@ -82,10 +83,11 @@ nextflow run main.nf -c conf/analysis.config -with-docker
 
 ### Docker Configuration
 
-The pipeline is configured to use Docker containers in both configuration files:
+The pipeline is configured to use Docker containers in multiple configuration files:
 
 - `conf/analysis.config` - Main analysis configuration
-- `conf/epi2me.config` - Epi2me-specific configuration
+- `conf/epi2me.config` - Epi2me-specific configuration  
+- `conf/mergebam.config` - Mergebam-specific configuration
 
 Key Docker settings:
 ```groovy
@@ -95,6 +97,25 @@ docker {
 }
 ```
 
+### Pipeline Modes
+
+The nWGS pipeline supports three main modes:
+
+1. **Analysis Mode** (default): Complete analysis workflow
+   ```bash
+   ./run_pipeline_docker.sh --run_mode_analysis
+   ```
+
+2. **Epi2me Mode**: Multi-omics analysis with Epi2me tools
+   ```bash
+   ./run_pipeline_docker.sh --run_mode_epi2me
+   ```
+
+3. **Mergebam Mode**: BAM merging and region extraction
+   ```bash
+   ./run_pipeline_docker.sh --run_mode_mergebam
+   ```
+
 ### Available Docker Images
 
 | Process | Docker Image | Description |
@@ -102,8 +123,8 @@ docker {
 | Default | `vilhelmmagnuslab/nwgs_default_images` | General analysis tools |
 | ACE TMC | `vilhelmmagnuslab/ace_1.24.0` | ACE copy number analysis |
 | AnnotateCNV | `vilhelmmagnuslab/annotcnv_images_27feb1025` | CNV annotation |
-| ClairS-TO | `vilhelmmagnuslab/clair3_amd64` | Structural variant calling |
-| Clair3 | `vilhelmmagnuslab/clair3_amd64` | Variant calling |
+| ClairS-TO | `vilhelmmagnuslab/clairsto_amd64` | somatic small variant calling |
+| Clair3 | `vilhelmmagnuslab/clair3_amd64` | variant calling |
 | IGV Tools | `vilhelmmagnuslab/igv_report_amd64` | IGV report generation |
 | Circos Plot | `vilhelmmagnuslab/vcf2circos` | Circos visualization |
 | NanoDx | `vilhelmmagnuslab/nanodx_env` | NanoDx classification |
@@ -119,7 +140,7 @@ docker {
 Run the test script to verify your setup:
 
 ```bash
-./test_pipeline.sh
+./test_pipeline_docker.sh
 ```
 
 This will run a minimal test to ensure all components are working correctly.
@@ -132,7 +153,8 @@ After setup, your directory structure should look like:
 nWGS_pipeline/
 ├── conf/
 │   ├── analysis.config      # Main Docker configuration
-│   └── epi2me.config        # Epi2me Docker configuration
+│   ├── epi2me.config        # Epi2me Docker configuration
+│   └── mergebam.config      # Mergebam Docker configuration
 ├── data/
 │   ├── reference/           # Reference files
 │   ├── humandb/            # Annotation databases
@@ -171,6 +193,10 @@ nWGS_pipeline/
    - Increase Docker memory limit in Docker Desktop settings
    - Or reduce memory allocation in configuration files
 
+5. **Path configuration issues**
+   - Ensure all paths in config files point to correct locations
+   - Update `params.path` in configuration files to match your data directory
+
 ### Getting Help
 
 - Check Docker logs: `docker logs <container_id>`
@@ -183,13 +209,37 @@ nWGS_pipeline/
 2. **Allocate sufficient memory** to Docker (8GB+ recommended)
 3. **Use multiple cores** by adjusting `cpus` parameter in config
 4. **Mount data directories** efficiently using Docker volumes
+5. **Use Docker layer caching** by keeping base images updated
+
+## 📋 Configuration Checklist
+
+Before running the pipeline, ensure:
+
+- [ ] Docker is installed and running
+- [ ] All Docker images are pulled successfully
+- [ ] Reference files are placed in `data/reference/`
+- [ ] Input data is placed in `data/testdata/`
+- [ ] Paths in configuration files are updated to match your setup
+- [ ] Sample IDs file is created (`data/testdata/sample_ids.txt`)
 
 ## 📚 Additional Resources
 
 - [Docker Documentation](https://docs.docker.com/)
 - [Nextflow Documentation](https://www.nextflow.io/docs/latest/)
 - [nWGS Pipeline Documentation](README.md)
+- [Singularity Setup Guide](SINGULARITY_SETUP.md)
+
+## 🔄 Migration from Singularity
+
+If you're migrating from Singularity to Docker:
+
+1. Update configuration files to use Docker containers
+2. Replace `.sif` container references with Docker image names
+3. Update volume mounting syntax for Docker
+4. Test with the provided test script
 
 ---
 
-**Note**: All Docker images are hosted at [https://hub.docker.com/repositories/vilhelmmagnuslab](https://hub.docker.com/repositories/vilhelmmagnuslab) and are automatically pulled during setup. 
+**Note**: All Docker images are hosted at [https://hub.docker.com/repositories/vilhelmmagnuslab](https://hub.docker.com/repositories/vilhelmmagnuslab) and are automatically pulled during setup.
+
+**Support**: For issues specific to Docker setup, please check the troubleshooting section above or refer to the main pipeline documentation. 

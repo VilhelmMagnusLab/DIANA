@@ -43,7 +43,6 @@ The pipeline consists of three main modules that can be run independently or seq
 ### 1. **Mergebam Pipeline**
 - Merges multiple BAM files per sample
 - Extracts regions of interest using OCC.protein_coding.bed
-- Quality control of merged BAMs
 
 ### 2. **Epi2me Pipeline**
 Three independent analysis types:
@@ -83,6 +82,8 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 ```
 
 ### Individual Modules
+
+**Docker Commands:**
 ```bash
 # Mergebam only
 ./run_pipeline_docker.sh --run_mode_mergebam
@@ -98,9 +99,30 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 ./run_pipeline_docker.sh --run_mode_analysis mgmt       # MGMT analysis only
 ./run_pipeline_docker.sh --run_mode_analysis cnv        # CNV analysis only
 ./run_pipeline_docker.sh --run_mode_analysis svannasv   # Svanna SV annotation only
-./run_pipeline_docker.sh --run_mode_analysis terp       # TERT promoter analysis only
-./run_pipeline_docker.sh --run_mode_analysis occ        # OCC analysis only
+./run_pipeline_docker.sh --run_mode_analysis terp       # TERTp promoter analysis only
+./run_pipeline_docker.sh --run_mode_analysis occ        # # clair3 and claisrs-to annotation using occ region of interest bam file
 ./run_pipeline_docker.sh --run_mode_analysis rmd        # Markdown report only
+```
+
+**Singularity/Apptainer Commands:**
+```bash
+# Mergebam only
+./run_pipeline_singularity.sh --run_mode_mergebam
+
+# Epi2me analyses
+./run_pipeline_singularity.sh --run_mode_epi2me all          # All Epi2me analyses
+./run_pipeline_singularity.sh --run_mode_epi2me modkit       # Modified base calling only
+./run_pipeline_singularity.sh --run_mode_epi2me cnv          # CNV analysis only
+./run_pipeline_singularity.sh --run_mode_epi2me sv           # Structural variants only
+
+# Analysis modules
+./run_pipeline_singularity.sh --run_mode_analysis all        # All analyses
+./run_pipeline_singularity.sh --run_mode_analysis mgmt       # MGMT analysis only
+./run_pipeline_singularity.sh --run_mode_analysis cnv        # CNV analysis only
+./run_pipeline_singularity.sh --run_mode_analysis svannasv   # Svanna SV annotation only
+./run_pipeline_singularity.sh --run_mode_analysis terp       # TERT promoter analysis only
+./run_pipeline_singularity.sh --run_mode_analysis occ        # clair3 and claisrs-to annotation using occ region of interest bam file
+./run_pipeline_singularity.sh --run_mode_analysis rmd        # Markdown report only
 ```
 
 ## Input Requirements
@@ -129,31 +151,69 @@ sample_id2   flowcell_id2
 
 ## Required Reference Data
 
-### Included Files (`refdata/` folder)
+### Reference Files Required
+The following reference files must be downloaded and placed in the `data/reference/` directory:
+
+**Analysis-specific files:**
 - `OCC.fusions.bed` - Fusion genes
-- `EPIC_sites_NEW.bed` - Methylation sites
+- `EPIC_sites_NEW.bed` - Methylation sites  
 - `MGMT_CpG_Island.hg38.bed` - MGMT CpG islands
-- `OCC.SNV.screening.bed` - SNV screening regions
+- `OCC.SNV.screening.bed` - SNV screening regions (region of interest bed file)
 - `TERTp_variants.bed` - TERT promoter variants
+- `human_GRCh38_trf.bed` - Tandem repeat regions
+- `Others` file downloaded from Zenado can be put into `data/reference/`
+
+**Annotation databases (place in `data/humandb/`):**
 - `hg38_refGene.txt` - RefGene annotation
 - `hg38_refGeneMrna.fa` - RefGene mRNA sequences
 - `hg38_clinvar_20240611.txt` - ClinVar annotations
 - `hg38_cosmic100coding2024.txt` - Cosmic annotations
-- `human_GRCh38_trf.bed` - Tandem repeat regions
- 
-### External Downloads Required
-- **Reference genome**: [Human Reference Genomes](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/reference-genomes/human-reference-genomes/)
-- **Gencode annotation**: [Gencode v48](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_48/gencode.v48.annotation.gff3.gz)
-- **Cosmic annotations**: [ANNOVAR Cosmic](https://annovar.openbioinformatics.org/en/latest/user-guide/filter/#cosmic-annotations)
 
-- **Other datasets** such as `hg38_refGene.txt`, `hg38_clinvar_20240611.txt`, `hg38_cosmic100coding2024.txt` and others can be found in [Zenodo](https://doi.org/10.5281/zenodo.15916972)
+**svanna databases (place in `data/reference/`):**
+- `svanna-data.zip` - svanna database need to be unzip after download and plce into the reference folder or the database can be downloaded from (https://github.com/monarch-initiative/SvAnna)
 
-## NanoDx Model Setup
+**nanoDX script and files (place in `data/reference/`):**
 
-The pipeline includes NanoDx in the `nanoDx/` folder. Download these large model files to `nanoDx/static/`:
+The nanoDX folder in the pipeline root should be moved into the `data/reference` folder and copy the following downloded files into `nanoDx/static/`:
 - `Capper_et_al.h5` (model file)
 - `Capper_et_al.h5.md5` (checksum)
 - `Capper_et_al_NN.pkl` (neural network)
+
+
+**Download files from [Zenodo](https://doi.org/10.5281/zenodo.16759248) and place them in the appropriate directories.**
+
+### Directory Structure Setup
+After downloading the reference files, your directory structure should look like this:
+
+```
+data/
+├── reference/                    # Reference files
+│   ├── GRCh38.fa
+│   ├── GRCh38.fa.fai
+│   ├── gencode.v48.annotation.gff3
+│   ├── OCC.fusions.bed
+│   ├── EPIC_sites_NEW.bed
+│   ├── MGMT_CpG_Island.hg38.bed
+│   ├── OCC.SNV.screening.bed
+│   ├── TERTp_variants.bed
+│   └── human_GRCh38_trf.bed
+│   └── etc
+
+├── humandb/                     # Annotation databases
+│   ├── hg38_refGene.txt
+│   ├── hg38_refGeneMrna.fa
+│   ├── hg38_clinvar_20240611.txt
+│   └── hg38_cosmic100coding2024.txt
+├── testdata/                    # Your input data
+│   ├── sample_ids.txt
+│   └── bams/                    # BAM files
+└── results/                     # Output (auto-created)
+```
+
+### External Downloads Required
+**Place this file in `data/reference/`:**
+- **Gencode annotation**: [Gencode v48](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_48/gencode.v48.annotation.gff3.gz)
+  - Download and place as: `gencode.v48.annotation.gff3`
 
 ## ACE Tumor Content Calculation
 
@@ -181,15 +241,130 @@ results/
     └── reports/                 # Comprehensive reports
 ```
 
+## Report Generation
+
+### Standard Report Generation
+
+**PDF reports are automatically generated** when running the pipeline with the following modes:
+- `--run_mode_analysis rmd` - Generate reports only
+- `--run_mode_analysis all` - Run all analyses and generate reports
+- `--run_mode_order` - Run complete pipeline sequentially and generate reports
+
+The reports are automatically created in the `results/report/` directory with the name `{sample_id}_markdown_pipeline_report.pdf`.
+
+### Additional Report Generation
+
+The `generate_report.sh` script is provided for **additional report generation** in cases where:
+- You want to regenerate reports after re-running specific processes
+- You need to create reports for samples that were processed separately
+- You want to customize report generation parameters
+- You need to generate reports after the pipeline has already completed
+
+### Using generate_report.sh
+
+#### Prerequisites
+- R with required packages: `rmarkdown`, `data.table`, `kableExtra`, and others
+- All analysis results from the nWGS pipeline must be available
+- Sample IDs file with tumor content information
+
+#### Installation of Required R Packages
+```bash
+R -e "install.packages(c('rmarkdown', 'data.table', 'kableExtra'), repos='https://cran.rstudio.com/')"
+```
+
+#### Usage
+```bash
+# Navigate to the bin directory
+cd bin
+
+# Make the script executable (if not already)
+chmod +x generate_report.sh
+
+# Run the report generation
+./generate_report.sh
+```
+
+#### Input Requirements
+- **sample_ids.txt**: Two-column file with sample ID and tumor content (decimal format)
+- **Analysis results**: All pipeline outputs must be present in the expected directories
+- **R Markdown template**: `nextflow_markdown_pipeline_update_final.Rmd`
+
+#### Output
+- **PDF reports**: Generated for each sample in `results/report/` directory
+- **Report name**: `{sample_id}_markdown_pipeline_report_final.pdf`
+
+#### Customization
+The script uses base path variables for easy customization:
+```bash
+BASE_DATA_PATH="/home/chbope/extension/nWGS_manuscript_data/data"
+RESULTS_PATH="${BASE_DATA_PATH}/results"
+REFERENCE_PATH="${BASE_DATA_PATH}/reference"
+TESTDATA_PATH="${BASE_DATA_PATH}/testdata"
+```
+
+Update these variables to match your data directory structure.
+
+#### Report Contents
+Each generated PDF report includes:
+- **Quality assessment metrics** (Cramino statistics)
+- **Methylation analysis** (MGMT promoter status)
+- **Copy number variation** (CNV plots and annotations)
+- **Structural variant analysis** (Svanna annotations)
+- **SNV calling results** (Clair3/ClairS-TO)
+- **Coverage analysis** (EGFR, IDH1, TERTp regions)
+- **NanoDx classification** (Tumor type prediction)
+
+#### Troubleshooting
+- **Missing R packages**: Install using the provided installation command
+- **Path issues**: Update base path variables in the script
+- **Missing input files**: Ensure all pipeline analyses have completed successfully
+
 ## Configuration
 
-Update the base path in all configuration files:
+### Path Configuration
+Update the base path in all configuration files to point to your data directory:
+
 ```groovy
 // conf/analysis.config, conf/epi2me.config, conf/mergebam.config
 params {
-    path = "/path/to/your/data/directory"  // ← Update this
+    path = "/path/to/your/data/directory"  // ← Update this to your data directory
 }
 ```
+
+### Container Configuration
+Choose your preferred container engine:
+
+**For Docker:**
+- Uncomment Docker containers in configuration files
+- Comment out Singularity/Apptainer containers
+- Run: `./setup_docker.sh`
+
+**For Singularity/Apptainer:**
+- Use default Singularity/Apptainer containers
+- Run: `./setup_singularity.sh`
+
+## Quick Setup Guide
+
+1. **Download reference files** from [Zenodo](https://doi.org/10.5281/zenodo.16759248)
+2. **Place files** in appropriate directories (`data/reference/` and `data/humandb/`)
+3. **Update paths** in configuration files (`conf/*.config`)
+4. **Choose container engine** (Docker or Singularity/Apptainer)
+5. **Run setup script**:
+   ```bash
+   # For Docker
+   ./setup_docker.sh
+   
+   # For Singularity/Apptainer  
+   ./setup_singularity.sh
+   ```
+6. **Test the pipeline**:
+   ```bash
+   # For Docker
+   ./test_pipeline_docker.sh
+   
+   # For Singularity/Apptainer
+   ./test_pipeline_singularity.sh
+   ```
 
 ## Troubleshooting
 
@@ -214,8 +389,9 @@ ls -la containers/*.sif                        # Singularity
 - **Documentation**: [DOCKER_SETUP.md](DOCKER_SETUP.md), [SINGULARITY_SETUP.md](SINGULARITY_SETUP.md)
 - **Issues**: [GitHub Issues](https://github.com/VilhelmMagnusLab/nWGS_pipeline/issues)
 - **Contact**: 
-  - Christian Bope (chbope@ous-hf.no / christianbope@gmail.com)
-  - Skabbi (skahal@ous-hf.no / skabbi@gmail.com)
+  - Christian Domilongo Bope (chbope@ous-hf.no / christianbope@gmail.com)
+  - Skarphedinn Halldorsson (skahal@ous-hf.no / skabbi@gmail.com)
+  - Richard Nagymihaly (ricnag@ous-hf.no)
 
 ## Citation
 
@@ -227,3 +403,8 @@ If you use this pipeline in your research, please cite:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Disclaimer
+This nanopore whole genome sequencing (nWGS) pipleine is a research tool currently under development. It has not been
+clinically validated in sufficiently large cohorts. Interpretation and implementation of the results in a clinical setting is in the
+sole responsibility of the treating physician.

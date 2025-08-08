@@ -31,28 +31,44 @@ mkdir -p data/humandb
 mkdir -p data/testdata
 mkdir -p data/results
 
+# Function to pull Docker image if it doesn't exist
+pull_if_not_exists() {
+    local image_name=$1
+    local image_with_tag="${image_name}:latest"
+    
+    if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "^${image_with_tag}$"; then
+        echo "   ✓ $image_with_tag already exists, skipping..."
+    else
+        echo "   Pulling $image_with_tag..."
+        docker pull "$image_with_tag"
+    fi
+}
+
 # Pull Docker images (this will take some time on first run)
 echo "🐳 Pulling Docker images from vilhelmmagnuslab repository..."
 echo "   This may take several minutes on first run..."
 
 # Core analysis images
-docker pull vilhelmmagnuslab/nwgs_default_images:latest
-docker pull vilhelmmagnuslab/ace_1.24.0:latest
-docker pull vilhelmmagnuslab/annotcnv_images_27feb1025:latest
-docker pull vilhelmmagnuslab/clair3_amd64:latest
-docker pull vilhelmmagnuslab/igv_report_amd64:latest
-docker pull vilhelmmagnuslab/vcf2circos:latest
-docker pull vilhelmmagnuslab/nanodx_env:latest
-docker pull vilhelmmagnuslab/markdown_images_28feb2025:latest
-docker pull vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-docker pull vilhelmmagnuslab/gviz_amd64:latest
+echo "Pulling core analysis images..."
+pull_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
+pull_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
+pull_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
+pull_if_not_exists "vilhelmmagnuslab/clair3_amd64"
+pull_if_not_exists "vilhelmmagnuslab/clairsto_amd64"
+pull_if_not_exists "vilhelmmagnuslab/igv_report_amd64"
+pull_if_not_exists "vilhelmmagnuslab/vcf2circos"
+pull_if_not_exists "vilhelmmagnuslab/nanodx_env"
+pull_if_not_exists "vilhelmmagnuslab/markdown_images_28feb2025"
+pull_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
+pull_if_not_exists "vilhelmmagnuslab/gviz_amd64"
 
 # Epi2me images
-docker pull vilhelmmagnuslab/snifflesv252_update_latest:latest
-docker pull vilhelmmagnuslab/qdnaseq_amd64_latest:latest
-docker pull vilhelmmagnuslab/modkit_latest:latest
+echo "Pulling Epi2me analysis images..."
+pull_if_not_exists "vilhelmmagnuslab/snifflesv252_update_latest"
+pull_if_not_exists "vilhelmmagnuslab/qdnaseq_amd64_latest"
+pull_if_not_exists "vilhelmmagnuslab/modkit_latest"
 
-echo " All Docker images pulled successfully"
+echo "✓ All Docker images pulled successfully"
 
 # Create a simple run script
 cat > run_pipeline_docker.sh << 'EOF'
@@ -135,10 +151,14 @@ echo ""
 echo "Next steps:"
 echo "1. Place your reference files in: data/reference/"
 echo "2. Place your input data in: data/testdata/"
-echo "3. Update the configuration in: conf/analysis.config"
+echo "3. Update the configuration in: conf/analysis.config, conf/epi2me.config and conf/mergebam.config"
 echo "4. Run the pipeline with: ./run_pipeline_docker.sh"
 echo "5. Test the setup with: ./test_pipeline_docker.sh"
+echo "6. If you want to use the Mergebam mode, run the pipeline with: ./run_pipeline_docker.sh --run_mode_mergebam"
+echo "7. If you want to use the Epi2me mode, run the pipeline with: ./run_pipeline_docker.sh --run_mode_epi2me"
+echo "8. If you want to use the analysis mode, run the pipeline with: ./run_pipeline_docker.sh --run_mode_analysis"
 echo ""
+echo "Before starting the pipeline, make sure that all paths for each mode are correctly set in the appropriate config files: conf/analysis.config, conf/epi2me.config, and conf/mergebam.config"
 echo "For more information, see the README.md file."
 echo ""
 echo "Happy analyzing! 🧬" 

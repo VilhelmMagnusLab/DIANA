@@ -47,22 +47,22 @@ If you prefer manual setup:
 mkdir -p containers/
 
 # Core analysis images
-singularity pull --dir containers/ vilhelmmagnuslab/nwgs_default_images:latest
-singularity pull --dir containers/ vilhelmmagnuslab/ace_1.24.0:latest
-singularity pull --dir containers/ vilhelmmagnuslab/annotcnv_images_27feb1025:latest
-singularity pull --dir containers/ vilhelmmagnuslab/clair3_amd64
-singularity pull --dir containers/ vilhelmmagnuslab/clair3_amd64:latest
-singularity pull --dir containers/ vilhelmmagnuslab/igv_report_amd64:latest
-singularity pull --dir containers/ vilhelmmagnuslab/vcf2circos:latest
-singularity pull --dir containers/ vilhelmmagnuslab/nanodx_images_3feb25:latest
-singularity pull --dir containers/ vilhelmmagnuslab/markdown_images_28feb2025:latest
-singularity pull --dir containers/ vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
-singularity pull --dir containers/ vilhelmmagnuslab/gviz_amd64:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/nwgs_default_images:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/ace_1.24.0:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/annotcnv_images_27feb1025:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/clair3_amd64
+singularity pull --dir containers/ docker://vilhelmmagnuslab/clairsto_amd64:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/igv_report_amd64:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/vcf2circos:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/nanodx_images_3feb25:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/markdown_images_28feb2025:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/gviz_amd64:latest
 
 # Epi2me images
-singularity pull --dir containers/ vilhelmmagnuslab/snifflesv252_update:latest
-singularity pull --dir containers/ vilhelmmagnuslab/qdnaseq_amd64:latest
-singularity pull --dir containers/ vilhelmmagnuslab/modkit:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/snifflesv252_update:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/qdnaseq_amd64:latest
+singularity pull --dir containers/ docker://vilhelmmagnuslab/modkit:latest
 ```
 
 ### 2. Create Directory Structure
@@ -102,8 +102,8 @@ apptainer {
 | Default | `nwgs_default_images_latest.sif` | General analysis tools |
 | ACE TMC | `ace_1.24.0_latest.sif` | ACE copy number analysis |
 | AnnotateCNV | `annotcnv_images_27feb1025_latest.sif` | CNV annotation |
-| ClairS-TO | `clairs-to_latest.sif` | Structural variant calling |
-| Clair3 | `clair3_amd64_latest.sif` | Variant calling |
+| ClairS-TO | `clairs-to_latest.sif` | somatic small variant calling |
+| Clair3 | `clair3_latest.sif` | Variant calling |
 | IGV Tools | `igv_report_amd64_latest.sif` | IGV report generation |
 | Circos Plot | `vcf2circos_latest.sif` | Circos visualization |
 | NanoDx | `nanodx_images_3feb25_latest.sif` | NanoDx classification |
@@ -112,7 +112,7 @@ apptainer {
 | Gviz | `gviz_amd64_latest.sif` | Genomic visualization |
 | Sniffles2 | `snifflesv252_update_latest_latest.sif` | SV calling (Epi2me) |
 | QDNAseq | `qdnaseq_amd64_latest_latest.sif` | CNV analysis (Epi2me) |
-| Modkit | `modkit_latest_latest.sif` | Modified base calling |
+| Modkit | `modkit_latest_latest.sif` | Modified base calling (Epi2me) |
 
 ##  Testing
 

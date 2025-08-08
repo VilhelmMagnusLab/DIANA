@@ -45,6 +45,7 @@ def loadSampleThresholds() {
 // Process Definitions
 //---------------------------------------------------------------------
 
+// Extract EPIC methylation sites and MGMT CpG islands from bedmethyl data
 process extract_epic {
     cpus 2
     memory '2 GB'
@@ -79,27 +80,7 @@ process extract_epic {
 }
 
 
-//Sturgeon classifier
-process sturgeon {
-    cpus 2
-    memory '2 GB'
-    label 'epic'
-    publishDir "${params.output_path}/classifier/sturgeon", mode: "copy", overwrite: true
-
-    input:
-    tuple val(sample_id), path(sturgeon_bed), path(sturgeon_model)
-
-    output:
-    tuple path("${sample_id}_bedmethyl_sturgeon.bed"), path("${sample_id}_bedmethyl_sturgeon")
-
-
-    """
-    /sturgeon/venv/bin/sturgeon inputtobed -i $sturgeon_bed  -o ${sample_id}_bedmethyl_sturgeon.bed  -s modkit_pileup  --reference-genome hg38
-   
-    /sturgeon/venv/bin/sturgeon predict -i ${sample_id}_bedmethyl_sturgeon.bed   -o  ${sample_id}_bedmethyl_sturgeon --model-files $sturgeon_model  --plot-results
-
-    """
-}
+// Prepare nanoDX input for methylation data processing and CpG site intersection
 process nanodx {
     label 'epic'
     publishDir "${params.output_path}/classifier/nanodx", mode: "copy", overwrite: true
@@ -116,9 +97,10 @@ process nanodx {
     """
 }
 
+// Neural network classification for tumor type prediction using NanoDx CrossNN classifier
 process run_nn_classifier {
     label 'nanodx'
-    publishDir "${params.output_path}/methylation/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/classifier/nanodx", mode: "copy", overwrite: true
     
     input:
     tuple val(sample_id), path(bed_file), path(model_file), path(snakefile), path(nn_model)
@@ -168,6 +150,7 @@ EOF
     """
 }
 
+// MGMT promoter methylation analysis and quantification
 process mgmt_promoter {
     label 'epic'
     publishDir "${params.output_path}/methylation/", mode: "copy", overwrite: true
@@ -197,6 +180,7 @@ process mgmt_promoter {
     """
 }
 
+// Structural variant annotation using Svanna for region of interest genes (occ genes)
 process svannasv {
 
     label 'svannasv'
@@ -233,8 +217,8 @@ process svannasv {
       INPUT_FILE=${sample_id}_OCC_SVs.vcf
    fi
  
-   java -jar ${params.bin_dir}/svanna-cli-1.0.4.jar prioritize  \
-   -d ${params.svanna_dir}/svanna-data  \
+   java -jar ${params.svanna_bin_dir}/svanna-cli-1.0.4.jar prioritize  \
+   -d ${params.ref_dir}/svanna-data  \
    --vcf \$INPUT_FILE \
    --phenotype-term HP:0100836 \
    --output-format html,vcf \
@@ -245,7 +229,7 @@ process svannasv {
    """
 }
 
-
+// Fusion event analysis and filtering from structural variants
 process svannasv_fusion_events {
     label 'svannasv'
     publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
@@ -277,6 +261,7 @@ process svannasv_fusion_events {
     """
 }
 
+// Circos plot generation for structural variant visualization
 process circosplot {
    label 'circos'
    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
@@ -300,6 +285,7 @@ process circosplot {
    """
 }
 
+// Copy number variant annotation and analysis with ACE
 process annotatecnv {
    label 'annotatecnv'
     publishDir "${params.output_path}/cnv/", mode: "copy", overwrite: true
@@ -375,6 +361,7 @@ process annotatecnv {
     """
 }
 
+// SNV calling and annotation using Clair3 for OCC (regions of interest) regions
 process clair3 {
     label 'clair3'
     publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
@@ -456,13 +443,8 @@ table_annovar.pl occ_merge_snv_avinpt \
    }
 
 
-//#################################
-//#### ClairS-TO
-//#################################
-//# ClairS-TO is a recent development to specifically call somatic variants in Tumor-only samples
-//# It's run separate from Clair3
-// # installed from https://github.com/HKU-BAL/ClairS-TO via micromamba
 
+// Somatic variant calling using ClairS-TO for tumor-only samples
 process clairs_to {
     label 'clairsto'
     publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
@@ -526,6 +508,7 @@ process clairs_to {
     """
    }
 
+// Merge and filter annotations from Clair3 and ClairS-TO results
 process merge_annotation {
     debug true
     label 'merge_annotation'
@@ -562,6 +545,7 @@ process merge_annotation {
     """
 }
 
+// TERT promoter variant visualization using IGV tools
 process igv_tools {
     label 'epic'
     publishDir "${params.output_path}/terp", mode: "copy", overwrite: true
@@ -584,7 +568,8 @@ process igv_tools {
     """
 }
 
-    process cramino_report {
+// Quality assessment and statistics using Cramino
+process cramino_report {
         label 'epic'
         publishDir "${params.output_path}/cramino", mode: "copy", overwrite: true
 
@@ -616,7 +601,7 @@ process igv_tools {
    """
     }
 
-
+// Genomic region coverage plotting for EGFR, IDH1, and TERTp
 process plot_genomic_regions {
     publishDir "${params.output_path}/coverage", mode: 'copy'
     label 'gviz'
@@ -654,7 +639,7 @@ process plot_genomic_regions {
     """
 }
 
-
+// Comprehensive PDF report generation using R Markdown
 process markdown_report {
     publishDir "${params.output_path}/report", mode: "copy", overwrite: true
 
@@ -733,7 +718,7 @@ process markdown_report {
     
     echo "Using Rscript at: \$RSCRIPT_PATH"
     
-    \$RSCRIPT_PATH -e "rmarkdown::render('/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])" \
+    \$RSCRIPT_PATH -e "rmarkdown::render('${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])" \
       "${sample_id}" \
       "\${PWD}/${craminoreport}" \
       "\${SAMPLE_FILE}" \
@@ -758,6 +743,7 @@ process markdown_report {
 }
 
 
+// ACE tumor content calculation and copy number analysis
 process ace_tmc {
     label 'ace_tmc'
     publishDir "${params.output_path}/cnv/ace/", mode: "copy", overwrite: true
@@ -813,56 +799,56 @@ workflow analysis {
         // Define fusion events channel conditionally to avoid undefined output errors
         def fusion_events_channel = Channel.empty()
         
-        if (params.run_mode_order) {
-            // Verify all required epi2me outputs exist before proceeding
-            // Temporarily disabled file validation to debug method invocation error
-            /*
-            input_data
-                .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv ->
-                    def missing_files = []
+        // if (params.run_mode_order) {
+        //     // Verify all required epi2me outputs exist before proceeding
+        //     // Temporarily disabled file validation to debug method invocation error
+        //     /*
+        //     input_data
+        //         .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv ->
+        //             def missing_files = []
                     
-                    // Check SV file
-                    if (!file(sv).exists()) {
-                        missing_files << "SV file: ${sv}"
-                    }
+        //             // Check SV file
+        //             if (!file(sv).exists()) {
+        //                 missing_files << "SV file: ${sv}"
+        //             }
                     
-                    // Check CNV files
-                    if (!file(segs_bed).exists()) {
-                        missing_files << "CNV segments file: ${segs_bed}"
-                    }
-                    if (!file(bins_bed).exists()) {
-                        missing_files << "CNV bins file: ${bins_bed}"
-                    }
+        //             // Check CNV files
+        //             if (!file(segs_bed).exists()) {
+        //                 missing_files << "CNV segments file: ${segs_bed}"
+        //             }
+        //             if (!file(bins_bed).exists()) {
+        //                 missing_files << "CNV bins file: ${bins_bed}"
+        //             }
 
-                    if (!file(segs_vcf).exists()) {
-                        missing_files << "CNV segments file: ${segs_vcf}"
-                    }
+        //             if (!file(segs_vcf).exists()) {
+        //                 missing_files << "CNV segments file: ${segs_vcf}"
+        //             }
                     
-                    // Check methylation file
-                    if (!file(bam).exists()) {
-                        missing_files << "Methylation file: ${bam}"
-                    }
+        //             // Check methylation file
+        //             if (!file(bam).exists()) {
+        //                 missing_files << "Methylation file: ${bam}"
+        //             }
                     
-                    if (missing_files.size() > 0) {
-                        error """
-                        Missing epi2me output files for sample ${sample_id}:
-                        ${missing_files.join('\n')}
-                        Pipeline must run in sequential order.
-                        """
-                    }
+        //             if (missing_files.size() > 0) {
+        //                 error """
+        //                 Missing epi2me output files for sample ${sample_id}:
+        //                 ${missing_files.join('\n')}
+        //                 Pipeline must run in sequential order.
+        //                 """
+        //             }
                     
-                    // Return tuple if all files exist
-                    tuple(
-                        sample_id, 
-                        bam,
-                        segs_bed,
-                        bins_bed,
-                        segs_vcf,
-                        bam
-                    )
-                }
-            */
-        }
+        //             // Return tuple if all files exist
+        //             tuple(
+        //                 sample_id, 
+        //                 bam,
+        //                 segs_bed,
+        //                 bins_bed,
+        //                 segs_vcf,
+        //                 bam
+        //             )
+        //         }
+        //     */
+        // }
         
         // Initialize channels as empty by default
         def annotatecnv_out = Channel.empty()
@@ -1746,7 +1732,7 @@ workflow analysis {
                 [
                     sample_id,
                     craminoreport,
-                    sample_id_file,
+                    sample_id_file,  
                     params.nanodx_dictinaire,
                     params.mardown_logo,
                     cnv_plot,
