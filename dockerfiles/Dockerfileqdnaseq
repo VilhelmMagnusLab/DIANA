@@ -1,0 +1,34 @@
+# Use stable R version
+FROM rocker/r-ver:4.3.2
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+      libcurl4-openssl-dev \
+      libssl-dev \
+      libxml2-dev \
+      libgit2-dev \
+      libbz2-dev \
+      liblzma-dev \
+      libz-dev \
+      libncurses5-dev \
+      samtools \
+    && apt-get clean
+
+# Install CRAN packages
+RUN R -e "install.packages(c('argparser', 'remotes'), repos='https://cloud.r-project.org')"
+
+# Install Bioconductor + required packages
+RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')" \
+ && R -e "BiocManager::install(version = '3.18')" \
+ && R -e "BiocManager::install(c('QDNAseq', 'AnnotationHub', 'AnnotationDbi'))"
+
+# Install QDNAseq.hg38 from GitHub
+RUN R -e "remotes::install_github('asntech/QDNAseq.hg38')"
+
+# Working directory
+WORKDIR /work
+
+# Test command
+CMD ["R", "--version"]
+
