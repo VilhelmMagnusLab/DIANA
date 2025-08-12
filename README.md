@@ -12,7 +12,7 @@ nWGS_pipeline is a comprehensive bioinformatics pipeline for analyzing Central N
 
 ## Pipeline Schematic
 
-The nWGS pipeline follows a modular architecture with three main Nextflow modules that can be run independently or sequentially:
+The nWGS pipeline follows a modular architecture with three main Nextflow modules (run_mode_mergebam, run_mode_epi2me and run_mode_analysis)that can be run independently or sequentially:
 
 <div align="center">
 
