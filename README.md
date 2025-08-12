@@ -10,6 +10,14 @@
 
 nWGS_pipeline is a comprehensive bioinformatics pipeline for analyzing Central Nervous System (CNS) samples using Oxford Nanopore sequencing data. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
 
+## Pipeline Schematic
+
+The nWGS pipeline follows a modular architecture with three main Nextflow modules that can be run independently or sequentially:
+
+![nWGS Pipeline Schematic](nWGS.png)
+
+*Pipeline workflow showing the flow from Nanopore BAM files through Mergebam, Epi2me, and Analysis modules to final PDF reports.*
+
 ## Quick Start
 
 ### Prerequisites
@@ -170,7 +178,7 @@ The following reference files must be downloaded and placed in the `data/referen
 - `hg38_cosmic100coding2024.txt` - Cosmic annotations
 
 **svanna databases (place in `data/reference/`):**
-- `svanna-data.zip` - svanna database need to be unzip after download and plce into the reference folder or the database can be downloaded from (https://github.com/monarch-initiative/SvAnna)
+- `svanna-data.zip` - svanna database need to be unzip after download and place into the reference folder or the database can be downloaded from (https://github.com/monarch-initiative/SvAnna)
 
 **nanoDX script and files (place in `data/reference/`):**
 
