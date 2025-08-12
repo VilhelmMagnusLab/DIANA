@@ -14,7 +14,11 @@ nWGS_pipeline is a comprehensive bioinformatics pipeline for analyzing Central N
 
 The nWGS pipeline follows a modular architecture with three main Nextflow modules that can be run independently or sequentially:
 
+<div align="center">
+
 ![nWGS Pipeline Schematic](nWGS.png)
+
+</div>
 
 *Pipeline workflow showing the flow from Nanopore BAM files through Mergebam, Epi2me, and Analysis modules to final PDF reports.*
 
