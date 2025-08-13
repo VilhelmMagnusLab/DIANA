@@ -64,7 +64,7 @@ pull_if_not_exists "vilhelmmagnuslab/vcf2circos"
 pull_if_not_exists "vilhelmmagnuslab/nanodx_images_3feb25"
 pull_if_not_exists "vilhelmmagnuslab/markdown_images_28feb2025"
 pull_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
-pull_if_not_exists "vilhelmmagnuslab/gviz_amd64"
+pull_if_not_exists "vilhelmmagnuslab/gviz_amd64ps"
 
 # Epi2me images
 echo "Pulling Epi2me analysis images..."

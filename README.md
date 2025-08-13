@@ -319,6 +319,37 @@ Choose your preferred container engine:
    ./test_pipeline_singularity.sh
    ```
 
+### Work Directory Customization
+You can specify a custom temporary work directory using the `-w` flag. This is useful for:
+- Managing disk space on different storage locations
+- Avoiding permission issues
+- Organizing temporary files
+
+**Example:**
+```bash
+# Docker
+./run_pipeline_docker.sh --run_mode_analysis tertp -w /path/to/your/work/dir
+
+# Singularity/Apptainer  
+./run_pipeline_singularity.sh --run_mode_analysis tertp -w /home/chbope/extension/trash/tmp
+```
+
+**Note:** The `-w` flag sets Nextflow's work directory where temporary files and intermediate results are stored during pipeline execution. By default nextflow create a folder `work` in the working directory.
+
+### Log Output Customization
+You can specify a custom log directory using the `--log-dir` flag.
+
+**Example:**
+```bash
+# Docker
+./run_pipeline_docker.sh --run_mode_analysis mgmt --log-dir /path/to/logs 
+
+# Singularity/Apptainer
+./run_pipeline_singularity.sh  --run_mode_analysis mgmt --log-dir /path/to/logs
+```
+
+**Note:** Logs include execution reports, timelines, traces, and Nextflow logs, automatically organized by sample ID.
+
 ## Troubleshooting
 
 ### Common Issues

@@ -16,8 +16,8 @@ def start_time = new Date()
 def validateParameters() {
     params.run_mode = params.run_mode_analysis ?: 'all'
     println "Analysis run mode: ${params.run_mode}"
-    if (!['mgmt', 'svannasv', 'cnv', 'occ', 'terp', 'mgmt', 'rmd', 'all'].contains(params.run_mode)) {
-        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: methylation, svannasv, cnv, occ, terp, mgmt, rmd, all"
+    if (!['mgmt', 'svannasv', 'cnv', 'occ', 'tertp', 'mgmt', 'rmd', 'all'].contains(params.run_mode)) {
+        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: methylation, svannasv, cnv, occ, tertp, mgmt, rmd, all"
     }
 }
 
@@ -548,7 +548,7 @@ process merge_annotation {
 // TERT promoter variant visualization using IGV tools
 process igv_tools {
     label 'epic'
-    publishDir "${params.output_path}/terp", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/coverage", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(tertp_variants), path(ncbirefseq), path(reference_genome), path(reference_genome_bai)
@@ -658,7 +658,7 @@ process markdown_report {
           path(merge_results),
           path(fusion_events),
           path(svannahtml), 
-          path(terphtml),
+          path(tertphtml),
           path(egfr_coverage),
           path(idh1_coverage),
           path(tertp_coverage),
@@ -733,7 +733,7 @@ process markdown_report {
       "\${PWD}/${mgmt_results}" \
       "\${PWD}/${merge_results}" \
       "\${PWD}/${fusion_events}" \
-      "\${PWD}/${terphtml}" \
+      "\${PWD}/${tertphtml}" \
       "\${PWD}/${svannahtml}" \
       "\${PWD}/${egfr_coverage}" \
       "\${PWD}/${idh1_coverage}" \
@@ -1274,11 +1274,11 @@ workflow analysis {
             merge_annotation(combine_file)
          }
 
-        // TERP analysis
-        if (params.run_mode in ['terp', 'all']) {
-            println "Running TERP Analysis..."
+        // tertp analysis
+        if (params.run_mode in ['tertp', 'all']) {
+            println "Running tertp Analysis..."
             igv_tools(boosts_igv_channel)
-        //    igv_tools.out.tertp_out_igv.view { "TERP output: $it" }
+        //    igv_tools.out.tertp_out_igv.view { "tertp output: $it" }
             plot_genomic_regions(boosts_plot_genomic_regions_channel)
         }
 
@@ -1641,13 +1641,13 @@ workflow analysis {
             }
 
             // Other tools - reuse outputs if already run
-            if (!(params.run_mode in ['terp', 'all'])) {
-                println "TERP analysis not run earlier, running now for RMD report..."
+            if (!(params.run_mode in ['tertp', 'all'])) {
+                println "tertp analysis not run earlier, running now for RMD report..."
         igv_tools(boosts_igv_channel)
         cramino_report(boosts_cramino)
         plot_genomic_regions(boosts_plot_genomic_regions_channel)
             } else {
-                println "Reusing TERP outputs from earlier analysis"
+                println "Reusing tertp outputs from earlier analysis"
             }
 
             // Add a new run_mode 'stat' for the cramino_report process
@@ -1684,7 +1684,7 @@ workflow analysis {
             }
             
             if (!igv_tools.out.tertp_out_igv) {
-                error "TERP HTML results not found. Make sure TERP analysis runs before RMD generation."
+                error "tertp HTML results not found. Make sure tertp analysis runs before RMD generation."
             }
             
             if (!cramino_report.out.craminostatout) {
@@ -1692,7 +1692,7 @@ workflow analysis {
             }
             
             if (!plot_genomic_regions.out.plot_genomic_regions_out) {
-                error "Genomic regions plot results not found. Make sure TERP analysis runs before RMD generation."
+                error "Genomic regions plot results not found. Make sure tertp analysis runs before RMD generation."
             }
             
             mergecnv_out = annotatecnv_results.rmdcnvtumornumber
@@ -1717,7 +1717,7 @@ workflow analysis {
                 def mgmt_results = args[8]
                 def svannahtml = args[9]
                 def fusion_events = args[10]
-                def terphtml = args[11]
+                def tertphtml = args[11]
                 def craminoreport = args[12]
                 def egfr_coverage = args[13]
                 def idh_coverage = args[14]
@@ -1744,7 +1744,7 @@ workflow analysis {
                     merge_annotation_filter_snvs_allcall,
                     fusion_events,
                     svannahtml,
-                    terphtml,
+                    tertphtml,
                     egfr_coverage,
                     idh_coverage,
                     tertp_coverage,

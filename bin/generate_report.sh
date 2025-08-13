@@ -75,7 +75,7 @@ while read -r sample_id tumor_content; do
     mgmt_results="${RESULTS_PATH}/methylation/${sample_id}_MGMT_results.csv"
     merge_results="${RESULTS_PATH}/merge_annot_clair3andclairsto/${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv"
     fusion_events="${RESULTS_PATH}/structure_variant/svannasv/${sample_id}_filter_fusion_event.tsv"
-    terphtml="${RESULTS_PATH}/coverage/${sample_id}_tertp_id1.html"
+    tertphtml="${RESULTS_PATH}/coverage/${sample_id}_tertp_id1.html"
     svannahtml="${RESULTS_PATH}/structure_variant/svannasv/${sample_id}_occ_svanna_annotation.html"
     egfr_coverage="${RESULTS_PATH}/coverage/${sample_id}_egfr_coverage.pdf"
     idh1_coverage="${RESULTS_PATH}/coverage/${sample_id}_idh1_coverage.pdf"
@@ -100,7 +100,7 @@ while read -r sample_id tumor_content; do
       "${mgmt_results}" \
       "${merge_results}" \
       "${fusion_events}" \
-      "${terphtml}" \
+      "${tertphtml}" \
       "${svannahtml}" \
       "${egfr_coverage}" \
       "${idh1_coverage}" \
