@@ -48,6 +48,10 @@ Thumbs.db
 logs/
 hs_err_pid*.log
 
+# Run logs (specific dated runs to ignore)
+analysis_mgmt_20250820_084817_84fc6d7c/
+analysis_mgmt_20250820_100329_bb3ed8f6/
+
 # Data files (large files that shouldn't be in git)
 *.bam
 *.bai
