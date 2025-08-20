@@ -1,0 +1,5 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+1	1b/d6acaa	2808240	analysis:extract_epic (T001)	COMPLETED	0	2025-08-20 10:03:13.596	2.8s	2.5s	99.2%	32.9 MB	59.4 MB	64.9 MB	252.1 KB
+3	b1/60bffe	2808820	analysis:nanodx (1)	COMPLETED	0	2025-08-20 10:03:16.504	1s	735ms	92.2%	9.7 MB	26.6 MB	18.5 MB	11.3 KB
+2	61/5f31dc	2808827	analysis:mgmt_promoter (1)	COMPLETED	0	2025-08-20 10:03:16.523	1.8s	1.5s	79.0%	73.9 MB	206.5 MB	15.4 MB	1.1 KB
+4	da/9bcf2d	2809180	analysis:run_nn_classifier (1)	COMPLETED	0	2025-08-20 10:03:17.598	8.4s	8s	59.8%	475.2 MB	1.2 GB	182.4 MB	16.1 KB

@@ -113,7 +113,8 @@ process run_nn_classifier {
     """
     #!/bin/bash
     export TMPDIR="\${PWD}/tmp/"
-    mkdir -p \$TMPDIR
+    export XDG_CACHE_HOME="\${TMPDIR}.cache"
+    mkdir -p "\$TMPDIR/.cache"
     
     # Use container's conda environment
     source /opt/conda/etc/profile.d/conda.sh
