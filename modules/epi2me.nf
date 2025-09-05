@@ -170,8 +170,8 @@ workflow epi2me {
             .map { line ->
                 def fields = line.tokenize("\t")
                 def sample_id = fields[0].trim()
-                def bam = file("${params.merge_bam_folder}/${sample_id}.*.bam")
-                def bai = file("${params.merge_bam_folder}/${sample_id}.*.bam.bai")
+                def bam = file("${params.merge_bam_folder}/${sample_id}.bam")
+                def bai = file("${params.merge_bam_folder}/${sample_id}.bam.bai")
 
                 bam = bam.find()
                 bai = bai.find()

@@ -1,0 +1,851 @@
+#!/bin/bash
+
+#==============================================================================
+# Smart Sample Monitor - Robust ONT BAM Processing Monitor
+#==============================================================================
+# 
+# Monitors ONT basecalled individual BAM files independently and triggers 
+# the nWGS pipeline immediately when ANY sample's final_summary file becomes ready.
+# Features intelligent config parsing, dynamic subdirectory detection, and
+# robust error handling.
+#
+# Directory structure supported:
+#   ${BASE_DATA_DIR}/
+#   ├── T001/[any_subdirectory]/final_summary_*_*_*.txt
+#   ├── T002/[any_subdirectory]/final_summary_*_*_*.txt
+#   └── ...
+#
+# Usage: ./smart_sample_monitor.sh [options]
+#
+# Options:
+#   -d, --data-dir DIR      Base data directory (default: auto-detect)
+#   -s, --samples FILE      Sample IDs file (default: auto-detect)
+#   -p, --pipeline DIR      Pipeline base directory (default: current)
+#   -w, --workdir DIR       Nextflow work directory base (default: /tmp/nextflow_work)
+#   -c, --config FILE       Config file to parse (default: conf/mergebam.config)
+#   -i, --interval SEC      Check interval in seconds (default: 300)
+#   -t, --timeout SEC       Timeout per sample in seconds (default: 432000)
+#   --parallel              Run samples in parallel (default: sequential)
+#   --max-parallel N        Max parallel jobs (default: 3)
+#   -v, --verbose           Verbose logging
+#   -h, --help              Show help
+#
+# Examples:
+#   ./smart_sample_monitor.sh
+#   ./smart_sample_monitor.sh --parallel --max-parallel 5 -v
+#   ./smart_sample_monitor.sh -d /custom/data -s /custom/samples.txt
+#==============================================================================
+
+set -eo pipefail
+
+# Script metadata
+readonly SCRIPT_NAME="Smart Sample Monitor"
+readonly SCRIPT_VERSION="1.0"
+readonly SCRIPT_DATE="2025-01-14"
+
+# Default configuration
+readonly DEFAULT_CONFIG_FILE="conf/mergebam.config"
+readonly DEFAULT_PIPELINE_DIR="$(pwd)"
+readonly DEFAULT_NEXTFLOW_WORK_DIR="/home/chbope/extension/trash"
+readonly DEFAULT_CHECK_INTERVAL=300
+readonly DEFAULT_TIMEOUT=432000
+readonly DEFAULT_MAX_PARALLEL=3
+
+# Global variables
+CONFIG_FILE="$DEFAULT_CONFIG_FILE"
+PIPELINE_DIR="$DEFAULT_PIPELINE_DIR"
+NEXTFLOW_WORK_DIR="$DEFAULT_NEXTFLOW_WORK_DIR"
+CHECK_INTERVAL="$DEFAULT_CHECK_INTERVAL"
+TIMEOUT="$DEFAULT_TIMEOUT"
+MAX_PARALLEL="$DEFAULT_MAX_PARALLEL"
+VERBOSE=false
+PARALLEL_MODE=false
+BASE_DATA_DIR=""
+SAMPLE_IDS_FILE=""
+
+# Tracking arrays
+declare -A SAMPLE_STATUS=()      # "pending", "ready", "running", "completed", "failed"
+declare -A SAMPLE_JOB_PIDS=()    # Process IDs for running jobs
+declare -A SAMPLE_START_TIME=()  # When sample monitoring started
+declare -A SAMPLE_READY_TIME=()  # When sample became ready
+
+# Colors for output (if terminal supports it)
+if [[ -t 1 ]]; then
+    readonly RED='\033[0;31m'
+    readonly GREEN='\033[0;32m'
+    readonly YELLOW='\033[1;33m'
+    readonly BLUE='\033[0;34m'
+    readonly CYAN='\033[0;36m'
+    readonly NC='\033[0m' # No Color
+else
+    readonly RED=''
+    readonly GREEN=''
+    readonly YELLOW=''
+    readonly BLUE=''
+    readonly CYAN=''
+    readonly NC=''
+fi
+
+#==============================================================================
+# Utility Functions
+#==============================================================================
+
+show_help() {
+    cat << EOF
+${CYAN}$SCRIPT_NAME v$SCRIPT_VERSION${NC}
+Intelligent monitoring for ONT BAM processing with automatic pipeline triggering
+
+${YELLOW}USAGE:${NC}
+    $0 [OPTIONS]
+
+${YELLOW}OPTIONS:${NC}
+    -d, --data-dir DIR      Base data directory containing sample folders
+    -s, --samples FILE      Sample IDs file (supports single column or tab-separated)
+    -p, --pipeline DIR      Pipeline base directory (default: current directory)
+    -w, --workdir DIR       Nextflow work directory base (default: /tmp/nextflow_work)
+    -c, --config FILE       Configuration file to parse (default: conf/mergebam.config)
+    -i, --interval SEC      Check interval in seconds (default: 300)
+    -t, --timeout SEC       Maximum wait time per sample (default: 432000 = 5 days)
+    --parallel              Enable parallel sample processing
+    --max-parallel N        Maximum parallel jobs (default: 3)
+    -v, --verbose           Enable verbose logging
+    -h, --help              Show this help message
+
+${YELLOW}EXAMPLES:${NC}
+    # Basic usage with auto-detection
+    $0
+
+    # Parallel processing with verbose output
+    $0 --parallel --max-parallel 5 -v
+
+    # Custom paths
+    $0 -d /path/to/data -s /path/to/samples.txt -w /tmp/work
+
+    # Different config file
+    $0 -c conf/analysis.config --parallel -v
+
+${YELLOW}DIRECTORY STRUCTURE:${NC}
+    The script expects sample directories with final_summary files:
+    
+    data_directory/
+    ├── SAMPLE_01/
+    │   └── [any_subdirectory]/
+    │       └── final_summary_*_*_*.txt
+    ├── SAMPLE_02/
+    │   └── [different_subdirectory]/
+    │       └── final_summary_*_*_*.txt
+    └── ...
+
+${YELLOW}SAMPLE IDS FILE FORMATS:${NC}
+    Single column:          Tab-separated:
+    T001                    T001    flow_cell_1
+    T002                    T002    flow_cell_2
+    T003                    T003    flow_cell_3
+
+For more information, see the documentation.
+EOF
+}
+
+log() {
+    local level="$1"
+    shift
+    local message="$*"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local color=""
+    
+    case "$level" in
+        ERROR)   color="$RED" ;;
+        WARNING) color="$YELLOW" ;;
+        SUCCESS) color="$GREEN" ;;
+        INFO)    color="$BLUE" ;;
+        VERBOSE) color="$CYAN" ;;
+        *)       color="" ;;
+    esac
+    
+    if [[ "$level" == "VERBOSE" && "$VERBOSE" != true ]]; then
+        return
+    fi
+    
+    echo -e "${color}[$timestamp] [$level]${NC} $message"
+}
+
+die() {
+    log "ERROR" "$*"
+    exit 1
+}
+
+#==============================================================================
+# Configuration Parsing Functions
+#==============================================================================
+
+extract_config_value() {
+    local config_file="$1"
+    local param_name="$2"
+    
+    [[ -f "$config_file" ]] || return 1
+    
+    # Extract parameter value, handling various quote styles and comments
+    grep -E "^\s*${param_name}\s*=" "$config_file" | \
+        sed -E 's|^\s*[^=]*=\s*"?([^"#]*)"?.*|\1|' | \
+        sed 's|//.*||' | \
+        xargs | \
+        head -1
+}
+
+resolve_variables() {
+    local input_path="$1"
+    local config_file="$2"
+    local resolved_path="$input_path"
+    
+    # Extract base variables
+    local base_path=$(extract_config_value "$config_file" "path")
+    local nwgs_dir=$(extract_config_value "$config_file" "nWGS_dir")
+    
+    # Replace variable patterns
+    if [[ -n "$base_path" ]]; then
+        resolved_path="${resolved_path//\$\{params.path\}/$base_path}"
+        resolved_path="${resolved_path//\$\{path\}/$base_path}"
+    fi
+    
+    if [[ -n "$nwgs_dir" ]]; then
+        resolved_path="${resolved_path//\$\{params.nWGS_dir\}/$nwgs_dir}"
+        resolved_path="${resolved_path//\$\{nWGS_dir\}/$nwgs_dir}"
+    fi
+    
+    echo "$resolved_path"
+}
+
+validate_config() {
+    local config_file="$1"
+    
+    if [[ ! -f "$config_file" ]]; then
+        die "Configuration file not found: $config_file"
+    fi
+    
+    local base_path=$(extract_config_value "$config_file" "path")
+    if [[ -z "$base_path" ]]; then
+        die "Required 'path' variable not found in config: $config_file"
+    fi
+    
+    log "VERBOSE" "Configuration validation passed for: $config_file"
+    log "VERBOSE" "Base path: $base_path"
+}
+
+auto_detect_paths() {
+    validate_config "$CONFIG_FILE"
+    
+    local base_path=$(extract_config_value "$CONFIG_FILE" "path")
+    
+    # Auto-detect base data directory
+    if [[ -z "$BASE_DATA_DIR" ]]; then
+        # Try to find input directory from config
+        local input_dir=$(extract_config_value "$CONFIG_FILE" "input_dir")
+        if [[ -n "$input_dir" ]]; then
+            BASE_DATA_DIR=$(resolve_variables "$input_dir" "$CONFIG_FILE")
+            log "INFO" "Auto-detected data directory from config: $BASE_DATA_DIR"
+        else
+            # Search for common data directory patterns
+            log "VERBOSE" "No input_dir in config, searching for data directories..."
+            
+            local candidate_dirs=()
+            
+            # Look for common directory names under base_path
+            for subdir in "testdata" "data" "samples" "input" "bam_data"; do
+                local candidate="$base_path/$subdir"
+                if [[ -d "$candidate" ]]; then
+                    candidate_dirs+=("$candidate")
+                fi
+            done
+            
+            # Also check if base_path itself contains sample directories
+            if [[ -d "$base_path" ]]; then
+                local sample_like_dirs=($(find "$base_path" -maxdepth 1 -type d -name "*[0-9]*" 2>/dev/null | head -3))
+                if [[ ${#sample_like_dirs[@]} -gt 0 ]]; then
+                    candidate_dirs+=("$base_path")
+                fi
+            fi
+            
+            # Use the first valid candidate
+            for candidate in "${candidate_dirs[@]}"; do
+                if [[ -d "$candidate" ]]; then
+                    BASE_DATA_DIR="$candidate"
+                    log "INFO" "Auto-detected data directory by search: $BASE_DATA_DIR"
+                    break
+                fi
+            done
+            
+            # Final fallback - use base_path itself
+            if [[ -z "$BASE_DATA_DIR" ]]; then
+                BASE_DATA_DIR="$base_path"
+                log "WARNING" "Using base path as data directory: $BASE_DATA_DIR"
+            fi
+        fi
+    fi
+    
+    # Auto-detect sample IDs file
+    if [[ -z "$SAMPLE_IDS_FILE" ]]; then
+        # Try to find sample file parameters from config
+        for param in "bam_sample_id_file" "analyse_sample_id_file" "epi2me_sample_id_file"; do
+            local sample_file=$(extract_config_value "$CONFIG_FILE" "$param")
+            if [[ -n "$sample_file" ]]; then
+                SAMPLE_IDS_FILE=$(resolve_variables "$sample_file" "$CONFIG_FILE")
+                log "INFO" "Auto-detected sample file: $SAMPLE_IDS_FILE (from $param)"
+                break
+            fi
+        done
+        
+        # If not found in config, search for common sample file patterns
+        if [[ -z "$SAMPLE_IDS_FILE" ]]; then
+            log "VERBOSE" "No sample file specified in config, searching for common patterns..."
+            
+            # Search in data directory and subdirectories
+            local search_dirs=("$BASE_DATA_DIR" "$base_path" "$(dirname "$CONFIG_FILE")/.." ".")
+            local file_patterns=("sample_ids_bam.txt" "sample_ids.txt")
+            
+            for search_dir in "${search_dirs[@]}"; do
+                if [[ ! -d "$search_dir" ]]; then
+                    continue
+                fi
+                
+                for pattern in "${file_patterns[@]}"; do
+                    local candidate_files=($(find "$search_dir" -name "$pattern" -type f 2>/dev/null | head -5))
+                    
+                    for candidate in "${candidate_files[@]}"; do
+                        if [[ -s "$candidate" ]]; then
+                            SAMPLE_IDS_FILE="$candidate"
+                            log "INFO" "Found sample file by pattern search: $SAMPLE_IDS_FILE"
+                            break 3  # Break out of all three loops
+                        fi
+                    done
+                done
+            done
+        fi
+        
+        # Last resort: look for any file with "sample" in the name
+        if [[ -z "$SAMPLE_IDS_FILE" ]]; then
+            log "VERBOSE" "Pattern search failed, looking for any file containing 'sample'..."
+            
+            for search_dir in "$BASE_DATA_DIR" "$base_path"; do
+                if [[ -d "$search_dir" ]]; then
+                    local sample_files=($(find "$search_dir" -name "*sample*" -type f 2>/dev/null | head -3))
+                    
+                    for candidate in "${sample_files[@]}"; do
+                        if [[ -s "$candidate" ]]; then
+                            log "WARNING" "Using potential sample file (please verify): $candidate"
+                            SAMPLE_IDS_FILE="$candidate"
+                            break 2
+                        fi
+                    done
+                fi
+            done
+        fi
+    fi
+    
+    # Validate results
+    [[ -n "$BASE_DATA_DIR" ]] || die "Could not determine base data directory"
+    [[ -n "$SAMPLE_IDS_FILE" ]] || die "Could not determine sample IDs file"
+    
+    # Check for unresolved variables
+    if [[ "$BASE_DATA_DIR" =~ \$\{ ]]; then
+        die "Unresolved variables in data directory: $BASE_DATA_DIR"
+    fi
+    
+    if [[ "$SAMPLE_IDS_FILE" =~ \$\{ ]]; then
+        die "Unresolved variables in sample file: $SAMPLE_IDS_FILE"
+    fi
+}
+
+#==============================================================================
+# Sample Management Functions
+#==============================================================================
+
+load_samples() {
+    local samples=()
+    local line_count=0
+    local valid_count=0
+    
+    if [[ ! -f "$SAMPLE_IDS_FILE" ]]; then
+        die "Sample IDs file not found: $SAMPLE_IDS_FILE"
+    fi
+    
+    # Send log messages to stderr so they don't interfere with return value
+    log "VERBOSE" "Reading sample IDs from: $SAMPLE_IDS_FILE" >&2
+    
+    while IFS=$'\t' read -r sample_id flow_cell_id || [[ -n "$sample_id" ]]; do
+        ((line_count++))
+        sample_id=$(echo "$sample_id" | xargs)  # Trim whitespace
+        
+        log "VERBOSE" "Line $line_count: raw='$sample_id' flow_cell='${flow_cell_id:-}'" >&2
+        
+        # Skip empty lines and comments
+        if [[ -n "$sample_id" && ! "$sample_id" =~ ^# ]]; then
+            samples+=("$sample_id")
+            SAMPLE_STATUS["$sample_id"]="pending"
+            SAMPLE_START_TIME["$sample_id"]=$(date +%s)
+            ((valid_count++))
+            log "VERBOSE" "Added valid sample #$valid_count: $sample_id" >&2
+        else
+            log "VERBOSE" "Skipped line $line_count: empty or comment" >&2
+        fi
+    done < "$SAMPLE_IDS_FILE"
+    
+    log "INFO" "Processed $line_count lines from sample file" >&2
+    log "INFO" "Found $valid_count valid samples" >&2
+    
+    if [[ ${#samples[@]} -eq 0 ]]; then
+        die "No valid samples found in: $SAMPLE_IDS_FILE"
+    fi
+    
+    log "INFO" "Loaded samples: ${samples[*]}" >&2
+    # Only output the samples to stdout for capture
+    echo "${samples[@]}"
+}
+
+find_summary_file() {
+    local sample_id="$1"
+    local sample_dir="$BASE_DATA_DIR/$sample_id"
+    
+    # Find all final_summary files recursively
+    local summary_files=($(find "$sample_dir" -name "final_summary_*_*_*" -type f 2>/dev/null))
+    
+    # Return the first non-empty file found
+    for file in "${summary_files[@]}"; do
+        if [[ -s "$file" ]]; then
+            echo "$file"
+            return 0
+        fi
+    done
+    
+    return 1
+}
+
+check_sample_ready() {
+    local sample_id="$1"
+    
+    # Skip if already processed
+    case "${SAMPLE_STATUS[$sample_id]}" in
+        "ready"|"running"|"completed"|"failed")
+            return 1
+            ;;
+    esac
+    
+    local sample_dir="$BASE_DATA_DIR/$sample_id"
+    
+    # Check if sample directory exists
+    if [[ ! -d "$sample_dir" ]]; then
+        log "VERBOSE" "Sample directory not found: $sample_dir"
+        return 1
+    fi
+    
+    # Look for summary file (created by another process)
+    local summary_file
+    if summary_file=$(find_summary_file "$sample_id"); then
+        local file_age=$(( $(date +%s) - $(stat -c %Y "$summary_file" 2>/dev/null || echo 0) ))
+        local file_age_hours=$((file_age / 3600))
+        local relative_path="${summary_file#$BASE_DATA_DIR/}"
+        
+        log "SUCCESS" "Sample $sample_id READY: Found new summary file $relative_path (${file_age_hours}h ago)"
+        SAMPLE_STATUS["$sample_id"]="ready"
+        SAMPLE_READY_TIME["$sample_id"]=$(date +%s)
+        return 0
+    else
+        log "VERBOSE" "Sample $sample_id: No summary file found yet - waiting for external process to create it"
+    fi
+    
+    return 1
+}
+
+#==============================================================================
+# Pipeline Execution Functions
+#==============================================================================
+
+run_sample_pipeline() {
+    local sample_id="$1"
+    local work_dir="$NEXTFLOW_WORK_DIR/${sample_id}_work"
+    
+    # Create work directory
+    mkdir -p "$work_dir"
+    
+    SAMPLE_STATUS["$sample_id"]="running"
+    log "INFO" "🚀 Starting pipeline for sample: $sample_id"
+    log "INFO" "Work directory: $work_dir"
+    
+    local log_file="$work_dir/pipeline.log"
+    local status_file="$work_dir/status"
+    
+    if [[ "$PARALLEL_MODE" == true ]]; then
+        # Run in background
+        (
+            cd "$PIPELINE_DIR"
+            if bash run_pipeline_singularity.sh --run_mode_order -w "$work_dir" > "$log_file" 2>&1; then
+                echo "COMPLETED" > "$status_file"
+                log "SUCCESS" "Sample $sample_id pipeline completed successfully"
+            else
+                echo "FAILED" > "$status_file"
+                log "ERROR" "Sample $sample_id pipeline failed"
+            fi
+        ) &
+        
+        local job_pid=$!
+        SAMPLE_JOB_PIDS["$sample_id"]=$job_pid
+        log "INFO" "Sample $sample_id running in background (PID: $job_pid)"
+    else
+        # Run in foreground - show output directly on screen
+        cd "$PIPELINE_DIR"
+        log "INFO" "Running pipeline in foreground - output will be shown directly"
+        log "INFO" "Activating conda environment: nwgs_env"
+        
+        # Activate conda environment and run pipeline without containers
+        if source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate nwgs_env && \
+           nextflow run main.nf -c conf/analysis.config --run_mode_order -w "$work_dir" -with-report report.html -with-timeline timeline.html -with-trace trace.txt; then
+            SAMPLE_STATUS["$sample_id"]="completed"
+            log "SUCCESS" "Sample $sample_id pipeline completed successfully"
+        else
+            SAMPLE_STATUS["$sample_id"]="failed"
+            log "ERROR" "Sample $sample_id pipeline failed"
+        fi
+    fi
+}
+
+check_running_jobs() {
+    if [[ "$PARALLEL_MODE" != true ]]; then
+        return
+    fi
+    
+    for sample_id in "${!SAMPLE_JOB_PIDS[@]}"; do
+        local job_pid="${SAMPLE_JOB_PIDS[$sample_id]}"
+        local work_dir="$NEXTFLOW_WORK_DIR/${sample_id}_work"
+        local status_file="$work_dir/status"
+        
+        # Check if job is still running
+        if ! kill -0 "$job_pid" 2>/dev/null; then
+            # Job finished
+            if [[ -f "$status_file" ]]; then
+                SAMPLE_STATUS["$sample_id"]=$(cat "$status_file")
+            else
+                SAMPLE_STATUS["$sample_id"]="failed"
+            fi
+            unset SAMPLE_JOB_PIDS["$sample_id"]
+        fi
+    done
+}
+
+get_running_job_count() {
+    echo ${#SAMPLE_JOB_PIDS[@]}
+}
+
+#==============================================================================
+# Main Monitoring Logic
+#==============================================================================
+
+show_status_summary() {
+    local pending=0 ready=0 running=0 completed=0 failed=0
+    
+    for sample_id in "${!SAMPLE_STATUS[@]}"; do
+        case "${SAMPLE_STATUS[$sample_id]}" in
+            "pending")   pending=$((pending + 1)) ;;
+            "ready")     ready=$((ready + 1)) ;;
+            "running")   running=$((running + 1)) ;;
+            "completed") completed=$((completed + 1)) ;;
+            "failed")    failed=$((failed + 1)) ;;
+        esac
+    done
+    
+    local total=${#SAMPLE_STATUS[@]}
+    log "INFO" "Status: $total total | $pending pending | $ready ready | $running running | $completed completed | $failed failed"
+}
+
+monitor_samples() {
+    log "VERBOSE" "Starting load_samples function..."
+    local samples_string=$(load_samples)
+    local samples=($samples_string)
+    
+    log "VERBOSE" "Received samples string: '$samples_string'"
+    log "VERBOSE" "Parsed into array: ${samples[*]}"
+    log "VERBOSE" "Array length: ${#samples[@]}"
+    
+    local start_time=$(date +%s)
+    local check_count=0
+    local max_checks=$((TIMEOUT / CHECK_INTERVAL))
+    
+    log "VERBOSE" "Initialized variables: start_time=$start_time, check_count=$check_count, max_checks=$max_checks"
+    
+    # Initialize all samples as pending
+    for sample_id in "${samples[@]}"; do
+        SAMPLE_STATUS["$sample_id"]="pending"
+        SAMPLE_START_TIME["$sample_id"]=$start_time
+        log "VERBOSE" "Initialized sample $sample_id as pending"
+    done
+    
+    log "INFO" "🔍 Starting monitoring for ${#samples[@]} samples"
+    log "INFO" "Check interval: ${CHECK_INTERVAL}s | Max time: $((TIMEOUT/60))min | Parallel: $PARALLEL_MODE"
+    
+    log "VERBOSE" "About to enter monitoring loop..."
+    log "VERBOSE" "Max checks: $max_checks, Timeout: $TIMEOUT, Interval: $CHECK_INTERVAL"
+    
+    while true; do
+        log "VERBOSE" "Inside while loop, iteration starting..."
+        check_count=$((check_count + 1))
+        log "VERBOSE" "Check count incremented to: $check_count"
+        local current_time=$(date +%s)
+        log "VERBOSE" "Got current time: $current_time"
+        local elapsed=$((current_time - start_time))
+        log "VERBOSE" "Calculated elapsed time: ${elapsed}s"
+        
+        log "INFO" "=== Check $check_count (${elapsed}s elapsed) ==="
+        log "VERBOSE" "Current time: $current_time, Start time: $start_time, Elapsed: ${elapsed}s"
+        
+        # Update running job statuses
+        check_running_jobs
+        
+        # Check each pending sample
+        local new_ready_count=0
+        for sample_id in "${samples[@]}"; do
+            log "VERBOSE" "Checking sample: $sample_id"
+            if check_sample_ready "$sample_id"; then
+                log "VERBOSE" "Sample $sample_id is ready, incrementing count"
+                new_ready_count=$((new_ready_count + 1))
+                
+                # Check if we can start this sample (parallel limit)
+                if [[ "$PARALLEL_MODE" == true ]]; then
+                    local running_count=$(get_running_job_count)
+                    if [[ $running_count -ge $MAX_PARALLEL ]]; then
+                        log "INFO" "Parallel limit reached ($running_count/$MAX_PARALLEL), queuing sample $sample_id"
+                        continue
+                    fi
+                fi
+                
+                log "INFO" "About to start pipeline for sample: $sample_id"
+                run_sample_pipeline "$sample_id"
+                log "VERBOSE" "Pipeline start function completed for sample: $sample_id"
+            else
+                log "VERBOSE" "Sample $sample_id is not ready yet"
+            fi
+        done
+        
+        log "VERBOSE" "Finished checking samples, new_ready_count: $new_ready_count"
+        
+        # Show status summary
+        log "VERBOSE" "SAMPLE_STATUS array size: ${#SAMPLE_STATUS[@]}"
+        log "VERBOSE" "SAMPLE_STATUS contents: ${!SAMPLE_STATUS[@]}"
+        for sid in "${!SAMPLE_STATUS[@]}"; do
+            log "VERBOSE" "  $sid -> ${SAMPLE_STATUS[$sid]}"
+        done
+        show_status_summary
+        
+        # Check completion conditions
+        local all_processed=true
+        local any_running=false
+        
+        log "VERBOSE" "Checking completion conditions for ${#samples[@]} samples..."
+        
+        for sample_id in "${samples[@]}"; do
+            local status="${SAMPLE_STATUS[$sample_id]}"
+            log "VERBOSE" "Sample $sample_id status: $status"
+            
+            case "$status" in
+                "pending"|"ready")
+                    log "VERBOSE" "  Setting all_processed=false due to $sample_id being $status"
+                    all_processed=false
+                    ;;
+                "running")
+                    log "VERBOSE" "  Setting any_running=true due to $sample_id being running"
+                    any_running=true
+                    ;;
+            esac
+        done
+        
+        log "VERBOSE" "All processed: $all_processed, Any running: $any_running"
+        
+        if [[ "$all_processed" == true ]]; then
+            if [[ "$any_running" == false ]]; then
+                log "SUCCESS" "🎉 All samples completed!"
+                break
+            else
+                log "INFO" "All samples triggered, waiting for running jobs to finish..."
+            fi
+        fi
+        
+        # Check timeout
+        if [[ $elapsed -gt $TIMEOUT ]]; then
+            log "WARNING" "⏰ Global timeout reached after $((TIMEOUT/3600))h"
+            break
+        fi
+        
+        # Progress report every hour
+        if [[ $((check_count % 12)) -eq 0 ]]; then
+            local elapsed_hours=$((elapsed / 3600))
+            log "INFO" "📊 Progress: $check_count checks, ${elapsed_hours}h elapsed"
+        fi
+        
+        sleep "$CHECK_INTERVAL"
+    done
+}
+
+#==============================================================================
+# Main Script Logic
+#==============================================================================
+
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -d|--data-dir)
+                BASE_DATA_DIR="$2"
+                shift 2
+                ;;
+            -s|--samples)
+                SAMPLE_IDS_FILE="$2"
+                shift 2
+                ;;
+            -p|--pipeline)
+                PIPELINE_DIR="$2"
+                shift 2
+                ;;
+            -w|--workdir)
+                NEXTFLOW_WORK_DIR="$2"
+                shift 2
+                ;;
+            -c|--config)
+                CONFIG_FILE="$2"
+                shift 2
+                ;;
+            -i|--interval)
+                CHECK_INTERVAL="$2"
+                shift 2
+                ;;
+            -t|--timeout)
+                TIMEOUT="$2"
+                shift 2
+                ;;
+            --parallel)
+                PARALLEL_MODE=true
+                shift
+                ;;
+            --max-parallel)
+                MAX_PARALLEL="$2"
+                shift 2
+                ;;
+            -v|--verbose)
+                VERBOSE=true
+                shift
+                ;;
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            *)
+                die "Unknown option: $1"
+                ;;
+        esac
+    done
+}
+
+validate_environment() {
+    # Check directories
+    [[ -d "$PIPELINE_DIR" ]] || die "Pipeline directory not found: $PIPELINE_DIR"
+    [[ -f "$PIPELINE_DIR/run_pipeline_singularity.sh" ]] || die "Pipeline script not found: $PIPELINE_DIR/run_pipeline_singularity.sh"
+    
+    # Create work directory
+    mkdir -p "$NEXTFLOW_WORK_DIR" || die "Cannot create work directory: $NEXTFLOW_WORK_DIR"
+    
+    # Validate final paths
+    [[ -d "$BASE_DATA_DIR" ]] || die "Data directory not found: $BASE_DATA_DIR"
+    [[ -f "$SAMPLE_IDS_FILE" ]] || die "Sample IDs file not found: $SAMPLE_IDS_FILE"
+    
+    log "INFO" "Environment validation passed"
+}
+
+show_configuration() {
+    log "INFO" "=== $SCRIPT_NAME v$SCRIPT_VERSION ==="
+    log "INFO" "Configuration:"
+    log "INFO" "  Data directory: $BASE_DATA_DIR"
+    log "INFO" "  Sample IDs file: $SAMPLE_IDS_FILE"
+    log "INFO" "  Pipeline directory: $PIPELINE_DIR"
+    log "INFO" "  Work directory: $NEXTFLOW_WORK_DIR"
+    log "INFO" "  Config file: $CONFIG_FILE"
+    log "INFO" "  Check interval: ${CHECK_INTERVAL}s"
+    if [[ $((TIMEOUT/3600)) -gt 0 ]]; then
+        log "INFO" "  Timeout: $((TIMEOUT/3600))h"
+    else
+        log "INFO" "  Timeout: $((TIMEOUT/60))min"
+    fi
+    log "INFO" "  Parallel mode: $PARALLEL_MODE"
+    if [[ "$PARALLEL_MODE" == true ]]; then
+        log "INFO" "  Max parallel: $MAX_PARALLEL"
+    fi
+    log "INFO" "  Verbose: $VERBOSE"
+}
+
+generate_final_report() {
+    local completed=0 failed=0 pending=0
+    
+    log "INFO" "=== Final Report ==="
+    
+    for sample_id in "${!SAMPLE_STATUS[@]}"; do
+        local status="${SAMPLE_STATUS[$sample_id]}"
+        local duration=""
+        
+        if [[ -n "${SAMPLE_READY_TIME[$sample_id]:-}" ]]; then
+            local ready_time="${SAMPLE_READY_TIME[$sample_id]}"
+            local start_time="${SAMPLE_START_TIME[$sample_id]}"
+            duration=" (ready after $((ready_time - start_time))s)"
+        fi
+        
+        case "$status" in
+            "completed") 
+                ((completed++))
+                log "SUCCESS" "✅ $sample_id: $status$duration"
+                ;;
+            "failed")
+                ((failed++))
+                log "ERROR" "❌ $sample_id: $status$duration"
+                ;;
+            *)
+                ((pending++))
+                log "WARNING" "⏳ $sample_id: $status$duration"
+                ;;
+        esac
+    done
+    
+    local total=${#SAMPLE_STATUS[@]}
+    log "INFO" "Summary: $total total, $completed completed, $failed failed, $pending pending"
+    
+    if [[ $failed -eq 0 && $pending -eq 0 ]]; then
+        log "SUCCESS" "🎉 All samples completed successfully!"
+        return 0
+    elif [[ $failed -gt 0 ]]; then
+        log "ERROR" "❌ Some samples failed"
+        return 1
+    else
+        log "WARNING" "⏳ Some samples still pending"
+        return 2
+    fi
+}
+
+main() {
+    # Parse command line
+    parse_arguments "$@"
+    
+    # Auto-detect paths if needed
+    if [[ -z "$BASE_DATA_DIR" || -z "$SAMPLE_IDS_FILE" ]]; then
+        auto_detect_paths
+    fi
+    
+    # Validate environment
+    validate_environment
+    
+    # Show configuration
+    show_configuration
+    
+    # Start monitoring
+    monitor_samples
+    
+    # Generate final report
+    generate_final_report
+}
+
+# Handle script interruption
+trap 'log "WARNING" "Script interrupted"; exit 130' SIGINT SIGTERM
+
+# Run main function
+main "$@"

@@ -458,7 +458,7 @@ process clairs_to {
     tuple val(sample_id), path('clairS_To_snv_avinput')
     tuple val(sample_id), path('ClairS_TO_snv.hg38_multianno.txt')
     tuple val(sample_id), path("${sample_id}_annotateandfilter_clairsto.csv"), emit:annotateandfilter_clairstoout
-    tuple val(sample_id), path("${sample_id}_merge_snv_indel_claisto.vcf.gz")
+    tuple val(sample_id), path("${sample_id}_merge_snv_indel_claisto.vcf.gz"), emit: clairsto_merged_vcf
 
     script:
     """
@@ -543,6 +543,39 @@ process merge_annotation {
         "${occ_genes}" \\
         ${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv
 
+    """
+}
+
+// New process: Run ClairS-TO and annotate with Ensembl VEP instead of ANNOVAR
+process clairs_to_vep {
+    label 'clairsto'
+    publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(merged_vcf)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_merge_snv_indel_claisto.vep.vcf.gz"), emit: vep_annotated_vcf
+
+    script:
+    """
+    # VEP annotation. Requires 'vep' and bgzip/tabix available in container.
+    # Uses cache at params.vep_cache_dir and GRCh38 reference.
+    vep \
+      --input_file ${merged_vcf} \
+      --output_file ${sample_id}_merge_snv_indel_claisto.vep.vcf \
+      --vcf \
+      --force_overwrite \
+      --offline \
+      --cache \
+      --dir_cache ${params.vep_cache_dir} \
+      --assembly GRCh38 \
+      --fasta ${params.reference_genome} \
+      --everything \
+      --fork ${task.cpus}
+
+    bgzip -f ${sample_id}_merge_snv_indel_claisto.vep.vcf
+    tabix -f -p vcf ${sample_id}_merge_snv_indel_claisto.vep.vcf.gz
     """
 }
 

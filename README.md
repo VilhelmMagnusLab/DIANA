@@ -157,7 +157,9 @@ sample_id2   flowcell_id2
 ├── humandb/                      # Annotation files
 ├── testdata/                     # Input data
 │   ├── sample_ids.txt           # Sample ID file
-│   └── single_bam_folder/       # BAM files
+│   └── single_bam_folder/
+│       ├── merge_bam/           # Merged BAM inputs
+│       └── occ_bam/             # ROI BAMs
 └── results/                      # Output (auto-created)
 ```
 
@@ -191,6 +193,9 @@ The nanoDX folder in the pipeline root should be moved into the `data/reference`
 - `Capper_et_al.h5.md5` (checksum)
 - `Capper_et_al_NN.pkl` (neural network)
 
+**ONT basecalling model (place directory in `data/reference/`):**
+- `r1041_e82_400bps_sup_v420/`  # Required by ClairS-TO; used via `clairsto_models`
+
 
 **Download files from [Zenodo](https://doi.org/10.5281/zenodo.16759248) and place them in the appropriate directories.**
 
@@ -218,7 +223,7 @@ data/
 │   └── hg38_cosmic100coding2024.txt
 ├── testdata/                    # Your input data
 │   ├── sample_ids.txt
-│   └── bams/                    # BAM files
+│   └── single_bam_folder/       # BAM files
 └── results/                     # Output (auto-created)
 ```
 

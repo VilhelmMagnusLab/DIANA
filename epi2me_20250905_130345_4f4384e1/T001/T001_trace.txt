@@ -1,0 +1,2 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+1	e9/1844f2	4137907	epi2me:run_epi2me_cnv (1)	COMPLETED	0	2025-09-05 13:01:58.441	1m 44s	1m 44s	101.2%	655.8 MB	2.5 GB	6.2 GB	66.2 MB
