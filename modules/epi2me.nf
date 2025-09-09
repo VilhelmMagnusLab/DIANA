@@ -40,7 +40,6 @@ process run_epi2me_modkit {
     modkit pileup \
       ${bam} \
       ${sample_id}.wf_mods.bedmethyl \
-      --region chr1:1-1000000 \
       --ref ${reference_genome} \
       --interval-size ${params.interval_size} \
       --log-filepath ${sample_id}_modkit.log 

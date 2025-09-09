@@ -7,14 +7,14 @@
 # Monitors ONT basecalled individual BAM files independently and triggers 
 # the nWGS pipeline immediately when ANY sample's final_summary file becomes ready.
 # Features intelligent config parsing, dynamic subdirectory detection, and
-# robust error handling.
+# robust error handling. This script should be run once the ONT sequencing is started
 #
 # Directory structure supported:
 #   ${BASE_DATA_DIR}/
 #   ├── T001/[any_subdirectory]/final_summary_*_*_*.txt
 #   ├── T002/[any_subdirectory]/final_summary_*_*_*.txt
 #   └── ...
-#
+# 
 # Usage: ./smart_sample_monitor.sh [options]
 #
 # Options:

@@ -1,0 +1,2 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+1	e9/e286aa	391083	analysis:cramino_report (1)	COMPLETED	0	2025-09-08 14:47:26.157	25.1s	24.7s	410.4%	65.8 MB	405.4 MB	6.1 GB	2.5 KB

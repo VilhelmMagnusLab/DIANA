@@ -16,8 +16,8 @@ def start_time = new Date()
 def validateParameters() {
     params.run_mode = params.run_mode_analysis ?: 'all'
     println "Analysis run mode: ${params.run_mode}"
-    if (!['mgmt', 'svannasv', 'cnv', 'occ', 'tertp', 'mgmt', 'rmd', 'all'].contains(params.run_mode)) {
-        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: methylation, svannasv, cnv, occ, tertp, mgmt, rmd, all"
+    if (!['mgmt', 'svannasv', 'cnv', 'occ', 'tertp', 'mgmt', 'rmd', 'stat', 'all'].contains(params.run_mode)) {
+        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: methylation, svannasv, cnv, occ, tertp, mgmt, rmd, stat, all"
     }
 }
 
@@ -383,6 +383,9 @@ process clair3 {
     script:
    
    """ 
+   # Activate conda environment for Clair3
+   source /opt/conda/etc/profile.d/conda.sh
+   conda activate clair3
 
    /opt/bin/run_clair3.sh \
     --bam_fn=$occ_bam \
@@ -393,7 +396,7 @@ process clair3 {
     --var_pct_phasing=1 \
     --platform="ont" \
     --no_phasing_for_fa \
-    --model_path=${params.ref_dir}/r1041_e82_400bps_sup_v420 \
+    --model_path=/opt/models/r1041_e82_400bps_sup_v420 \
     --output=output_clair3
  
  convert2annovar.pl output_clair3/pileup.vcf.gz \
@@ -1154,14 +1157,24 @@ workflow analysis {
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id -> 
-                    tuple(
-                        sample_id, 
-                        file("${params.merge_bam_folder}/${sample_id}.bam", checkIfExists: true),
-                        file("${params.merge_bam_folder}/${sample_id}.bam.bai", checkIfExists: true),
-                        file(params.reference_genome, checkIfExists: true),
-                        file("${params.reference_genome}.fai", checkIfExists: true)
-                    )
+                    def bam_file = file("${params.merge_bam_folder}/${sample_id}.merge.bam")
+                    def bai_file = file("${params.merge_bam_folder}/${sample_id}.merge.bam.bai")
+                    
+                    // Only process samples that have corresponding BAM files
+                    if (bam_file.exists() && bai_file.exists()) {
+                        tuple(
+                            sample_id, 
+                            bam_file,
+                            bai_file,
+                            file(params.reference_genome, checkIfExists: true),
+                            file("${params.reference_genome}.fai", checkIfExists: true)
+                        )
+                    } else {
+                        println "WARNING: Skipping sample ${sample_id} - BAM file not found: ${bam_file}"
+                        null
+                    }
                 }
+                .filter { it != null }
 
         // MGMT analysis
         if (params.run_mode in ['mgmt', 'all']) {
@@ -1193,7 +1206,7 @@ workflow analysis {
                     .map { sample_id -> 
                         tuple(
                             sample_id,
-                            file("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz"),
+                            file("${params.bedmethyl_folder}/${sample_id}.wf_mods.bedmethyl.gz"),
                             file(params.epicsites),
                             file(params.mgmt_cpg_island_hg38)
                         )
@@ -1529,6 +1542,12 @@ workflow analysis {
             //plot_genomic_regions(boosts_plot_genomic_regions_channel)
         }
 
+        // Statistics mode - run cramino for quality assessment
+        if (params.run_mode in ['stat']) {
+            println "Running Cramino Statistics..."
+            cramino_report(boosts_cramino)
+        }
+
         // RMD report generation
         if (params.run_mode in ['rmd', 'all'] || params.run_mode_order) {
             println "Running RMD Report Generation..."
@@ -1573,7 +1592,7 @@ workflow analysis {
                     .map { sample_id -> 
                         tuple(
                             sample_id,
-                            file("${params.bedmethyl_folder}/*.wf_mods.bedmethyl.gz"),
+                            file("${params.bedmethyl_folder}/${sample_id}.wf_mods.bedmethyl.gz"),
                             file(params.epicsites),
                             file(params.mgmt_cpg_island_hg38)
                         )
