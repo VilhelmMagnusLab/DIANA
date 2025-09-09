@@ -1,7 +1,0 @@
-task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
-2	09/115ef2	2091164	mergebam:merge_bam_files (1)	COMPLETED	0	2025-08-25 13:25:57.504	4m 16s	4m 15s	230.2%	27.6 MB	458.6 MB	12.6 GB	6.1 GB
-1	9e/561d69	2096289	analysis:ace_tmc (1)	COMPLETED	0	2025-08-25 13:30:13.215	28.1s	27.7s	62.6%	534 MB	2.4 GB	48.9 MB	4.6 MB
-3	61/02f093	2097668	mergebam:extract_roi (1)	COMPLETED	0	2025-08-25 13:30:41.347	3m 31s	3m 31s	64.8%	12.1 MB	23.2 MB	6.2 GB	56.3 MB
-6	7d/a9c918	2103910	epi2me:run_epi2me_sv (1)	COMPLETED	0	2025-08-25 13:34:12.398	50.9s	50.6s	295.1%	264.2 MB	1 GB	6.2 GB	3 MB
-4	a0/d43a7f	2107455	epi2me:run_epi2me_cnv (1)	FAILED	1	2025-08-25 13:35:03.327	7.9s	7.8s	-	-	-	-	-
-5	34/e15003	2108150	epi2me:run_epi2me_modkit (1)	ABORTED	-	2025-08-25 13:35:11.199	-	-	-	-	-	-	-
