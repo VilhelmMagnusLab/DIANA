@@ -51,6 +51,8 @@ hs_err_pid*.log
 # Run logs (analysis directories to ignore)
 analysis_mgmt*/
 analysis_tertp*/
+epi2me_*/
+analysis_*/
 
 # Data files (large files that shouldn't be in git)
 *.bam
