@@ -1,9 +1,9 @@
 rule ichorCNA:
-  input: "/home/chbope/Documents/trash/epi2me/qdna_seq/T21-058_raw_bins.bin.wig",
+  input: "/home/chbope/Documents/trash/epi2me/qdna_seq/T001_raw_bins.bin.wig",
   output:
-    pdf="/home/chbope/Documents/trash/epi2me/qdna_seq/T21_genomeWide.pdf",
-    seg="/home/chbope/Documents/trash/epi2me/qdna_seq/T21.seg",
-    txt="/home/chbope/Documents/trash/epi2me/qdna_seq/T21.params.txt",
+    pdf="/home/chbope/Documents/trash/epi2me/qdna_seq/T001_genomeWide.pdf",
+    seg="/home/chbope/Documents/trash/epi2me/qdna_seq/T001.seg",
+    txt="/home/chbope/Documents/trash/epi2me/qdna_seq/T001.params.txt",
     dir=directory("/home/chbope/Documents/trash/epi2me/qdna_seq/")
   conda: "envs/ichorCNA.yaml"
   shell: """mkdir -p {output.dir} && \

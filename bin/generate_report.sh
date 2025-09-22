@@ -48,7 +48,7 @@
 samples_file="/home/chbope/extension/nWGS_manuscript_data/data/testdata/sample_ids.txt"
 
 # RMarkdown template file path
-rmd_template="/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_final.Rmd"
+rmd_template="/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_final9sep.Rmd"
 
 # Define base paths to avoid repetition
 BASE_DATA_PATH="/home/chbope/extension/nWGS_manuscript_data/data"
@@ -73,19 +73,21 @@ while read -r sample_id tumor_content; do
     cnv_chr9="${RESULTS_PATH}/cnv/${sample_id}_cnv_chr9.pdf"
     cnv_chr7="${RESULTS_PATH}/cnv/${sample_id}_cnv_chr7.pdf"
     mgmt_results="${RESULTS_PATH}/methylation/${sample_id}_MGMT_results.csv"
-    merge_results="${RESULTS_PATH}/merge_annot_clair3andclairsto/${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv"
+    merge_results="${RESULTS_PATH}/merge_annot_clair3andclairsto/${sample_id}_merge_annotation_filter_snvs_allcall.csv"
     fusion_events="${RESULTS_PATH}/structure_variant/svannasv/${sample_id}_filter_fusion_event.tsv"
     tertphtml="${RESULTS_PATH}/coverage/${sample_id}_tertp_id1.html"
     svannahtml="${RESULTS_PATH}/structure_variant/svannasv/${sample_id}_occ_svanna_annotation.html"
     egfr_coverage="${RESULTS_PATH}/coverage/${sample_id}_egfr_coverage.pdf"
     idh1_coverage="${RESULTS_PATH}/coverage/${sample_id}_idh1_coverage.pdf"
+    idh2_coverage="${RESULTS_PATH}/coverage/${sample_id}_idh2_coverage.pdf"
     tertp_coverage="${RESULTS_PATH}/coverage/${sample_id}_tertp_coverage.pdf"
+    tsneplot="${RESULTS_PATH}/classifier/nanodx/${sample_id}_tsne_plot.pdf"
     
     # Output PDF path
-    output_file="${RESULTS_PATH}/report/${sample_id}_markdown_pipeline_report_final.pdf"
+    output_file="${RESULTS_PATH}/report/${sample_id}_markdown_pipeline_report_final4.pdf"
 
     # Now call the Rscript exactly as you want
-    Rscript -e "rmarkdown::render('${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[20])" \
+    Rscript -e "rmarkdown::render('${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[22])" \
       "${sample_id}" \
       "${craminoreport}" \
       "${sample_ids_file}" \
@@ -104,7 +106,9 @@ while read -r sample_id tumor_content; do
       "${svannahtml}" \
       "${egfr_coverage}" \
       "${idh1_coverage}" \
+      "${idh2_coverage}" \
       "${tertp_coverage}" \
+      "${tsneplot}" \
       "${output_file}"
     rm -rf /tmp/Rtmp*
 

@@ -213,11 +213,11 @@ if [ $? -eq 0 ]; then
         if [ -z "$SAMPLE_IDS" ]; then
             SAMPLE_FILE=""
             if [ "$PROCESS_TYPE" = "analysis" ] || [[ "$PROCESS_TYPE" == analysis_* ]]; then
-                SAMPLE_FILE=$(awk -F'=' '/analyse_sample_id_file/ {gsub(/^[ \t\"]+|[ \t\"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/analysis.config" | head -1)
+                SAMPLE_FILE=$(awk -F'=' '/analyse_sample_id_file/ {gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/analysis.config" | head -1)
             elif [ "$PROCESS_TYPE" = "epi2me" ]; then
-                SAMPLE_FILE=$(awk -F'=' '/epi2me_sample_id_file/ {gsub(/^[ \t\"]+|[ \t\"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/epi2me.config" | head -1)
+                SAMPLE_FILE=$(awk -F'=' '/epi2me_sample_id_file/ {gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/epi2me.config" | head -1)
             elif [ "$PROCESS_TYPE" = "mergebam" ]; then
-                SAMPLE_FILE=$(awk -F'=' '/bam_sample_id_file/ {gsub(/^[ \t\"]+|[ \t\"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/mergebam.config" | head -1)
+                SAMPLE_FILE=$(awk -F'=' '/bam_sample_id_file/ {gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/mergebam.config" | head -1)
             fi
             if [ -n "$SAMPLE_FILE" ] && [ -f "$SAMPLE_FILE" ]; then
                 SAMPLE_IDS=$(awk -F'[,\t ]+' 'NF {print $1}' "$SAMPLE_FILE" | grep -E '^[A-Za-z0-9._-]+' | sort -u | tr '\n' ' ')

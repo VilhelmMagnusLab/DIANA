@@ -2,8 +2,8 @@
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 7) {
-    stop("Usage: plot_genomic_regions.R <gviz_data> <sample_id> <bam_file> <output_egfr_coverage> <output_idh1_coverage> <output_tertp_coverage> <cytoband_file>")
+if (length(args) != 8) {
+    stop("Usage: plot_genomic_regions.R <gviz_data> <sample_id> <bam_file> <output_egfr_coverage> <output_idh1_coverage> <output_idh2_coverage> <output_tertp_coverage> <cytoband_file>")
 }
 
 gviz_data_path <- args[1]
@@ -11,8 +11,9 @@ sample_id <- args[2]
 bam_file <- args[3]
 egfr_output <- args[4]
 idh1_output <- args[5]
-tertp_output <- args[6]
-cytoband_file <- args[7]
+idh2_output <- args[6]
+tertp_output <- args[7]
+cytoband_file <- args[8]
 
 # Load required libraries
 suppressPackageStartupMessages({
@@ -82,7 +83,7 @@ pdf(idh1_output, width=10, height=6)
 itrack <- createCustomIdeogram("2")
 gtrack <- GenomeAxisTrack()
 sTrack <- SequenceTrack(Hsapiens, chromosome = "2")
-Sample_track <- AlignmentsTrack(bam_file, name = "IDH1 p.132")
+Sample_track <- AlignmentsTrack(bam_file, name = "IDH1 p.R132")
 ht <- HighlightTrack(
     trackList = list(sTrack, Sample_track),
     start = c(208248388), 
@@ -99,6 +100,31 @@ plotTracks(
     cex.mismatch = 0.5
 )
 dev.off()
+
+# Plot IDH2 p.R172
+pdf(idh2_output, width=10, height=6)
+# IDH2 p.R172 (hg38)
+itrack <- createCustomIdeogram("15")
+gtrack <- GenomeAxisTrack()
+sTrack <- SequenceTrack(Hsapiens, chromosome = "15")
+Sample_track <- AlignmentsTrack(bam_file, name = "IDH2 p.R172")
+
+ht <- HighlightTrack(
+  trackList = list(sTrack, Sample_track),
+  start = c(90088605),   # first base of the R172 codon
+  width = 2,             # or use 3 to cover the full codon
+  chromosome = "15"
+)
+
+plotTracks(
+  list(itrack, gtrack, ht),
+  chromosome = "15",
+  from = 90088587,       # start - 18 bp
+  to   = 90088622,       # start + 17 bp
+  cex = 0.9,
+  cex.mismatch = 0.5
+)
+
 
 # Plot TERTp
 pdf(tertp_output, width=10, height=6)

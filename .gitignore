@@ -1,136 +1,146 @@
-# Nextflow
-work/
-.nextflow/
-.nextflow.log*
-.nextflow.pid
-.nextflow.trace
-.nextflow.trace.txt
-.nextflow.trace.html
-.nextflow.trace.json
-.nextflow.trace.txt.*
-.nextflow.trace.html.*
-.nextflow.trace.json.*
+    # Nextflow
+    work/
+    .nextflow/
+    .nextflow.log*
+    .nextflow.pid
+    .nextflow.trace
+    .nextflow.trace.txt
+    .nextflow.trace.html
+    .nextflow.trace.json
+    .nextflow.trace.txt.*
+    .nextflow.trace.html.*
+    .nextflow.trace.json.*
 
-# Output directories
-results/
-output/
-*.html
-*.pdf
-*.png
-*.jpg
-*.jpeg
-*.svg
+    # Output directories
+    results/
+    output/
+    analysis_*/
+    epi2me_*/
+    full_pipeline_*/
+    containers/
+    *.html
+    *.pdf
+    *.png
+    *.jpg
+    *.jpeg
+    *.svg
 
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
+    # Temporary files
+    *.tmp
+    *.temp
+    *.swp
+    *.swo
+    *~
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+    # OS generated files
+    .DS_Store
+    .DS_Store?
+    ._*
+    .Spotlight-V100
+    .Trashes
+    ehthumbs.db
+    Thumbs.db
 
-# IDE files
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
+    # IDE files
+    .vscode/
+    .idea/
+    *.sublime-project
+    *.sublime-workspace
 
-# Log files
-*.log
-logs/
-hs_err_pid*.log
+    # Log files
+    *.log
+    logs/
+    hs_err_pid*.log
+    trace-*.txt
 
-# Run logs (analysis directories to ignore)
-analysis_mgmt*/
-analysis_tertp*/
-epi2me_*/
-analysis_*/
+    # Run logs (analysis directories to ignore)
+    analysis_mgmt*/
+    analysis_tertp*/
+    epi2me_*/
+    analysis_*/
+    mergebam_*/
+    full_pipeline_*/
 
-# Data files (large files that shouldn't be in git)
-*.bam
-*.bai
-*.fastq
-*.fastq.gz
-*.fq
-*.fq.gz
-*.fa
-*.fa.gz
-*.fasta
-*.fasta.gz
-*.vcf
-*.vcf.gz
-*.bed
-*.bed.gz
-*.gtf
-*.gff
-*.gff3
+    # Data files (large files that shouldn't be in git)
+    *.bam
+    *.bai
+    *.fastq
+    *.fastq.gz
+    *.fq
+    *.fq.gz
+    *.fa
+    *.fa.gz
+    *.fasta
+    *.fasta.gz
+    *.vcf
+    *.vcf.gz
+    *.bed
+    *.bed.gz
+    *.gtf
+    *.gff
+    *.gff3
 
-# Container images
-*.sif
-*.img
-*.tar.gz
-containers/
+    # Container images
+    *.sif
+    *.img
+    *.tar.gz
+    containers/
 
-# Reference data (usually large)
-refdata/
-reference/
-humandb/
+    # Reference data (usually large)
+    refdata/
+    reference/
+    humandb/
 
-# Test data
-testdata/
-data/
+    # Test data
+    testdata/
+    data/
 
-# nanoDx large model files (excluded due to size)
-nanoDx/static/Capper_et_al.h5
-nanoDx/static/Capper_et_al.h5.md5
-nanoDx/static/Capper_et_al_NN.pkl
+    # nanoDx large model files (excluded due to size)
+    nanoDx/static/Capper_et_al.h5
+    nanoDx/static/Capper_et_al.h5.md5
+    nanoDx/static/Capper_et_al_NN.pkl
+    nanoDx/static/Capper_et_al1.h5
+    nanoDx/workflow/.snakemake/
+    nanoDx/Rplots.pdf
 
-# Environment files
-.env
-.conda/
-conda-meta/
+    # Environment files
+    .env
+    .conda/
+    conda-meta/
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+    # Python
+    __pycache__/
+    *.py[cod]
+    *$py.class
+    *.so
+    .Python
+    build/
+    develop-eggs/
+    dist/
+    downloads/
+    eggs/
+    .eggs/
+    lib/
+    lib64/
+    parts/
+    sdist/
+    var/
+    wheels/
+    *.egg-info/
+    .installed.cfg
+    *.egg
 
-# R
-.Rhistory
-.RData
-.Ruserdata
-*.Rproj
+    # R
+    .Rhistory
+    .RData
+    .Ruserdata
+    *.Rproj
 
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb
+    # Jupyter
+    .ipynb_checkpoints/
+    *.ipynb
 
-# Backup files
-*.bak
-*.backup
-*.old 
+    # Backup files
+    *.bak
+    *.backup
+    *.old 

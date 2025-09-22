@@ -92,8 +92,13 @@ process run_epi2me_cnv {
     
     script:
     """
-    export R_HOME=/usr/local/lib/R
-    echo R_HOME: \$R_HOME
+    # Clear all R environment variables to prevent host library conflicts
+    unset R_HOME R_LIBS R_LIBS_USER R_LIBS_SITE R_USER_CACHE_DIR R_PROFILE_USER R_ENVIRON_USER
+    export R_LIBS_USER=""
+    export R_LIBS_SITE=""
+    export R_USER_CACHE_DIR=""
+    
+    echo "R environment cleared for container isolation"
     
     # Check if Rscript is available
     which Rscript || echo "Rscript not found in PATH"
@@ -169,14 +174,22 @@ workflow epi2me {
             .map { line ->
                 def fields = line.tokenize("\t")
                 def sample_id = fields[0].trim()
+                // Try exact match first, then wildcard pattern
                 def bam = file("${params.merge_bam_folder}/${sample_id}.bam")
                 def bai = file("${params.merge_bam_folder}/${sample_id}.bam.bai")
+                
+                // If exact match doesn't exist, try wildcard pattern
+                if (!bam.exists()) {
+                    bam = file("${params.merge_bam_folder}/${sample_id}.*.bam")
+                    bam = bam.find()
+                }
+                if (!bai.exists()) {
+                    bai = file("${params.merge_bam_folder}/${sample_id}.*.bam.bai")
+                    bai = bai.find()
+                }
 
-                bam = bam.find()
-                bai = bai.find()
-
-                if (!bam || !bai) {
-                    error "BAM file or index file not found for sample ID: ${sample_id}"
+                if (!bam || !bai || !bam.exists() || !bai.exists()) {
+                    error "BAM file or index file not found for sample ID: ${sample_id}. Tried both exact match (${sample_id}.bam) and wildcard pattern (${sample_id}.*.bam)"
                 }
 
                 return tuple(

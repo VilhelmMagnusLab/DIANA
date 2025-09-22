@@ -151,6 +151,55 @@ EOF
     """
 }
 
+// Dimensionality reduction plot generation using t-SNE/UMAP
+process tsne_plot {
+    label 'tsne'
+    publishDir "${params.output_path}/classifier/nanodx", mode: "copy", overwrite: true
+    
+    input:
+    tuple val(sample_id), path(epic_bed)
+    path(color_map)
+    path(training_set)
+    
+    output:
+    tuple val(sample_id), path("${sample_id}_tsne_plot.pdf"), emit: tsne_out
+    
+    script:
+    """
+    #!/bin/bash
+    set -e
+    
+    # Activate conda environment to access Rscript
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate tsneenv
+    
+    # Verify Rscript is available
+    if ! command -v Rscript >/dev/null 2>&1; then
+        echo "ERROR: Rscript not found after activating tsneenv"
+        echo "Available conda environments:"
+        conda env list
+        echo "PATH: \$PATH"
+        exit 1
+    fi
+    
+    echo "Using Rscript from: \$(which Rscript)"
+    
+    # Run the t-SNE script
+    Rscript ${params.nWGS_dir}/bin/crossnn_tsne_fixed.R \\
+        --color-map ${color_map} \\
+        --bed ${epic_bed} \\
+        --trainingset ${training_set} \\
+        --method umap \\
+        --umap-n-neighbours 15 \\
+        --umap-min-dist 0.1 \\
+        --umap-pca-dim 50 \\
+        --pdf ${sample_id}_tsne_plot.pdf \\
+        --html ${sample_id}_tsne_plot.html
+    
+    echo "t-SNE plot generated for ${sample_id}"
+    """
+}
+
 // MGMT promoter methylation analysis and quantification
 process mgmt_promoter {
     label 'epic'
@@ -655,6 +704,7 @@ process plot_genomic_regions {
           path("${sample_id}_egfr_coverage.pdf"),
           path("${sample_id}_idh1_coverage.pdf"),
           path("${sample_id}_tertp_coverage.pdf"),
+          path("${sample_id}_idh2_coverage.pdf"),
           emit: plot_genomic_regions_out
 
     script:
@@ -671,6 +721,7 @@ process plot_genomic_regions {
         "${bam_file}" \
         "${sample_id}_egfr_coverage.pdf" \
         "${sample_id}_idh1_coverage.pdf" \
+        "${sample_id}_idh2_coverage.pdf" \
         "${sample_id}_tertp_coverage.pdf" \
         "${cytoband_file}"
     """
@@ -698,7 +749,9 @@ process markdown_report {
           path(tertphtml),
           path(egfr_coverage),
           path(idh1_coverage),
+          path(idh2_coverage),
           path(tertp_coverage),
+          path(tsne_plot_file),
           path(nanodx_classifier)
 
     output:
@@ -755,7 +808,7 @@ process markdown_report {
     
     echo "Using Rscript at: \$RSCRIPT_PATH"
     
-    \$RSCRIPT_PATH -e "rmarkdown::render('${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[20])" \
+    \$RSCRIPT_PATH -e "rmarkdown::render('${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final9sep.Rmd', output_file=commandArgs(trailingOnly=TRUE)[22])" \
       "${sample_id}" \
       "\${PWD}/${craminoreport}" \
       "\${SAMPLE_FILE}" \
@@ -774,7 +827,9 @@ process markdown_report {
       "\${PWD}/${svannahtml}" \
       "\${PWD}/${egfr_coverage}" \
       "\${PWD}/${idh1_coverage}" \
+      "\${PWD}/${idh2_coverage}" \
       "\${PWD}/${tertp_coverage}" \
+      "\${PWD}/${tsne_plot_file}" \
       "\${PWD}/\${output_file}"
     """
 }
@@ -950,8 +1005,8 @@ workflow analysis {
                 def segs_vcf = args[9]
                 def sv = args[10]
                 
-                log.info "Creating Svanna input for sample: ${sample_id} (order mode)"
-                log.info "SV file path: ${sv}"
+                //log.info "Creating Svanna input for sample: ${sample_id} (order mode)"
+                //log.info "SV file path: ${sv}"
                 
                 // Create index file path from the SV file path
                 def sv_path = sv.toString()
@@ -966,7 +1021,7 @@ workflow analysis {
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id -> 
-                    log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
+                    //log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
                     def sv_file = file("${params.sv_folder}/${sample_id}.vcf.gz")
                     
                     //if (!sv_file.exists()) {
@@ -1157,8 +1212,27 @@ workflow analysis {
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id -> 
-                    def bam_file = file("${params.merge_bam_folder}/${sample_id}.merge.bam")
-                    def bai_file = file("${params.merge_bam_folder}/${sample_id}.merge.bam.bai")
+                    // Try exact match first, then wildcard pattern (avoid .occ.bam files)
+                    def bam_file = file("${params.merge_bam_folder}/${sample_id}.bam")
+                    def bai_file = file("${params.merge_bam_folder}/${sample_id}.bam.bai")
+                    
+                    // If exact match doesn't exist, try .merge.bam specifically
+                    if (!bam_file.exists()) {
+                        bam_file = file("${params.merge_bam_folder}/${sample_id}.merge.bam")
+                        bai_file = file("${params.merge_bam_folder}/${sample_id}.merge.bam.bai")
+                    }
+                    
+                    // If still not found, try wildcard but exclude .occ.bam files
+                    if (!bam_file.exists()) {
+                        def pattern_files = file("${params.merge_bam_folder}/${sample_id}.*.bam")
+                        def potential_bams = pattern_files instanceof List ? pattern_files : [pattern_files]
+                        // Filter out .occ.bam files
+                        def filtered_bams = potential_bams.findAll { !it.name.contains('.occ.') }
+                        if (filtered_bams.size() > 0) {
+                            bam_file = filtered_bams[0]
+                            bai_file = file("${bam_file}.bai")
+                        }
+                    }
                     
                     // Only process samples that have corresponding BAM files
                     if (bam_file.exists() && bai_file.exists()) {
@@ -1170,7 +1244,7 @@ workflow analysis {
                             file("${params.reference_genome}.fai", checkIfExists: true)
                         )
                     } else {
-                        println "WARNING: Skipping sample ${sample_id} - BAM file not found: ${bam_file}"
+                        println "WARNING: Skipping sample ${sample_id} - BAM file not found. Tried: ${sample_id}.bam, ${sample_id}.merge.bam, ${sample_id}.*.bam (excluding .occ.bam)"
                         null
                     }
                 }
@@ -1251,6 +1325,13 @@ workflow analysis {
                 }
             
             run_nn_classifier(nanodx_out)
+            
+            // Generate t-SNE plot using EPIC bed files
+            tsne_plot(
+                extract_epic.out.epicselectnanodxinput,
+                file(params.nanodxcolormap),
+                file(params.nanodxh5)
+            )
         }
 
         // Svanna analysis
@@ -1604,13 +1685,7 @@ workflow analysis {
             // Create channels for downstream processes
             MGMT_output = extract_epic.out.MGMTheaderout
             
-            // MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-            //     .map { args -> 
-            //         def sample_id = args[0]
-            //         def sturgeoninput = args[1]
-            //         tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
-            //     }
-            
+        
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
                 .map { args -> 
                     def sample_id = args[0]
@@ -1638,6 +1713,13 @@ workflow analysis {
             
             run_nn_classifier(nanodx_out)
             rmd_nanodx_out = run_nn_classifier.out.rmdnanodx
+            
+            // Generate t-SNE plot using EPIC bed files
+            tsne_plot(
+                extract_epic.out.epicselectnanodxinput,
+                file(params.nanodxcolormap),
+                file(params.nanodxh5)
+            )
             } else {
                 println "Reusing MGMT outputs from earlier analysis"
                 // The outputs are already available from the MGMT section
@@ -1757,6 +1839,7 @@ workflow analysis {
             .combine(igv_tools.out.tertp_out_igv, by:0)
             .combine(cramino_report.out.craminostatout, by:0)
             .combine(plot_genomic_regions.out.plot_genomic_regions_out, by:0)
+            .combine(tsne_plot.out.tsne_out, by:0)
             // Create final map for markdown report
         mergecnv_out_map = mergecnv_out.map { args -> 
                 def sample_id = args[0]
@@ -1773,8 +1856,10 @@ workflow analysis {
                 def tertphtml = args[11]
                 def craminoreport = args[12]
                 def egfr_coverage = args[13]
-                def idh_coverage = args[14]
+                def idh1_coverage = args[14]
                 def tertp_coverage = args[15]
+                def idh2_coverage = args[16]
+                def tsne_plot_file = args[17]
                 
                 // Debug: Print the number of arguments received
                 println "DEBUG: mergecnv_out_map received ${args.size()} arguments: ${args}"
@@ -1799,8 +1884,10 @@ workflow analysis {
                     svannahtml,
                     tertphtml,
                     egfr_coverage,
-                    idh_coverage,
+                    idh1_coverage,
+                    idh2_coverage,
                     tertp_coverage,
+                    tsne_plot_file,
                     nanodx_classifier
                 ]
             }.view()
