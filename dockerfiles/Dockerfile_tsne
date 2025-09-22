@@ -1,0 +1,98 @@
+# Use Ubuntu 24.04 as base image
+FROM ubuntu:24.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    bzip2 \
+    ca-certificates \
+    git \
+    build-essential \
+    libhdf5-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    pkg-config \
+    fonts-liberation \
+    libapparmor1 \
+    libedit2 \
+    lsb-release \
+    ca-certificates \
+    apt-transport-https \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Miniconda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    chmod +x /tmp/miniconda.sh && \
+    /tmp/miniconda.sh -b -p /opt/conda && \
+    rm /tmp/miniconda.sh && \
+    /opt/conda/bin/conda init bash && \
+    /opt/conda/bin/conda clean -afy
+
+# Make conda available in PATH
+ENV PATH="/opt/conda/bin:$PATH"
+
+# Accept conda terms of service and create conda environment
+COPY environment.yml /tmp/environment.yml
+RUN conda config --set channel_priority flexible && \
+    conda config --set auto_update_conda false && \
+    conda config --set show_channel_urls true && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r && \
+    conda env create -f /tmp/environment.yml && \
+    conda clean -afy
+
+# Set the conda environment as default
+ENV CONDA_DEFAULT_ENV=tsneenv
+ENV PATH="/opt/conda/envs/tsneenv/bin:$PATH"
+
+# Install additional R packages via conda (using only conda-forge and bioconda)
+RUN /opt/conda/bin/conda run -n tsneenv conda install --channel conda-forge --channel bioconda -y \
+    r-optparse \
+    r-data.table \
+    r-dplyr \
+    r-stringr \
+    bioconductor-rhdf5 \
+    r-matrixstats \
+    r-ggplot2 \
+    r-rtsne \
+    r-htmlwidgets \
+    r-r.utils \
+    r-ggtext \
+    r-uwot \
+    r-plotly
+
+# Clean up conda cache
+RUN conda clean -afy
+
+# Create a non-root user
+RUN useradd -m -s /bin/bash analyst && \
+    chown -R analyst:analyst /opt/conda
+
+# Switch to non-root user
+USER analyst
+WORKDIR /home/analyst
+
+# Set R environment variables and HDF5 configuration
+ENV R_LIBS_USER=/opt/conda/envs/tsneenv/lib/R/library
+ENV HDF5_USE_FILE_LOCKING=FALSE
+ENV HDF5_DISABLE_VERSION_CHECK=1
+ENV OMP_NUM_THREADS=4
+ENV R_MAX_VSIZE=8GB
+
+# Configure HDF5 for large files and verify installation
+RUN echo "export HDF5_USE_FILE_LOCKING=FALSE" >> /home/analyst/.bashrc && \
+    /opt/conda/envs/tsneenv/bin/Rscript -e "library(optparse); library(data.table); library(dplyr); library(stringr); library(rhdf5); library(matrixStats); library(ggplot2); library(ggtext); library(Rtsne); library(uwot); library(plotly); library(htmlwidgets); library(R.utils); cat('All packages loaded successfully!\n')"
+
+# Default command
+CMD ["/bin/bash"]
