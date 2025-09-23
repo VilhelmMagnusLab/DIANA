@@ -185,14 +185,14 @@ process tsne_plot {
     echo "Using Rscript from: \$(which Rscript)"
     
     # Run the t-SNE script
-    Rscript ${params.nWGS_dir}/bin/crossnn_tsne_fixed.R \\
+    Rscript ${params.nWGS_dir}/bin/crossnn_tsne_fixedupdate.R \\
         --color-map ${color_map} \\
         --bed ${epic_bed} \\
         --trainingset ${training_set} \\
         --method umap \\
-        --umap-n-neighbours 15 \\
-        --umap-min-dist 0.1 \\
-        --umap-pca-dim 50 \\
+        --umap-n-neighbours 10 \\
+        --umap-min-dist 0.5 \\
+        --umap-pca-dim 100 \\
         --pdf ${sample_id}_tsne_plot.pdf \\
         --html ${sample_id}_tsne_plot.html
     
@@ -598,38 +598,6 @@ process merge_annotation {
     """
 }
 
-// New process: Run ClairS-TO and annotate with Ensembl VEP instead of ANNOVAR
-process clairs_to_vep {
-    label 'clairsto'
-    publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
-
-    input:
-    tuple val(sample_id), path(merged_vcf)
-
-    output:
-    tuple val(sample_id), path("${sample_id}_merge_snv_indel_claisto.vep.vcf.gz"), emit: vep_annotated_vcf
-
-    script:
-    """
-    # VEP annotation. Requires 'vep' and bgzip/tabix available in container.
-    # Uses cache at params.vep_cache_dir and GRCh38 reference.
-    vep \
-      --input_file ${merged_vcf} \
-      --output_file ${sample_id}_merge_snv_indel_claisto.vep.vcf \
-      --vcf \
-      --force_overwrite \
-      --offline \
-      --cache \
-      --dir_cache ${params.vep_cache_dir} \
-      --assembly GRCh38 \
-      --fasta ${params.reference_genome} \
-      --everything \
-      --fork ${task.cpus}
-
-    bgzip -f ${sample_id}_merge_snv_indel_claisto.vep.vcf
-    tabix -f -p vcf ${sample_id}_merge_snv_indel_claisto.vep.vcf.gz
-    """
-}
 
 // TERT promoter variant visualization using IGV tools
 process igv_tools {
@@ -808,7 +776,7 @@ process markdown_report {
     
     echo "Using Rscript at: \$RSCRIPT_PATH"
     
-    \$RSCRIPT_PATH -e "rmarkdown::render('${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final9sep.Rmd', output_file=commandArgs(trailingOnly=TRUE)[22])" \
+    \$RSCRIPT_PATH -e "rmarkdown::render('${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[22])" \
       "${sample_id}" \
       "\${PWD}/${craminoreport}" \
       "\${SAMPLE_FILE}" \
@@ -891,56 +859,6 @@ workflow analysis {
         // Define fusion events channel conditionally to avoid undefined output errors
         def fusion_events_channel = Channel.empty()
         
-        // if (params.run_mode_order) {
-        //     // Verify all required epi2me outputs exist before proceeding
-        //     // Temporarily disabled file validation to debug method invocation error
-        //     /*
-        //     input_data
-        //         .map { sample_id, bam, bai, ref, ref_bai, tr_bed, modkit, segs_bed, bins_bed, segs_vcf, sv ->
-        //             def missing_files = []
-                    
-        //             // Check SV file
-        //             if (!file(sv).exists()) {
-        //                 missing_files << "SV file: ${sv}"
-        //             }
-                    
-        //             // Check CNV files
-        //             if (!file(segs_bed).exists()) {
-        //                 missing_files << "CNV segments file: ${segs_bed}"
-        //             }
-        //             if (!file(bins_bed).exists()) {
-        //                 missing_files << "CNV bins file: ${bins_bed}"
-        //             }
-
-        //             if (!file(segs_vcf).exists()) {
-        //                 missing_files << "CNV segments file: ${segs_vcf}"
-        //             }
-                    
-        //             // Check methylation file
-        //             if (!file(bam).exists()) {
-        //                 missing_files << "Methylation file: ${bam}"
-        //             }
-                    
-        //             if (missing_files.size() > 0) {
-        //                 error """
-        //                 Missing epi2me output files for sample ${sample_id}:
-        //                 ${missing_files.join('\n')}
-        //                 Pipeline must run in sequential order.
-        //                 """
-        //             }
-                    
-        //             // Return tuple if all files exist
-        //             tuple(
-        //                 sample_id, 
-        //                 bam,
-        //                 segs_bed,
-        //                 bins_bed,
-        //                 segs_vcf,
-        //                 bam
-        //             )
-        //         }
-        //     */
-        // }
         
         // Initialize channels as empty by default
         def annotatecnv_out = Channel.empty()
