@@ -33,6 +33,7 @@ process merge_bam_files {
 
     script:
     """
+    ulimit -n 50000
     echo "Merging BAM files for sample: ${sample_id}"
     for bam in ${bam_files}; do
         echo "Processing file: \${bam}" # Print each BAM file being merged
