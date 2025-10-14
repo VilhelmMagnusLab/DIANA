@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dockerfile for crossnnumap container (`dockerfiles/Dockerfile_tsne`)
 - Enhanced MGMT methylation table in reports with percentage values and improved headers
 - Comprehensive `.gitignore` patterns to exclude large output directories and temporary files
+- Added AA Change column to SNV summary table in executive summary report (`bin/nextflow_markdown_pipeline_update_finalexecsummary.Rmd`)
+- Added placeholder regions for acrocentric chromosome p-arms (chr13, chr14, chr15, chr21, chr22) in CNV plots to display empty space instead of missing data
 
 ### `Fixed`
 - Fixed t-SNE plot process failure in `--run_mode_analysis rmd` mode
@@ -30,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - "Classification by Pyro" → "Classification by CpG 76–79"
   - "Classification by Full" → "Classification by CpG 1–98"
 - Converted MGMT methylation values to percentages in final reports
+- Enhanced SNV summary table processing to extract and display protein changes (p.XXX notation) in AA Change column
+- Improved CNV visualization (`bin/CNV_function_new_update.R`) to correctly represent acrocentric chromosomes with visual empty space for missing p-arm regions
 
 ### `Removed`
 - Obsolete `bin/generate_report.sh` (replaced by Singularity version)

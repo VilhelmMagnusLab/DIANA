@@ -56,7 +56,28 @@ plot_CNV_data <- function(calls_file, annot_file, segs_file, out_new_cnv_plot, o
   
   # Merge Calls and Annot
   Calls <- left_join(Calls, Annot)
+
   
+ # These chromosomes have very small/absent p-arms that are not represented in the data
+ p_arm_regions <- data.frame(
+    Chr = factor(c("13", "14", "15", "21", "22"), levels = levels(Calls$Chr)),
+    Start = c(1, 1, 1, 1, 1),
+    End = c(16500000, 16100000, 17083673, 11000000, 13700000),
+    Bin = NA,
+    Log2ratio = NA,
+    Strand = NA,
+    Seg = NA,
+    Score = NA,
+    LOG2CNT = NA,
+    Gene = NA
+  )
+
+  # Add the placeholder rows to Calls
+  Calls <- bind_rows(Calls, p_arm_regions)
+
+  # Re-sort by chromosome and position
+  Calls <- Calls %>% arrange(Chr, Start)
+
   lim <- 3
   offset <- 0.1
   Calls$Log2ratio_Capped <- ifelse(abs(Calls$Log2ratio) > lim, sign(Calls$Log2ratio)*lim + sign(Calls$Log2ratio)*offset, Calls$Log2ratio)
@@ -82,13 +103,28 @@ plot_CNV_data <- function(calls_file, annot_file, segs_file, out_new_cnv_plot, o
           panel.background = element_rect(colour = "grey", size = 0.4)) +
     scale_y_continuous(minor_breaks = 0)
   
-  p2 <- p + geom_label_s(
-    aes(x = Start, y = Log2ratio_Capped, label = Gene, fontface = 2),
+  # p2 <- p + geom_label_s(
+  #   aes(x = Start, y = Log2ratio_Capped, label = Gene, fontface = 2),
+  #   size = 4,
+  #   color = "red",
+  #   box.padding = unit(0.25, "lines")
+  # ) +
+  #   ggtitle(sample_id)
+  
+ # ggsave(filename = out_new_cnv_plot, plot = p2, width = 18, height = 5)
+
+  p2 <- p +
+  geom_text_repel(
+    aes(x = Start, y = Log2ratio_Capped, label = Gene),
     size = 4,
-    color = "red",
-    box.padding = unit(0.25, "lines")
-  ) +
-    ggtitle(sample_id)
+    color = "black",
+    fontface = "bold",
+    box.padding = unit(0.5, "lines"),
+    #point.padding = unit(0.3, "lines"),
+    max.overlaps = 20,       # limit how many labels are shown
+    min.segment.length = 0,  # draw connecting lines if needed
+    segment.color = "black"
+  )  + ggtitle(sample_id)
   
   ggsave(filename = out_new_cnv_plot, plot = p2, width = 18, height = 5)
   

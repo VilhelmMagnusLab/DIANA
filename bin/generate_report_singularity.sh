@@ -60,7 +60,7 @@ echo "Using Singularity image: $SINGULARITY_IMAGE"
 samples_file="/home/chbope/extension/nWGS_manuscript_data/data/testdata/sample_ids.txt"
 
 # RMarkdown template file path
-rmd_template="/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_final.Rmd"
+rmd_template="/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_finalexecsummary.Rmd"
 
 # Define base paths to avoid repetition
 BASE_DATA_PATH="/home/chbope/extension/nWGS_manuscript_data/data"
@@ -106,15 +106,16 @@ while read -r sample_id tumor_content; do
     idh2_coverage="${RESULTS_PATH}/coverage/${sample_id}_idh2_coverage.pdf"
     tertp_coverage="${RESULTS_PATH}/coverage/${sample_id}_tertp_coverage.pdf"
     tsneplot="${RESULTS_PATH}/classifier/nanodx/${sample_id}_tsne_plot.pdf"
+    snv_target_genes="${REFERENCE_PATH}/snv_target_genes.txt"
     
     # Output PDF path
-    output_file="${RESULTS_PATH}/report/${sample_id}_markdown_pipeline_report_final5.pdf"
+    output_file="${RESULTS_PATH}/report/${sample_id}_markdown_pipeline_report_finalexecsummary.pdf"
 
     # Create output directory if it doesn't exist
     mkdir -p "$(dirname "$output_file")"
 
     # Now call the Rscript using Singularity container
-    singularity exec "$SINGULARITY_IMAGE" Rscript -e "rmarkdown::render('${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[22])" \
+    singularity exec "$SINGULARITY_IMAGE" Rscript -e "rmarkdown::render('${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[23])" \
       "${sample_id}" \
       "${craminoreport}" \
       "${sample_ids_file}" \
@@ -136,6 +137,7 @@ while read -r sample_id tumor_content; do
       "${idh2_coverage}" \
       "${tertp_coverage}" \
       "${tsneplot}" \
+      "${snv_target_genes}" \
       "${output_file}"
     
     # Clean up temporary R files

@@ -352,11 +352,11 @@ process annotatecnv {
    tuple val(sample_id), path("${sample_id}_calls_fixed.vcf"), emit: callsfixedout
    tuple val(sample_id), path("${sample_id}_annotatedcnv.csv"), emit:annotatedcnvcsvout
    tuple val(sample_id), path("${sample_id}_annotatedcnv_filter.csv"), emit:annotatedcnvfiltercsvout
-   tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), emit:cnvpdfout
+   //tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), emit:cnvpdfout
    tuple val(sample_id), path("${sample_id}_annotatedcnv_filter_header.csv"), emit:rmdannotatedcnvfilter
-   tuple val(sample_id), path("${sample_id}_CNV_plot.html"), emit:rmdcnvhtml
+   //tuple val(sample_id), path("${sample_id}_CNV_plot.html"), emit:rmdcnvhtml
    tuple val(sample_id), path("${sample_id}_tumor_copy.txt"), path("${sample_id}_bins_filter.bed"), emit:tumorcopyandbinsfilterout
-   tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), path("${sample_id}_annotatedcnv_filter.csv"), emit:cnvpdfandcsvout
+   //tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), path("${sample_id}_annotatedcnv_filter.csv"), emit:cnvpdfandcsvout
    tuple val(sample_id), path("${sample_id}_cnv_plot_full.pdf"), path("${sample_id}_tumor_copy_number.txt"), path("${sample_id}_annotatedcnv_filter_header.csv"), path("${sample_id}_cnv_chr9.pdf"), path("${sample_id}_cnv_chr7.pdf"), emit: rmdcnvtumornumber
 
    script:
@@ -390,7 +390,7 @@ process annotatecnv {
    cut -f1,2,3,5,6,8,9,13 > ${sample_id}_annotatedcnv.csv
 
     # Generate plots and reports
-   cnv_html.R $calls_bed ${sample_id}_annotatedcnv.csv ${sample_id}_CNV_plot.pdf ${sample_id}_CNV_plot.html $sample_id
+   #cnv_html.R $calls_bed ${sample_id}_annotatedcnv.csv ${sample_id}_CNV_plot.pdf ${sample_id}_CNV_plot.html $sample_id
     
     CNV_function_new_update.R $calls_bed ${sample_id}_annotatedcnv.csv $seg_bed \
         ${sample_id}_cnv_plot_full.pdf ${sample_id}_cnv_chr9.pdf ${sample_id}_cnv_chr7.pdf $sample_id 
@@ -720,7 +720,8 @@ process markdown_report {
           path(idh2_coverage),
           path(tertp_coverage),
           path(tsne_plot_file),
-          path(nanodx_classifier)
+          path(nanodx_classifier),
+          path(snv_target_genes)
 
     output:
     file("${sample_id}_markdown_pipeline_report.pdf")
@@ -776,7 +777,7 @@ process markdown_report {
     
     echo "Using Rscript at: \$RSCRIPT_PATH"
     
-    \$RSCRIPT_PATH -e "rmarkdown::render('${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd', output_file=commandArgs(trailingOnly=TRUE)[22])" \
+    \$RSCRIPT_PATH -e "rmarkdown::render('${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_finalexecsummary.Rmd', output_file=commandArgs(trailingOnly=TRUE)[23])" \
       "${sample_id}" \
       "\${PWD}/${craminoreport}" \
       "\${SAMPLE_FILE}" \
@@ -798,6 +799,7 @@ process markdown_report {
       "\${PWD}/${idh2_coverage}" \
       "\${PWD}/${tertp_coverage}" \
       "\${PWD}/${tsne_plot_file}" \
+      "\${PWD}/${snv_target_genes}" \
       "\${PWD}/\${output_file}"
     """
 }
@@ -1806,7 +1808,8 @@ workflow analysis {
                     idh2_coverage,
                     tertp_coverage,
                     tsne_plot_file,
-                    nanodx_classifier
+                    nanodx_classifier,
+                    file("${params.ref_dir}/snv_target_genes.txt")
                 ]
             }.view()
 
