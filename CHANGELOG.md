@@ -3,9 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0dev] - 2025-01-23
+## [1.0dev] - 2025-01-16
 
 ### `Added`
+- Fusion event exon/intron annotation pipeline with new Python scripts:
+  - `bin/breaking_point_bed_translocation_exon.py` - Extract breakpoints from VCF to BED format
+  - `bin/create_gff3_with_introns.py` - Calculate intron regions from exon boundaries in GFF3 files
+  - `bin/remove_duplicate_report_exon.py` - Process intersectBed output to extract gene and feature information
+  - `bin/summarize_fusion_features.py` - Consolidate fusion annotations with exon/intron/CDS/UTR/intergenic features
+  - `bin/annotate_intergenic_breakpoints.py` - Add intergenic annotations for unannotated breakpoints
+- Enhanced report generation (`bin/nextflow_markdown_pipeline_update_finalexecsummary.Rmd`) with:
+  - Conditional EGFR section (only shown if EGFR is in CNV table)
+  - Conditional SNV explanatory text (only shown if SNVs are detected)
+  - Italic formatting for all gene names in tables (SNV, CNV, Fusion Events)
+  - *TERT*p formatting for TERT promoter variants
+  - LaTeX packages for preventing title/content page break separation (`needspace`, `etoolbox`, `titlesec`)
 - Enhanced t-SNE plotting script (`bin/crossnn_tsne_fixedupdate.R`) with improved styling and bigger/bolder unknown cross symbols
 - Singularity-based report generation script (`bin/generate_report_singularity.sh`)
 - Crossnnumap container image support in setup scripts (`setup_singularity.sh`, `setup_docker.sh`)
@@ -24,6 +36,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resolved plotting issues with unknown cross symbols in t-SNE visualizations
 
 ### `Changed`
+- Updated `modules/analysis.nf`:
+  - Enhanced `svannasv_fusion_events` process to add exon/intron annotation pipeline
+  - Integrated new Python scripts for fusion feature extraction
+  - Added GFF3 enhancement step to include calculated introns
+  - Added fusion event filtering to report only complete events (with both start and end breakpoints)
+- Updated `modules/epi2me.nf` with fusion annotation workflow
 - Updated `modules/analysis.nf` to use enhanced t-SNE script with corrected parameters
 - Modified `nextflow.config` to conditionally disable R environment clearing for RMD mode
 - Updated MGMT table headers in reports:

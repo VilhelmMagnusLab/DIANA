@@ -55,7 +55,7 @@ colorMap <- fread(opt$`color-map`, blank.lines.skip = TRUE) %>%
 hexCol <- colorMap$color
 names(hexCol) <- colorMap$colorLabel
 hexCol[is.na(hexCol)] <- "grey"
-hexCol["unknown"] <- "red"
+hexCol["unknown"] <- "black"
 
 # ---------- LOAD CASE (sample) ----------
 bed <- fread(opt$bed)

@@ -79,6 +79,7 @@
     *.gtf
     *.gff
     *.gff3
+    chromosome_arms.tsv
 
     # Container images
     *.sif
@@ -135,6 +136,10 @@
     .RData
     .Ruserdata
     *.Rproj
+
+    # Test files
+    *test*.Rmd
+    test_*.Rmd
 
     # Jupyter
     .ipynb_checkpoints/

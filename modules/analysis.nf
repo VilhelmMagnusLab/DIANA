@@ -17,7 +17,7 @@ def validateParameters() {
     params.run_mode = params.run_mode_analysis ?: 'all'
     println "Analysis run mode: ${params.run_mode}"
     if (!['mgmt', 'svannasv', 'cnv', 'occ', 'tertp', 'mgmt', 'rmd', 'stat', 'all'].contains(params.run_mode)) {
-        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: methylation, svannasv, cnv, occ, tertp, mgmt, rmd, stat, all"
+        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: svannasv, cnv, occ, tertp, mgmt, rmd, stat, all"
     }
 }
 
@@ -289,24 +289,39 @@ process svannasv_fusion_events {
 
     output:
     tuple val(sample_id), path("${sample_id}_filter_fusion_event.tsv"), emit: filterfusioneventout
+    tuple val(sample_id), path("${sample_id}_filter_fusion_event_detailed.tsv")
 
     script:
 
     """
-    breaking_point_bed_translocation.py --vcf $occ_svannavcf --out  ${sample_id}_breaking_bedpoints.bed
+    # Create enhanced GFF3 with both exons and introns
+    create_gff3_with_introns.py --gff3 $genecode_bed --out ${sample_id}_genecode_with_introns.gff3
+
+    breaking_point_bed_translocation_exon.py --vcf $occ_svannavcf --out  ${sample_id}_breaking_bedpoints.bed
 
     awk 'BEGIN{OFS="\t"} {if (\$1 !~ /^chr/) \$1 = "chr"\$1; print}' ${sample_id}_breaking_bedpoints.bed > ${sample_id}_breaking_bedpoints_sort.bed
 
-    intersectBed -a ${sample_id}_breaking_bedpoints_sort.bed  -b $genecode_bed  -wb  > ${sample_id}_breaking_bedpoints_genecode.bed
+    # Intersect with enhanced GFF3 that includes introns
+    intersectBed -a ${sample_id}_breaking_bedpoints_sort.bed  -b ${sample_id}_genecode_with_introns.gff3  -wb  > ${sample_id}_breaking_bedpoints_genecode.bed
 
-    #remove duplicate bed points
+    #remove duplicate bed points and add exon/intron annotations
 
-    remove_duplicate_report.py --in  ${sample_id}_breaking_bedpoints_genecode.bed  \
+    remove_duplicate_report_exon.py --in  ${sample_id}_breaking_bedpoints_genecode.bed  \
             --formatted ${sample_id}_breaking_bedpoints_genecode_format.bed \
              --out ${sample_id}_breaking_bedpoints_genecode_clean.bed    \
              --paired ${sample_id}_breaking_bedpoints_genecode_clean_paired.bed  \
              --gene-list $occ_fusions_genes \
-             --filtered ${sample_id}_filter_fusion_event.tsv
+             --filtered ${sample_id}_filter_fusion_event_detailed_temp.tsv
+
+    # Add intergenic annotations for breakpoints that don't overlap any features
+    annotate_intergenic_breakpoints.py --original-bed ${sample_id}_breaking_bedpoints_sort.bed \
+             --annotated ${sample_id}_filter_fusion_event_detailed_temp.tsv \
+             --out ${sample_id}_filter_fusion_event_detailed.tsv
+
+    #summarize exon/intron/intergenic features into compact format
+
+    summarize_fusion_features.py --in ${sample_id}_filter_fusion_event_detailed.tsv \
+             --out ${sample_id}_filter_fusion_event.tsv
 
     """
 }

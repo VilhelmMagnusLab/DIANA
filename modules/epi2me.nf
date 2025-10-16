@@ -92,17 +92,29 @@ process run_epi2me_cnv {
     
     script:
     """
+    # Create a .Renviron file to forcefully override R library paths
+    # This prevents R from using host libraries even if they're accessible
+    cat > .Renviron <<'RENVEOF'
+R_LIBS_USER=
+R_LIBS_SITE=
+R_USER_CACHE_DIR=
+R_PROFILE_USER=
+R_ENVIRON_USER=
+R_HOME=
+RENVEOF
+
     # Clear all R environment variables to prevent host library conflicts
     unset R_HOME R_LIBS R_LIBS_USER R_LIBS_SITE R_USER_CACHE_DIR R_PROFILE_USER R_ENVIRON_USER
     export R_LIBS_USER=""
     export R_LIBS_SITE=""
     export R_USER_CACHE_DIR=""
-    
+    export HOME="/tmp"
+
     echo "R environment cleared for container isolation"
-    
+
     # Check if Rscript is available
     which Rscript || echo "Rscript not found in PATH"
-    
+
     # Check if the R script exists
     if [ ! -f "${workflow.projectDir}/bin/run_qdnaseq_rds.r" ]; then
         echo "ERROR: R script not found"
@@ -113,7 +125,7 @@ process run_epi2me_cnv {
         --bam ${bam} \
         --binsize ${params.binsize} \
         --out_prefix ${sample_id}
-    
+
     # Check if output files were created
     ls -la ${sample_id}_*
     """
