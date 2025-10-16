@@ -185,7 +185,7 @@ process tsne_plot {
     echo "Using Rscript from: \$(which Rscript)"
     
     # Run the t-SNE script
-    Rscript ${params.nWGS_dir}/bin/crossnn_tsne_fixedupdate.R \\
+    Rscript ${params.nWGS_dir}/bin/crossnn_tsne_fixed.R \\
         --color-map ${color_map} \\
         --bed ${epic_bed} \\
         --trainingset ${training_set} \\
