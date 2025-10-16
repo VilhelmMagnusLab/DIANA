@@ -65,7 +65,24 @@ output_pdf_file        <- args[23]
 if (!file.exists(votes_file)) {
   stop("Votes file not found: ", votes_file)
 }
+
+# Check if votes file is empty before reading
+file_info <- file.info(votes_file)
+if (file_info$size == 0) {
+  stop("Votes file is empty: ", votes_file)
+}
+
+# Try reading and check if it has data
+votes_lines <- readLines(votes_file, warn = FALSE)
+if (length(votes_lines) <= 1) {
+  stop("Votes file contains only headers or is empty: ", votes_file)
+}
+
 votes <- read.csv(votes_file, header = TRUE, sep = "\t")
+if (nrow(votes) == 0) {
+  stop("Votes file has no data rows: ", votes_file)
+}
+
 print(votes)
 mc <- read.csv(votes_file, header = TRUE, sep = "\t")
 if (!file.exists(dictionary_file)) {
@@ -121,7 +138,7 @@ knitr::include_graphics(logo_file)
 
 ## Sample ID: `r args[1]`
 
-The report is based on mean coverage of **`r mean_coverage`** and the estimated tumor content in sample is **`r tumor_percent`%**.
+The report is based on a mean coverage of **`r mean_coverage`** and the estimated tumor content in sample is the **`r tumor_percent`%**.
 
 ### CrossNN Methylation-based Classification
 
@@ -366,7 +383,7 @@ tryCatch({
 
 ```
 
-### Structure Variant Fusion Events
+### Structural Variants/ Fusion Events
 
 ```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
@@ -477,7 +494,7 @@ tryCatch({
         
         # Display the text
         if (!is.na(mean_meth_full) && !is.na(classification_full)) {
-            cat(sprintf("The mean methylation is **%s%%**. The sample is therefore classified as **%s**.\n", 
+            cat(sprintf("The mean methylation is **%s%%**. The methylation status of the *MGMT* promoter region is classified as **%s**.\n", 
                        mean_meth_full, classification_full))
         } else {
             cat("MGMT methylation data incomplete.\n")
@@ -577,15 +594,20 @@ mc_filtered <- mc %>%
     arrange(desc(score)) %>%
     slice_head(n = 5)  # Take top 5 scores
 
-ggplot(data = mc_filtered, aes(x = Methylation.Class.Name, y = score)) +
-    geom_bar(stat = "identity", fill = "#1f78b4") +
-    geom_hline(yintercept = 0.2, linetype = "dashed") +
-    coord_flip() +
-    scale_x_discrete(limits = rev(mc_filtered$Methylation.Class.Name)) +
-    scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
-    ylab("score") + xlab("") +
-    ggtitle("Methylation class (MC)") +
-    theme_classic() + theme(aspect.ratio = 1)
+# Only plot if there's data
+if (nrow(mc_filtered) > 0) {
+    ggplot(data = mc_filtered, aes(x = Methylation.Class.Name, y = score)) +
+        geom_bar(stat = "identity", fill = "#1f78b4") +
+        geom_hline(yintercept = 0.2, linetype = "dashed") +
+        coord_flip() +
+        scale_x_discrete(limits = rev(mc_filtered$Methylation.Class.Name)) +
+        scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
+        ylab("score") + xlab("") +
+        ggtitle("Methylation class (MC)") +
+        theme_classic() + theme(aspect.ratio = 1)
+} else {
+    cat("No methylation class scores available for plotting.\n")
+}
 
 ```
 
@@ -596,15 +618,20 @@ mcf_filtered <- mcf %>%
     arrange(desc(score_MCF)) %>%
     slice_head(n = 5)  # Take top 5 scores
 
-ggplot(mcf_filtered, aes(x = Methylation.Class.Family, y = score_MCF)) +
-    geom_bar(stat = "identity", fill = "#4daf4a") +
-    geom_hline(yintercept = 0.2, linetype = "dashed") +
-    coord_flip() +
-    scale_x_discrete(limits = rev(mcf_filtered$Methylation.Class.Family)) +
-    scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
-    ylab("score") + xlab("") +
-    ggtitle("Methylation class family (MCF)") +
-    theme_classic() + theme(aspect.ratio = 1)
+# Only plot if there's data
+if (nrow(mcf_filtered) > 0) {
+    ggplot(mcf_filtered, aes(x = Methylation.Class.Family, y = score_MCF)) +
+        geom_bar(stat = "identity", fill = "#4daf4a") +
+        geom_hline(yintercept = 0.2, linetype = "dashed") +
+        coord_flip() +
+        scale_x_discrete(limits = rev(mcf_filtered$Methylation.Class.Family)) +
+        scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
+        ylab("score") + xlab("") +
+        ggtitle("Methylation class family (MCF)") +
+        theme_classic() + theme(aspect.ratio = 1)
+} else {
+    cat("No methylation class family scores available for plotting.\n")
+}
 
 ```
 \newpage
@@ -771,7 +798,7 @@ if (length(results) > 0) {
 }
 ```
 
-### High-Confidence Copy Number Variants in Cancer Genes (Amplifications & Homozygous Deletions)
+### High-Confidence Copy Number Variation in Cancer Genes (Amplifications & Homozygous Deletions)
 ```{r comment='', echo=FALSE}
 
 #cat("Table 1: Copy Number Variation Filter Table\n\n")
@@ -806,7 +833,7 @@ if(nrow(df_filtered) == 0){
 } else {
     # Show explanatory text before the table
     #cat("The table is filtered for copy number variation events with a score of 2 (amplification) or -2 (homozygous deletion) and no sex chromosome.\n\n")
-    cat(strwrap("The table is filtered for copy number variation events with a score of 2 (amplification) or -2 (homozygous deletion) and no sex chromosome.\n",
+    cat(strwrap("The table is filtered for copy number variation events with a score of 2 (amplification) or -2 (homozygous deletion) and no sex chromosomes.\n",
   width = 110
 ), sep = "\n")
     # HTML formatting
@@ -955,10 +982,10 @@ knitr::include_graphics(tertp_plot_file)
 
 ### *MGMT* methylation status
 
-Nanopore sequencing covers methylation on all 98 CpG sites in the *MGMT* promoter as opposed to
-the 4 CpG sites (sites 76-79) as previously reported. The table below summarizes methylation on all
-CpG sites in the *MGMT* promoter (sites 1-98) and the four previously reported sites (sites 76-79) 
-and states how the sample classifies by both methods.
+Nanopore sequencing covers the methylation status on all 98 CpG sites in the *MGMT* promoter region as opposed to
+the 4 CpG sites (sites 76-79) previously reported. The table below summarizes the methylation level on all
+CpG sites in the *MGMT* promoter region (sites 1-98) and the four previously reported sites (sites 76-79) 
+and states how the sample classifies according to both methods.
 ```{r comment='', echo=FALSE, results='asis'}
 tryCatch({
     df_mgmt <- read.csv(mgmt_results_file, stringsAsFactors = FALSE)
@@ -980,8 +1007,8 @@ tryCatch({
         }
 
         # Update column names with new headers and percentage indicators
-        colnames(df_mgmt) <- gsub("mean_methylation_full", "Mean Methylation, CpG 1–98 (%)", colnames(df_mgmt))
-        colnames(df_mgmt) <- gsub("mean_methylation_pyro", "Mean Methylation, CpG 76–79 (%)", colnames(df_mgmt))
+        colnames(df_mgmt) <- gsub("mean_methylation_full", "Mean Methylation, CpG 1–98 [%]", colnames(df_mgmt))
+        colnames(df_mgmt) <- gsub("mean_methylation_pyro", "Mean Methylation, CpG 76–79 [%]", colnames(df_mgmt))
         colnames(df_mgmt) <- gsub("Classification_by_Pyro", "Classification by CpG 76–79", colnames(df_mgmt))
         colnames(df_mgmt) <- gsub("Classification_by_Full", "Classification by CpG 1–98", colnames(df_mgmt))
 
@@ -1019,10 +1046,9 @@ tryCatch({
 
 ```
 
-\newpage
 ### SNV Calling and Annotation
 
-SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 are reported. Where GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency. The *GRCh38* build reference genome was used for the SNV calling and annotation.
+SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 and known pathogenic upstream variants, i.e. TERTp, are reported. GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency. The *GRCh38* build reference genome was used for the SNV calling and annotation.
 
 ```{r comment='', echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 library(knitr)
@@ -1245,7 +1271,7 @@ tryCatch({
 ```
 
 
-### Structure Variant Fusion Events
+### Structural Variation/ Fusion Events
 ```{r comment='', echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
 library(kableExtra)
@@ -1273,8 +1299,9 @@ tryCatch({
     #cat("Original columns found:", paste(colnames(df_mgmt), collapse = ", "), "\n")
     
     # Define essential columns for structural variants
-    essential_columns <- c("chr", "star", "end", "ID", "svtype", "breaking", "Genes")
-    
+    # Updated to include new "Features" column that contains exon/intron information
+    essential_columns <- c("chr", "star", "end", "ID", "svtype", "breaking", "Genes", "Features")
+
     # Keep only essential columns that exist in the data
     available_essential <- essential_columns[essential_columns %in% colnames(df_mgmt)]
     df_mgmt <- df_mgmt[, available_essential, drop = FALSE]
@@ -1285,7 +1312,7 @@ tryCatch({
     # Check if the file is empty or has only headers
     if (!is_empty_file(df_mgmt)) {
         # Add explanatory text for structure variants
-        explanatory_text <- paste("Fusion events detected in the sample. The table shows essential breakpoint information including chromosome, position, Sniffles ID, structural variant type, and associated genes.")
+        explanatory_text <- paste("Fusion events detected in the sample. The table shows essential breakpoint information including chromosome, position, Sniffles ID, structural variant type, associated genes, and genomic features (exons/introns) involved in the fusion.")
         cat(strwrap(explanatory_text, width = 110), sep = "\n\n")
         
         if (knitr::is_html_output()) {
@@ -1341,8 +1368,7 @@ tryCatch({
 
 ### Disclaimer 
 
-This nanopore whole genome sequencing (*nWGS*) pipleine is a research tool currently under
-development. It has not been clinically validated in sufficiently large cohorts. Interpretation and implementation of the results in a clinical setting is in the sole responsibility of the treating physician.
+This nanopore whole genome sequencing (nWGS) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
 
 #### Report generated on `r Sys.time()`
 
