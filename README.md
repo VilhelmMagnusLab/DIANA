@@ -222,6 +222,10 @@ The nanoDX folder in the pipeline root should be moved into the `data/reference`
 **ONT basecalling model (place directory in `data/reference/`):**
 - `r1041_e82_400bps_sup_v420/`  # Required by ClairS-TO; used via `clairsto_models`
 
+**Assembly folder (included in Zenodo download, place in `data/reference/`):**
+- `Assembly/` - Assembly reference folder required for vcfcircos visualization (included in Zenodo download)
+  - **Important:** Ensure the correct path to the reference directory is configured in your `option.json` file
+  - The "Static" parameter in `option.json` should point to your `data/reference` directory path
 
 **Download files from [Zenodo](https://doi.org/10.5281/zenodo.16759248) and place them in the appropriate directories.**
 
@@ -234,6 +238,7 @@ data/
 │   ├── GRCh38.fa
 │   ├── GRCh38.fa.fai
 │   ├── gencode.v48.annotation.gff3
+│   ├── Assembly/                # Assembly folder for vcfcircos (from Zenodo)
 │   ├── OCC.fusions.bed
 │   ├── EPIC_sites_NEW.bed
 │   ├── MGMT_CpG_Island.hg38.bed
