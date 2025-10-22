@@ -105,10 +105,10 @@ workflow mergebam {
 
         // Run extract_roi process
         grouped_files_out = merge_bam_files.out.mergebamout
-            .map { sample_id, bam, bai -> 
-                tuple(sample_id, bam, bai, params.roi_bed)
+            .map { sample_id, bam, bai ->
+                tuple(sample_id, bam, bai, file(params.roi_bed))
             }
-        
+
         extract_roi_results = extract_roi(grouped_files_out)
 
     emit:

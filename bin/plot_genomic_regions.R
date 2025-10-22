@@ -83,17 +83,17 @@ pdf(idh1_output, width=10, height=6)
 itrack <- createCustomIdeogram("2")
 gtrack <- GenomeAxisTrack()
 sTrack <- SequenceTrack(Hsapiens, chromosome = "2")
-Sample_track <- AlignmentsTrack(bam_file, name = "IDH1 p.R132")
+Sample_track <- AlignmentsTrack(bam_file, name = "IDH1 p.R132", reverseStacking = TRUE)
 ht <- HighlightTrack(
     trackList = list(sTrack, Sample_track),
-    start = c(208248388), 
+    start = c(208248388),
     width = 2,
     chromosome = "2"
 )
 plotTracks(
-    list(itrack, gtrack, ht), 
+    list(itrack, gtrack, ht),
     chromosome = "2",
-    from = 208248370, 
+    from = 208248370,
     to = 208248405,
     #main = paste("IDH1 p.R132 -", sample_id),
     cex = 0.9,
@@ -107,7 +107,7 @@ pdf(idh2_output, width=10, height=6)
 itrack <- createCustomIdeogram("15")
 gtrack <- GenomeAxisTrack()
 sTrack <- SequenceTrack(Hsapiens, chromosome = "15")
-Sample_track <- AlignmentsTrack(bam_file, name = "IDH2 p.R172")
+Sample_track <- AlignmentsTrack(bam_file, name = "IDH2 p.R172", reverseStacking = TRUE)
 
 ht <- HighlightTrack(
   trackList = list(sTrack, Sample_track),
@@ -131,18 +131,18 @@ pdf(tertp_output, width=10, height=6)
 itrack <- createCustomIdeogram("5")
 gtrack <- GenomeAxisTrack()
 sTrack <- SequenceTrack(Hsapiens, chromosome = "5")
-Sample_track <- AlignmentsTrack(bam_file, name = "TERTp")
+Sample_track <- AlignmentsTrack(bam_file, name = "TERTp", reverseStacking = TRUE)
 ht <- HighlightTrack(
     trackList = list(sTrack, Sample_track),
-    start = c(1295113, 1295135), 
+    start = c(1295113, 1295135),
     width = 0,
     chromosome = "5",
     name = "TERTp"
 )
 plotTracks(
-    list(itrack, gtrack, ht), 
+    list(itrack, gtrack, ht),
     chromosome = "5",
-    from = 1295103, 
+    from = 1295103,
     to = 1295145,
     #main = paste("TERTp -", sample_id),
     cex = 0.9,

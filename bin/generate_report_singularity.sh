@@ -60,7 +60,7 @@ echo "Using Singularity image: $SINGULARITY_IMAGE"
 samples_file="/home/chbope/extension/nWGS_manuscript_data/data/testdata/sample_ids.txt"
 
 # RMarkdown template file path
-rmd_template="/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_finalexecsummary.Rmd"
+rmd_template="/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_finalexecsummarytest.Rmd"
 
 # Define base paths to avoid repetition
 BASE_DATA_PATH="/home/chbope/extension/nWGS_manuscript_data/data"

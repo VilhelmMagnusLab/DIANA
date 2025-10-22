@@ -172,14 +172,15 @@ workflow epi2me {
         }
 
         // Create input channel based on run mode
-        input_channel = params.run_mode_order ? 
-            merged_data.map { sid, bam, bai -> 
+        // Use merged_data input for both run_mode_order and run_mode_epianalyse
+        input_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
+            merged_data.map { sid, bam, bai, ref, ref_bai ->
                 tuple(
-                    sid, 
-                    bam, 
+                    sid,
+                    bam,
                     bai,
-                    reference_genome,
-                    reference_genome_bai
+                    ref,
+                    ref_bai
                 )
             } : Channel
             .from(file(params.epi2me_sample_id_file).readLines())
@@ -275,17 +276,39 @@ workflow epi2me {
             tuple(sid, file("${params.episv}/${sid}.vcf.gz"))
         }
 
-        // Mix actual results with defaults
-        modkit_results = modkit_ch.mix(default_modkit)
-        cnv_results = cnv_ch.mix(default_cnv)
-        sv_results = sv_ch.mix(default_sv)
+        // Mix actual results with defaults (but only for standalone mode, not for run_mode_order/epianalyse)
+        // In run_mode_order and run_mode_epianalyse, we want to wait for actual process outputs
+        modkit_results = (params.run_mode_order || params.run_mode_epianalyse) ?
+            modkit_ch : modkit_ch.mix(default_modkit)
+        cnv_results = (params.run_mode_order || params.run_mode_epianalyse) ?
+            cnv_ch : cnv_ch.mix(default_cnv)
+        sv_results = (params.run_mode_order || params.run_mode_epianalyse) ?
+            sv_ch : sv_ch.mix(default_sv)
 
         // Combine all results
         results_ch = input_channel
             .join(modkit_results, by: 0)
             .join(cnv_results, by: 0)
             .join(sv_results, by: 0)
-            .map { sample_id, bam, bai, ref, ref_bai, modkit, segs_bed, bins_bed, segs_vcf, sv ->
+            .map { args ->
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def modkit = args[5]
+
+                // CNV outputs (10 files): segs_bed, bins_bed, segs_vcf, copyNumbersCalled.rds, calls.bed, calls.vcf, raw_bins.bed, plots.pdf, isobar_plot.png, cov.png
+                def segs_bed = args[6]
+                def bins_bed = args[7]
+                def segs_vcf = args[8]
+                def rds_file = args[9]  // copyNumbersCalled.rds - needed for ACE
+                // Skip the other CNV outputs (args[10] through args[15])
+
+                // SV outputs: sv.vcf.gz and sv.vcf.gz.tbi
+                def sv = args[16]
+                def sv_index = args[17]
+
                 log.info "Processing completed for sample: ${sample_id}"
                 tuple(
                     sample_id,
@@ -293,6 +316,7 @@ workflow epi2me {
                     segs_bed,
                     bins_bed,
                     segs_vcf,
+                    rds_file,
                     sv
                 )
             }

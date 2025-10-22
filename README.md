@@ -52,11 +52,11 @@ chmod +x setup_singularity.sh
 
 The pipeline consists of three main modules that can be run independently or sequentially:
 
-### 1. **Mergebam Pipeline**
+### 1. **Mergebam Pipeline** (`--run_mode_mergebam`)
 - Merges multiple BAM files per sample
-- Extracts regions of interest using OCC.protein_coding.bed
+- Extracts protein-coding regions of interest using `OCC.protein_coding.bed`
 
-### 2. **Epi2me Pipeline**
+### 2. **Epi2me Pipeline** (`--run_mode_epi2me`)
 Three independent analysis types:
 
 | Analysis | Tool | Purpose | Output |
@@ -65,12 +65,24 @@ Three independent analysis types:
 | **Structural Variants** | Sniffles2 | Structural variant detection | `*.vcf.gz` |
 | **Copy Number Variation** | QDNAseq | CNV detection | `*_segs.bed`, `*_bins.bed`, `*_segs.vcf` |
 
-### 3. **Analysis Pipeline**
+### 3. **Analysis Pipeline** (`--run_mode_analysis`)
 - **MGMT methylation analysis** using EPIC array sites
 - **NanoDx neural network classification**
 - **Structural variant annotation** with Svanna
 - **CNV analysis** with ACE tumor content determination
 - **Comprehensive reporting** (HTML, IGV snapshots, Circos plots, Markdown)
+
+## Pipeline Run Modes
+
+The pipeline can be executed in different modes:
+
+| Mode | Flag | Description | Use Case |
+|------|------|-------------|----------|
+| **Complete Pipeline** | `--run_mode_order` | Runs all three modules sequentially (Mergebam → Epi2me → Analysis) | Starting from raw BAM files |
+| **Epi2me + Analysis** | `--run_mode_epianalyse` | Runs Epi2me and Analysis sequentially (assumes merged BAM files exist) | When BAM files are already merged |
+| **Mergebam Only** | `--run_mode_mergebam` | Merges BAM files and extracts regions of interest | BAM preparation only |
+| **Epi2me Only** | `--run_mode_epi2me [all\|modkit\|cnv\|sv]` | Runs specific Epi2me analyses | Methylation, CNV, or SV calling |
+| **Analysis Only** | `--run_mode_analysis [all\|mgmt\|cnv\|svannasv\|terp\|occ\|rmd]` | Runs specific downstream analyses | Report generation or specific analyses |
 
 ## Container Systems
 
@@ -86,11 +98,20 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 
 ### Complete Pipeline (Recommended)
 ```bash
-# Docker
+# Docker - Full pipeline starting from raw BAM files
 ./run_pipeline_docker.sh --run_mode_order --sample_id T001
 
-# Singularity/Apptainer
+# Singularity/Apptainer - Full pipeline starting from raw BAM files
 ./run_pipeline_singularity.sh --run_mode_order --sample_id T001
+```
+
+### Epi2me + Analysis (When BAM files are already merged)
+```bash
+# Docker - Skip mergebam, run Epi2me and Analysis
+./run_pipeline_docker.sh --run_mode_epianalyse --sample_id T001
+
+# Singularity/Apptainer - Skip mergebam, run Epi2me and Analysis
+./run_pipeline_singularity.sh --run_mode_epianalyse --sample_id T001
 ```
 
 ### Individual Modules
@@ -112,7 +133,7 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 ./run_pipeline_docker.sh --run_mode_analysis cnv        # CNV analysis only
 ./run_pipeline_docker.sh --run_mode_analysis svannasv   # Svanna SV annotation only
 ./run_pipeline_docker.sh --run_mode_analysis terp       # TERTp promoter analysis only
-./run_pipeline_docker.sh --run_mode_analysis occ        # # clair3 and claisrs-to annotation using occ region of interest bam file
+./run_pipeline_docker.sh --run_mode_analysis occ        # Clair3 and ClairS-TO annotation using OCC region of interest BAM file
 ./run_pipeline_docker.sh --run_mode_analysis rmd        # Markdown report only
 ```
 
@@ -133,7 +154,7 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 ./run_pipeline_singularity.sh --run_mode_analysis cnv        # CNV analysis only
 ./run_pipeline_singularity.sh --run_mode_analysis svannasv   # Svanna SV annotation only
 ./run_pipeline_singularity.sh --run_mode_analysis terp       # TERT promoter analysis only
-./run_pipeline_singularity.sh --run_mode_analysis occ        # clair3 and claisrs-to annotation using occ region of interest bam file
+./run_pipeline_singularity.sh --run_mode_analysis occ        # Clair3 and ClairS-TO annotation using OCC region of interest BAM file
 ./run_pipeline_singularity.sh --run_mode_analysis rmd        # Markdown report only
 ```
 
@@ -170,12 +191,17 @@ The following reference files must be downloaded and placed in the `data/referen
 
 **Analysis-specific files:**
 - `OCC.fusions.bed` - Fusion genes
-- `EPIC_sites_NEW.bed` - Methylation sites  
+- `EPIC_sites_NEW.bed` - Methylation sites
 - `MGMT_CpG_Island.hg38.bed` - MGMT CpG islands
-- `OCC.SNV.screening.bed` - SNV screening regions (region of interest bed file)
+- `OCC.protein_coding.bed` - Protein-coding gene regions for SNV screening and BAM extraction (must be proper 10-field BED format)
 - `TERTp_variants.bed` - TERT promoter variants
 - `human_GRCh38_trf.bed` - Tandem repeat regions
-- `Others` file downloaded from Zenado should be put into `data/reference/`
+- `Others` file downloaded from Zenodo should be put into `data/reference/`
+
+**Note:** The `OCC.protein_coding.bed` file is used throughout the pipeline for:
+  - Extracting protein-coding regions during BAM merging (mergebam module)
+  - SNV screening regions for variant calling (ClairS-TO analysis)
+  - Ensure this file is properly formatted with exactly 10 tab-separated fields per line
 
 **Annotation databases (place in `data/humandb/`):**
 - `hg38_refGene.txt` - RefGene annotation
@@ -211,7 +237,7 @@ data/
 │   ├── OCC.fusions.bed
 │   ├── EPIC_sites_NEW.bed
 │   ├── MGMT_CpG_Island.hg38.bed
-│   ├── OCC.SNV.screening.bed
+│   ├── OCC.protein_coding.bed
 │   ├── TERTp_variants.bed
 │   └── human_GRCh38_trf.bed
 │   └── etc

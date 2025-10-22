@@ -3,6 +3,46 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2025-10-22
+
+### `Added`
+- Added `--run_mode_epianalyse` pipeline execution mode to run Epi2me and Analysis modules sequentially when merged BAM files already exist
+- Added comprehensive "Pipeline Run Modes" documentation table in README.md
+- Added BED file format validation notes in README.md
+
+### `Fixed`
+- Fixed tumor content not appearing in PDF report when user provides 2-column `sample_ids.txt` file (sample_id + tumor_content)
+  - Updated `modules/analysis.nf` (lines 862-895) to always create local `sample_file.txt` in work directory
+  - Implemented priority logic: user-provided tumor content → ACE-calculated tumor content → no tumor content
+  - Resolved issue where `sample_ids.txt` was passed as string value instead of staged file in `run_mode_analysis`
+- Fixed circos plot always generating empty output files
+  - Updated `modules/analysis.nf` (lines 437-468) to properly detect gzipped VCF files (.vcf.gz)
+  - Added gzip detection: uses `zcat` for compressed files, `grep` for uncompressed files
+  - Added graceful error handling when vcf2circos fails (creates empty placeholder instead of pipeline failure)
+- Fixed BED file formatting errors in `OCC.protein_coding.bed`
+  - Corrected line 204: Removed trailing tab character (was causing 11 fields error)
+  - Corrected line 206: Converted spaces to tabs for proper BED format
+  - Corrected line 208: Removed extra field (11th field)
+  - Corrected line 209: Removed extra fields (11th and 12th fields)
+  - All 208 lines now have proper 10-field BED format required by bedtools
+
+### `Changed`
+- Consolidated BED file usage: replaced `occ_snv_screening` parameter with `occ_protein_coding_bed` throughout pipeline
+  - Updated `modules/analysis.nf`: Replaced all 4 occurrences of `occ_snv_screening` with `occ_protein_coding_bed`
+  - Updated `conf/analysis.config`: Removed `occ_snv_screening` parameter definition
+  - Updated `conf/example.config`: Removed `occ_snv_screening` parameter definition
+  - Unified protein-coding region file usage across mergebam, SNV screening, and analysis modules
+- Enhanced README.md documentation
+  - Added pipeline execution mode flags to module headers
+  - Added usage examples for `--run_mode_epianalyse` mode
+  - Updated reference files section to document `OCC.protein_coding.bed` usage and requirements
+  - Improved directory structure examples to reflect current file naming
+  - Fixed typo: "Zenado" → "Zenodo"
+  - Improved tool name capitalization consistency (Clair3, ClairS-TO)
+
+### `Removed`
+- Removed redundant `OCC.SNV.screening.bed` reference file parameter (consolidated into `OCC.protein_coding.bed`)
+
 ## [1.0dev] - 2025-01-16
 
 ### `Added`

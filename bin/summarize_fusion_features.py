@@ -135,7 +135,7 @@ def summarize_fusion_events(input_file, output_file):
         chr, star, end, ID, svtype, breaking, Genes, feature_type, exon_number, transcript_id
 
     Output format:
-        chr, star, end, ID, svtype, breaking, Genes, Features
+        chr, star, end, ID, svtype, breaking, Genes
     """
     # Read input file
     with open(input_file, 'r', newline='') as fin:
@@ -171,8 +171,6 @@ def summarize_fusion_events(input_file, output_file):
         if id_val not in complete_ids:
             continue
 
-        features = summarize_features(group_rows)
-
         summarized.append({
             'chr': chr_val,
             'star': star,
@@ -180,8 +178,7 @@ def summarize_fusion_events(input_file, output_file):
             'ID': id_val,
             'svtype': svtype,
             'breaking': breaking,
-            'Genes': genes,
-            'Features': features
+            'Genes': genes
         })
 
     # Sort by chromosome, position, ID, and breaking point
@@ -206,7 +203,7 @@ def summarize_fusion_events(input_file, output_file):
     summarized.sort(key=sort_key)
 
     # Write output
-    output_header = ['chr', 'star', 'end', 'ID', 'svtype', 'breaking', 'Genes', 'Features']
+    output_header = ['chr', 'star', 'end', 'ID', 'svtype', 'breaking', 'Genes']
     with open(output_file, 'w', newline='') as fout:
         writer = csv.DictWriter(fout, fieldnames=output_header, delimiter='\t')
         writer.writeheader()

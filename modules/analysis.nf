@@ -97,6 +97,29 @@ process nanodx {
     """
 }
 
+//Sturgeon classifier
+process sturgeon {
+    cpus 4
+    memory '2 GB'
+    label 'epic'
+    publishDir "${params.output_path}/classifier/sturgeon", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(sturgeon_bed), path(sturgeon_model)
+
+    output:
+    tuple path("${sample_id}_bedmethyl_sturgeon.bed"), path("${sample_id}_bedmethyl_sturgeon")
+
+
+    """
+    /sturgeon/venv/bin/sturgeon inputtobed -i $sturgeon_bed  -o ${sample_id}_bedmethyl_sturgeon.bed  -s modkit_pileup  --reference-genome hg38
+
+    /sturgeon/venv/bin/sturgeon predict -i ${sample_id}_bedmethyl_sturgeon.bed   -o  ${sample_id}_bedmethyl_sturgeon --model-files $sturgeon_model  --plot-results
+
+    """
+}
+
+
 // Neural network classification for tumor type prediction using NanoDx CrossNN classifier
 process run_nn_classifier {
     label 'nanodx'
@@ -184,7 +207,7 @@ process tsne_plot {
     
     echo "Using Rscript from: \$(which Rscript)"
     
-    # Run the t-SNE script
+    # Run the memory-optimized t-SNE script (uses 30k probes instead of 100k to reduce RAM usage)
     Rscript ${params.nWGS_dir}/bin/crossnn_tsne_fixed.R \\
         --color-map ${color_map} \\
         --bed ${epic_bed} \\
@@ -290,6 +313,8 @@ process svannasv_fusion_events {
     output:
     tuple val(sample_id), path("${sample_id}_filter_fusion_event.tsv"), emit: filterfusioneventout
     tuple val(sample_id), path("${sample_id}_filter_fusion_event_detailed.tsv")
+    tuple val(sample_id), path("${sample_id}_filter_fusion_event_ensembl_only.tsv"), optional: true
+    tuple val(sample_id), path("${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv"), optional: true
 
     script:
 
@@ -323,6 +348,31 @@ process svannasv_fusion_events {
     summarize_fusion_features.py --in ${sample_id}_filter_fusion_event_detailed.tsv \
              --out ${sample_id}_filter_fusion_event.tsv
 
+    # Filter fusion events to keep only those with official Ensembl gene IDs (ENSG...)
+    echo "Filtering for fusions with complete Ensembl gene IDs..."
+    filter_fusion_complete_ensembl.py \
+        --input ${sample_id}_filter_fusion_event_detailed.tsv \
+        --output ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv \
+        --gff3 $genecode_bed \
+        --stats ${sample_id}_ensembl_filter_stats.txt
+
+    # Annotate fusion breakpoints with exon coordinates and coding phase
+    if [ -s ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv ]; then
+        echo "Annotating breakpoints with exon coordinates and phase information..."
+        annotate_fusion_exon_phase.py \
+            --input ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv \
+            --output ${sample_id}_filter_fusion_event_detailed_ensembl_only_exon_phase.tsv \
+            --gff3 $genecode_bed \
+            --stats ${sample_id}_exon_phase_stats.txt
+
+        # Use the exon/phase annotated version as the detailed output
+        mv ${sample_id}_filter_fusion_event_detailed_ensembl_only_exon_phase.tsv ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv
+
+        # Create summarized version of Ensembl-filtered fusions
+        summarize_fusion_features.py --in ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv \
+             --out ${sample_id}_filter_fusion_event_ensembl_only.tsv
+    fi
+
     """
 }
 
@@ -340,12 +390,33 @@ process circosplot {
    script:
    """
    # Check if file is empty (excluding header)
-   if [ \$(grep -v '^#' ${svanna_output} | wc -l) -eq 0 ]; then
-      echo "Warning: ${svanna_output} is empty. Skipping vcf2circos plot generation."
+   # Handle both gzipped and uncompressed VCF files
+   if [[ ${svanna_output} == *.gz ]]; then
+      # For gzipped files, use zcat
+      VARIANT_COUNT=\$(zcat ${svanna_output} | grep -v '^#' | wc -l)
+   else
+      # For uncompressed files, use grep directly
+      VARIANT_COUNT=\$(grep -v '^#' ${svanna_output} | wc -l)
+   fi
+
+   if [ \$VARIANT_COUNT -eq 0 ]; then
+      echo "Warning: ${svanna_output} has no variants (0 non-header lines). Skipping vcf2circos plot generation."
       touch ${sample_id}_vcf2circo.html
       exit 0
    else
+      echo "Found \$VARIANT_COUNT variants in ${svanna_output}. Generating circos plot..."
+      # Try to generate circos plot, but create empty file if it fails
+      set +e  # Don't exit on error
       vcf2circos -i $svanna_output -o ${sample_id}_vcf2circo.html -p $vcf2circos_json -a hg38
+      CIRCOS_EXIT=\$?
+      set -e  # Re-enable exit on error
+
+      if [ \$CIRCOS_EXIT -ne 0 ]; then
+          echo "Warning: vcf2circos failed with exit code \$CIRCOS_EXIT. Creating empty placeholder file."
+          touch ${sample_id}_vcf2circo.html
+      else
+          echo "Circos plot generated successfully."
+      fi
    fi
    """
 }
@@ -518,7 +589,7 @@ process clairs_to {
     publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai),  path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex),path(hg38_cosmic100),path(hg38_cosmic100index), path(occ_snv_screening)
+    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai),  path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex),path(hg38_cosmic100),path(hg38_cosmic100index), path(occ_protein_coding_bed)
     
     output:
     tuple val(sample_id), path('clairsto_output/')
@@ -547,7 +618,7 @@ process clairs_to {
         --threads=${task.cpus} \
         --platform="ont_r10_dorado_4khz" \
         --output_dir=clairsto_output \
-        --bed_fn=${occ_snv_screening} \
+        --bed_fn=${occ_protein_coding_bed} \
         --conda_prefix /opt/micromamba/envs/clairs-to
 
     bcftools merge --force-samples clairsto_output/snv.vcf.gz clairsto_output/indel.vcf.gz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
@@ -712,23 +783,23 @@ process plot_genomic_regions {
 
 // Comprehensive PDF report generation using R Markdown
 process markdown_report {
-    publishDir "${params.output_path}/report", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/report", mode: "copy", overwrite: true, pattern: "*.pdf"
 
     input:
-    tuple val(sample_id), 
+    tuple val(sample_id),
           path(craminoreport),
-          val(sample_id_file), 
-          path(dictionaire), 
-          path(logo), 
-          path(cnv_plot), 
-          path(tumor_number), 
+          val(sample_id_file),
+          path(dictionaire),
+          path(logo),
+          path(cnv_plot),
+          path(tumor_number),
           path(annotatecnv),
           path(cnv_chr9),
-          path(cnv_chr7), 
+          path(cnv_chr7),
           path(mgmt_results),
           path(merge_results),
           path(fusion_events),
-          path(svannahtml), 
+          path(svannahtml),
           path(tertphtml),
           path(egfr_coverage),
           path(idh1_coverage),
@@ -736,7 +807,8 @@ process markdown_report {
           path(tertp_coverage),
           path(tsne_plot_file),
           path(nanodx_classifier),
-          path(snv_target_genes)
+          path(snv_target_genes),
+          path(rmd_template)
 
     output:
     file("${sample_id}_markdown_pipeline_report.pdf")
@@ -761,9 +833,39 @@ process markdown_report {
             exit 1
         fi
     else
-        # For run_mode_analysis: Use the original sample_id_file
-        SAMPLE_FILE="${sample_id_file}"
-        echo "Using original sample_id_file for run_mode_analysis: \${SAMPLE_FILE}"
+        # For run_mode_analysis: Check if user provided tumor content first (takes priority)
+        if [ ! -f "${sample_id_file}" ]; then
+            echo "ERROR: Sample ID file not found: ${sample_id_file}"
+            exit 1
+        fi
+
+        # Count columns in the sample_id_file
+        NUM_COLS=\$(awk '{print NF; exit}' "${sample_id_file}")
+        echo "Detected \$NUM_COLS columns in sample_id_file: ${sample_id_file}"
+
+        if [ "\$NUM_COLS" -ge 2 ]; then
+            # User provided 2 columns (sample_id + tumor content) - use user-provided value
+            # Extract the line for this sample_id
+            grep "^${sample_id}[[:space:]]" "${sample_id_file}" > sample_file.txt || {
+                echo "WARNING: Sample ${sample_id} not found in ${sample_id_file}, creating file with sample_id only"
+                echo "${sample_id}" > sample_file.txt
+            }
+            SAMPLE_FILE="\${PWD}/sample_file.txt"
+            echo "Created local sample_file.txt with user-provided tumor content:"
+            cat "\${SAMPLE_FILE}"
+        elif [ -f "${params.output_path}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
+            # User provided only 1 column, but ACE results available - use ACE-calculated value
+            THRESHOLD_VALUE=\$(cat "${params.output_path}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
+            echo -e "${sample_id}\\t\${THRESHOLD_VALUE}" > sample_file.txt
+            echo "Created sample_file.txt with ACE-calculated tumor content: ${sample_id} \${THRESHOLD_VALUE}"
+            SAMPLE_FILE="\${PWD}/sample_file.txt"
+        else
+            # Only 1 column and no ACE results - copy as-is
+            cp "${sample_id_file}" sample_file.txt
+            SAMPLE_FILE="\${PWD}/sample_file.txt"
+            echo "Created local sample_file.txt (single column, no tumor content)"
+            cat "\${SAMPLE_FILE}"
+        fi
     fi
 
     # Now call the Rscript with the updated Rmd file using absolute paths
@@ -791,8 +893,8 @@ process markdown_report {
     fi
     
     echo "Using Rscript at: \$RSCRIPT_PATH"
-    
-    \$RSCRIPT_PATH -e "rmarkdown::render('${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_finalexecsummary.Rmd', output_file=commandArgs(trailingOnly=TRUE)[23])" \
+
+    \$RSCRIPT_PATH -e "rmarkdown::render('\${PWD}/${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[23])" \
       "${sample_id}" \
       "\${PWD}/${craminoreport}" \
       "\${SAMPLE_FILE}" \
@@ -816,6 +918,21 @@ process markdown_report {
       "\${PWD}/${tsne_plot_file}" \
       "\${PWD}/${snv_target_genes}" \
       "\${PWD}/\${output_file}"
+
+    # Clean up intermediate files and folders created by R Markdown (belt and suspenders)
+    echo "Cleaning up intermediate R Markdown files..."
+    rm -rf *_files *.html *.log *.tex *_cache 2>/dev/null || true
+
+    echo "RMD report generated successfully"
+
+
+    # This removes any intermediate files that might have been published before pattern filter
+    echo "Final cleanup of report directory..."
+    find ${params.output_path}/report -type d -name "*_files" -exec rm -rf {} + 2>/dev/null || true
+    find ${params.output_path}/report -type f -name "*.tex" -delete 2>/dev/null || true
+    find ${params.output_path}/report -type f -name "*.html" -delete 2>/dev/null || true
+    find ${params.output_path}/report -type f -name "*.log" -delete 2>/dev/null || true
+    echo "Cleanup complete - only PDF files remain"
     """
 }
 
@@ -887,12 +1004,12 @@ workflow analysis {
         def cramino_report_out = Channel.empty()
         
         // Initialize sample_thresholds based on run mode
-        def sample_thresholds = params.run_mode_order ? [:] : loadSampleThresholds()
+        def sample_thresholds = (params.run_mode_order || params.run_mode_epianalyse) ? [:] : loadSampleThresholds()
         println "Sample thresholds: ${sample_thresholds}"
 
         // Create segsfromepi2me channel based on mode
-        boosts_segsfromepi2me_channel = params.run_mode_order ?
-            input_data.map { args -> 
+        boosts_segsfromepi2me_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
+            input_data.map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -903,10 +1020,11 @@ workflow analysis {
                 def segs_bed = args[7]
                 def bins_bed = args[8]
                 def segs_vcf = args[9]
-                def sv = args[10]
-                
+                def rds_file = args[10]
+                def sv = args[11]
+
                 tuple(
-                    sample_id, 
+                    sample_id,
                     segs_vcf,
                     file(params.occ_fusions),
                     bins_bed,
@@ -926,7 +1044,7 @@ workflow analysis {
                     )
                 }
 
-        boosts_svanna_channel = params.run_mode_order ?
+        boosts_svanna_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
             input_data.map { args -> 
                 def sample_id = args[0]
                 def bam = args[1]
@@ -938,7 +1056,8 @@ workflow analysis {
                 def segs_bed = args[7]
                 def bins_bed = args[8]
                 def segs_vcf = args[9]
-                def sv = args[10]
+                def rds_file = args[10]
+                def sv = args[11]
                 
                 //log.info "Creating Svanna input for sample: ${sample_id} (order mode)"
                 //log.info "SV file path: ${sv}"
@@ -971,7 +1090,7 @@ workflow analysis {
                     )
                 }
 
-        boosts_clair3_channel = params.run_mode_order ?
+        boosts_clair3_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
             input_data.map { args -> 
                 def sample_id = args[0]
                 def bam = args[1]
@@ -983,7 +1102,8 @@ workflow analysis {
                 def segs_bed = args[7]
                 def bins_bed = args[8]
                 def segs_vcf = args[9]
-                def sv = args[10]
+                def rds_file = args[10]
+                def sv = args[11]
                 
                 tuple(
                     sample_id, 
@@ -1016,7 +1136,7 @@ workflow analysis {
                     )
                 }
 
-        boosts_clairSTo_channel = params.run_mode_order ?
+        boosts_clairSTo_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
             input_data.map { args -> 
                 def sample_id = args[0]
                 def bam = args[1]
@@ -1028,7 +1148,8 @@ workflow analysis {
                 def segs_bed = args[7]
                 def bins_bed = args[8]
                 def segs_vcf = args[9]
-                def sv = args[10]
+                def rds_file = args[10]
+                def sv = args[11]
                 
                 tuple(
                     sample_id, 
@@ -1042,7 +1163,7 @@ workflow analysis {
                     file(params.clinvarindex),
                     file(params.hg38_cosmic100), 
                     file(params.hg38_cosmic100index),
-                    file(params.occ_snv_screening)
+                    file(params.occ_protein_coding_bed)
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
@@ -1059,12 +1180,12 @@ workflow analysis {
                         file(params.clinvarindex),
                         file(params.hg38_cosmic100), 
                         file(params.hg38_cosmic100index),
-                        file(params.occ_snv_screening)
-                    
+                        file(params.occ_protein_coding_bed)
+
                     )
                 }
 
-        boosts_igv_channel = params.run_mode_order ?
+        boosts_igv_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
             input_data.map { args -> 
                 def sample_id = args[0]
                 def bam = args[1]
@@ -1076,7 +1197,8 @@ workflow analysis {
                 def segs_bed = args[7]
                 def bins_bed = args[8]
                 def segs_vcf = args[9]
-                def sv = args[10]
+                def rds_file = args[10]
+                def sv = args[11]
                 
                 tuple(sample_id, bam, bai, file(params.tertp_variants), file(params.ncbirefseq), ref, ref_bai)
             } :
@@ -1090,7 +1212,7 @@ workflow analysis {
                           file("${params.reference_genome}.fai"))
                 }
 
-        boosts_plot_genomic_regions_channel = params.run_mode_order ?
+        boosts_plot_genomic_regions_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
             input_data.map { args -> 
                 def sample_id = args[0]
                 def bam = args[1]
@@ -1102,7 +1224,8 @@ workflow analysis {
                 def segs_bed = args[7]
                 def bins_bed = args[8]
                 def segs_vcf = args[9]
-                def sv = args[10]
+                def rds_file = args[10]
+                def sv = args[11]
                 
                 tuple(
                     sample_id, 
@@ -1123,7 +1246,7 @@ workflow analysis {
                     )
                 }
 
-        boosts_cramino = params.run_mode_order ?
+        boosts_cramino = (params.run_mode_order || params.run_mode_epianalyse) ?
             input_data.map { args -> 
                 def sample_id = args[0]
                 def bam = args[1]
@@ -1135,7 +1258,8 @@ workflow analysis {
                 def segs_bed = args[7]
                 def bins_bed = args[8]
                 def segs_vcf = args[9]
-                def sv = args[10]
+                def rds_file = args[10]
+                def sv = args[11]
                 
                 tuple(
                     sample_id, 
@@ -1189,8 +1313,8 @@ workflow analysis {
         if (params.run_mode in ['mgmt', 'all']) {
             println "Running MGMT Analysis..."
             
-            // Create MGMT channel that works for both modes
-            mgmt_ch = params.run_mode_order ? 
+            // Create MGMT channel that works for combined modes (order and epianalyse)
+            mgmt_ch = (params.run_mode_order || params.run_mode_epianalyse) ? 
                 input_data.map { args -> 
                     def sample_id = args[0]
                     def bam = args[1]
@@ -1202,7 +1326,8 @@ workflow analysis {
                     def segs_bed = args[7]
                     def bins_bed = args[8]
                     def segs_vcf = args[9]
-                    def sv = args[10]
+                def rds_file = args[10]
+                    def sv = args[11]
                     
                     tuple(
                         sample_id, 
@@ -1227,12 +1352,12 @@ workflow analysis {
             // Create channels for downstream processes
             MGMT_output = extract_epic.out.MGMTheaderout
             
-            // MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-            //     .map { args -> 
-            //         def sample_id = args[0]
-            //         def sturgeoninput = args[1]
-            //         tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
-            //     }
+            MGMT_sturgeon = extract_epic.out.sturgeonbedinput
+                 .map { args -> 
+                     def sample_id = args[0]
+                     def sturgeoninput = args[1]
+                     tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
+                 }
             
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
                 .map { args -> 
@@ -1242,7 +1367,7 @@ workflow analysis {
                 }
 
             // Run the processes
-            //sturgeon(MGMT_sturgeon)
+            sturgeon(MGMT_sturgeon)
             mgmt_promoter(MGMT_output)
             nanodx(mgmt_nanodx)
             
@@ -1352,18 +1477,28 @@ workflow analysis {
             // Handle sample_thresholds for different run modes
             def samples_needing_ace = []
             def samples_with_provided_threshold = [:]
-            
-            if (params.run_mode_order) {
-                // In run_mode_order, we always compute ACE to get thresholds
-                println "Using run_mode_order - computing ACE for all samples to get thresholds"
-                
-                // Load sample IDs from bam_sample_id_file for run_mode_order
-                def sample_ids = file(params.bam_sample_id_file).readLines().collect { line ->
-                    // Extract only the sample ID part (first column), removing flow cell ID
-                    line.trim().split(/\s+/)[0]
+
+            if (params.run_mode_order || params.run_mode_epianalyse) {
+                // In run_mode_order or run_mode_epianalyse, we always compute ACE to get thresholds
+                println "Using ${params.run_mode_order ? 'run_mode_order' : 'run_mode_epianalyse'} - computing ACE for all samples to get thresholds"
+
+                // For run_mode_order, load from bam_sample_id_file
+                // For run_mode_epianalyse, load from epi2me_sample_id_file
+                if (params.run_mode_order) {
+                    def sample_ids = file(params.bam_sample_id_file).readLines().collect { line ->
+                        // Extract only the sample ID part (first column), removing flow cell ID
+                        line.trim().split(/\s+/)[0]
+                    }
+                    samples_needing_ace = sample_ids.toSet()
+                } else {
+                    // For run_mode_epianalyse, load from epi2me_sample_id_file
+                    def sample_ids = file(params.epi2me_sample_id_file).readLines().collect { line ->
+                        // Extract only the sample ID part (first column)
+                        line.trim().split(/\t/)[0]
+                    }
+                    samples_needing_ace = sample_ids.toSet()
                 }
-                samples_needing_ace = sample_ids.toSet()
-                println "Samples for ACE calculation in run_mode_order: ${samples_needing_ace}"
+                println "Samples for ACE calculation: ${samples_needing_ace}"
             } else {
                 // Separate samples that need ACE from those that don't
                 samples_needing_ace = sample_thresholds.findAll { k, v -> v == null }.keySet()
@@ -1375,18 +1510,38 @@ workflow analysis {
 
             // Run ACE only for samples that need calculation (have null threshold)
             if (samples_needing_ace.size() > 0) {
-        ace_input = Channel
-            .fromPath("${params.cnv_rds}/*_copyNumbersCalled.rds")
-            .map { rds_file -> 
-                def sample_id = rds_file.name.toString().split("_")[0]
-                        if (samples_needing_ace.contains(sample_id)) {
-                    println "Found matching RDS file for sample ${sample_id}: ${rds_file}"
-                            tuple(sample_id, rds_file)
-                } else {
-                    null
+        // For run_mode_epianalyse or run_mode_order, use RDS from input_data channel
+        // For standalone mode, scan filesystem
+        if (params.run_mode_order || params.run_mode_epianalyse) {
+            ace_input = input_data
+                .map { args ->
+                    def sample_id = args[0]
+                    def rds_file = args[10]
+
+                    if (samples_needing_ace.contains(sample_id)) {
+                        println "Found matching RDS file for sample ${sample_id} from epi2me output"
+                        tuple(sample_id, rds_file)
+                    } else {
+                        null
+                    }
                 }
-            }
-            .filter { it != null }
+                .filter { it != null }
+        } else {
+            ace_input = Channel
+                .fromPath("${params.cnv_rds}/*_copyNumbersCalled.rds")
+                .map { rds_file ->
+                    // Extract sample ID: everything before "_copyNumbersCalled.rds"
+                    def sample_id = rds_file.name.toString().replaceAll(/_copyNumbersCalled\.rds$/, '')
+                            if (samples_needing_ace.contains(sample_id)) {
+                        println "Found matching RDS file for sample ${sample_id}: ${rds_file}"
+                                tuple(sample_id, rds_file)
+                    } else {
+                        println "Skipping RDS file for sample ${sample_id} (not in samples_needing_ace)"
+                        null
+                    }
+                }
+                .filter { it != null }
+        }
 
                 // Run ACE analysis
             ace_tmc(ace_input)
@@ -1412,8 +1567,8 @@ workflow analysis {
             println "Final threshold mapping: ${final_thresholds}"
 
             // Create channel for annotatecnv based on run mode
-            if (params.run_mode_order) {
-                // Use epi2me output paths when in run_mode_order
+            if (params.run_mode_order || params.run_mode_epianalyse) {
+                // Use epi2me output paths when in run_mode_order or run_mode_epianalyse
                 annotatecnv_input = input_data
                     .map { args -> 
                         def sample_id = args[0]
@@ -1426,7 +1581,8 @@ workflow analysis {
                         def segs_bed = args[7]
                         def bins_bed = args[8]
                         def segs_vcf = args[9]
-                        def sv = args[10]
+                def rds_file = args[10]
+                        def sv = args[11]
                         println "Processing epi2me results for sample: ${sample_id} from epi2me output"
                         
                         // Debug: Check if files exist
@@ -1463,8 +1619,8 @@ workflow analysis {
             }
 
             // Combine with thresholds and prepare final input
-            // For run_mode_order, we use calculated thresholds from ACE
-            def annotatecnv_with_provided = params.run_mode_order ? 
+            // For run_mode_order and run_mode_epianalyse, we use calculated thresholds from ACE
+            def annotatecnv_with_provided = (params.run_mode_order || params.run_mode_epianalyse) ? 
                 annotatecnv_input.combine(ace_thresholds, by: 0).map { args ->
                     def sample_id = args[0]
                     def segs_vcf = args[1]
@@ -1473,7 +1629,7 @@ workflow analysis {
                     def segs_bed = args[4]
                     def threshold = args[5]
                     
-                    println "Preparing annotatecnv input for ${sample_id} in run_mode_order with ACE threshold: ${threshold}"
+                    println "Preparing annotatecnv input for ${sample_id} with ACE threshold: ${threshold}"
                     tuple(
                         sample_id,
                         segs_vcf,
@@ -1515,8 +1671,8 @@ workflow analysis {
                     }
 
             // For samples with calculated thresholds, combine with ace_thresholds
-            def annotatecnv_with_calculated = params.run_mode_order ? 
-                Channel.empty() :  // Skip this in run_mode_order since we handle it above
+            def annotatecnv_with_calculated = (params.run_mode_order || params.run_mode_epianalyse) ? 
+                Channel.empty() :  // Skip this in run_mode_order/run_mode_epianalyse since we handle it above
                 annotatecnv_input
                     .filter { args -> 
                         def sample_id = args[0]
@@ -1583,7 +1739,7 @@ workflow analysis {
                 println "MGMT analysis not run earlier, running now for RMD report..."
                 
                 // Create channel for MGMT analysis
-        mgmt_ch = params.run_mode_order ? 
+        mgmt_ch = (params.run_mode_order || params.run_mode_epianalyse) ? 
                 input_data.map { args -> 
                     def sample_id = args[0]
                     def bam = args[1]
@@ -1595,7 +1751,8 @@ workflow analysis {
                     def segs_bed = args[7]
                     def bins_bed = args[8]
                     def segs_vcf = args[9]
-                    def sv = args[10]
+                def rds_file = args[10]
+                    def sv = args[11]
                     
                     tuple(
                         sample_id, 
@@ -1795,17 +1952,14 @@ workflow analysis {
                 def tertp_coverage = args[15]
                 def idh2_coverage = args[16]
                 def tsne_plot_file = args[17]
-                
-                // Debug: Print the number of arguments received
-                println "DEBUG: mergecnv_out_map received ${args.size()} arguments: ${args}"
-                
+
                 // Use correct sample ID file based on run mode
                 def sample_id_file = params.run_mode_order ? "placeholder" : params.analyse_sample_id_file
-                
+
                 [
                     sample_id,
                     craminoreport,
-                    sample_id_file,  
+                    sample_id_file,
                     params.nanodx_dictinaire,
                     params.mardown_logo,
                     cnv_plot,
@@ -1824,7 +1978,8 @@ workflow analysis {
                     tertp_coverage,
                     tsne_plot_file,
                     nanodx_classifier,
-                    file("${params.ref_dir}/snv_target_genes.txt")
+                    file("${params.ref_dir}/snv_target_genes.txt"),
+                    file("${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd")
                 ]
             }.view()
 

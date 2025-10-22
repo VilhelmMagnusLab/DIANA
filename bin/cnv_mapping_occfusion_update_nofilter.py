@@ -27,7 +27,7 @@ def classify_copy_number_event(log2_ratio, f_T, C_N=2):
     except ZeroDivisionError:
         C_T = float('nan')
 
-    if C_T < 0 or math.isnan(C_T):
+    if C_T < 0 or math.isnan(C_T) or math.isinf(C_T):
         return "0", "Loss", "2"
 
     C_T_rounded = round(C_T)  # Round to the nearest integer

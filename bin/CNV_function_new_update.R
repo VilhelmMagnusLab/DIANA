@@ -79,9 +79,11 @@ plot_CNV_data <- function(calls_file, annot_file, segs_file, out_new_cnv_plot, o
   Calls <- Calls %>% arrange(Chr, Start)
 
   lim <- 3
+  plot_lim <- 2  # Y-axis will be fixed from -2 to 2
   offset <- 0.1
-  Calls$Log2ratio_Capped <- ifelse(abs(Calls$Log2ratio) > lim, sign(Calls$Log2ratio)*lim + sign(Calls$Log2ratio)*offset, Calls$Log2ratio)
-  Calls$Segs_Capped <- ifelse(abs(Calls$Seg) > lim, sign(Calls$Seg)*lim + sign(Calls$Seg)*offset, Calls$Seg)
+  # Cap values at plot_lim for visualization (values beyond ±3 will show as triangles at ±1.9)
+  Calls$Log2ratio_Capped <- ifelse(abs(Calls$Log2ratio) > lim, sign(Calls$Log2ratio)*(plot_lim - offset), Calls$Log2ratio)
+  Calls$Segs_Capped <- ifelse(abs(Calls$Seg) > lim, sign(Calls$Seg)*(plot_lim - offset), Calls$Seg)
   Calls$flag <- abs(Calls$Log2ratio) > lim
   Calls$flagSegs <- abs(Calls$Segs) > lim
   
@@ -101,7 +103,7 @@ plot_CNV_data <- function(calls_file, annot_file, segs_file, out_new_cnv_plot, o
           strip.text.x = element_text(size = 12),
           strip.background = element_blank(),
           panel.background = element_rect(colour = "grey", size = 0.4)) +
-    scale_y_continuous(minor_breaks = 0)
+    scale_y_continuous(limits = c(-2, 2), minor_breaks = 0)
   
   # p2 <- p + geom_label_s(
   #   aes(x = Start, y = Log2ratio_Capped, label = Gene, fontface = 2),
@@ -148,7 +150,7 @@ plot_CNV_data <- function(calls_file, annot_file, segs_file, out_new_cnv_plot, o
           strip.text.x = element_text(size = 12),
           strip.background = element_blank(),
           panel.background = element_rect(colour = "grey", size = 0.4)) +
-    scale_y_continuous(minor_breaks = 0)
+    scale_y_continuous(limits = c(-2, 2), minor_breaks = 0)
   
   p92 <- p9 + geom_label_s(nudge_x = 5000000, 
                            nudge_y = -0.1,
@@ -174,7 +176,7 @@ plot_CNV_data <- function(calls_file, annot_file, segs_file, out_new_cnv_plot, o
           strip.text.x = element_text(size = 12),
           strip.background = element_blank(),
           panel.background = element_rect(colour = "grey", size = 0.4)) +
-    scale_y_continuous(minor_breaks = 0)
+    scale_y_continuous(limits = c(-2, 2), minor_breaks = 0)
   
   p72 <- p7 + geom_label_s(nudge_x = 5000000,
                            nudge_y = -0.2,
