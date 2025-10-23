@@ -220,14 +220,14 @@ The nanoDX folder in the pipeline root should be moved into the `data/reference`
 - `Capper_et_al_NN.pkl` (neural network)
 
 **ONT basecalling model (place directory in `data/reference/`):**
-- `r1041_e82_400bps_sup_v420/`  # Required by ClairS-TO; used via `clairsto_models`
+- `r1041_e82_400bps_sup_v420/`  # Required by ClairS-TO; used via `clairsto_models`. The model ZIP file `r1041_e82_400bps_sup_v420.zip` can be downloaded from Zenodo and then unzipped.
 
 **Assembly folder (included in Zenodo download, place in `data/reference/`):**
 - `Assembly/` - Assembly reference folder required for vcfcircos visualization (included in Zenodo download. The file need to be unzip after download)
   - **Important:** Ensure the correct path to the reference directory is configured in your `option.json` file
   - The "Static" parameter in `option.json` should point to your `data/reference` directory path
 
-**Download files from [Zenodo](https://doi.org/10.5281/zenodo.16759248) and place them in the appropriate directories.**
+**Download files from [Zenodo](https://doi.org/10.5281/zenodo.15916972) and place them in the appropriate directories.**
 
 ### Directory Structure Setup
 After downloading the reference files, your directory structure should look like this:
@@ -297,6 +297,7 @@ results/
 - `--run_mode_analysis rmd` - Generate reports only
 - `--run_mode_analysis all` - Run all analyses and generate reports
 - `--run_mode_order` - Run complete pipeline sequentially and generate reports
+- `--run_mode_epianalyse` - Run Epi2me and Analysis modules and generate reports
 
 The reports are automatically created in the `results/report/` directory with the name `{sample_id}_markdown_pipeline_report.pdf`.
 
@@ -334,7 +335,7 @@ Choose your preferred container engine:
 
 ## Quick Setup Guide
 
-1. **Download reference files** from [Zenodo](https://doi.org/10.5281/zenodo.16759248)
+1. **Download reference files** from [Zenodo](https://doi.org/10.5281/zenodo.15916972)
 2. **Place files** in appropriate directories (`data/reference/` and `data/humandb/`)
 3. **Update paths** in configuration files (`conf/*.config`)
 4. **Choose container engine** (Docker or Singularity/Apptainer)
