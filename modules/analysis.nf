@@ -260,12 +260,12 @@ process svannasv {
    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
 
    input:
-   tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(occ_fusions)
+   tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(occ_protein_coding_bed)
 
    output:
    //file("${sample_id}_OCC_SVs.vcf")
    tuple val(sample_id), path("${sample_id}_OCC_SVs.vcf"), emit: occsvannavcfout
-   tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.html"), emit:rmdsvannahtml 
+   tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.html"), emit:rmdsvannahtml
    tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.vcf.gz"), emit: occsvannaannotationannotationvcf
 
 //   export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
@@ -276,10 +276,10 @@ process svannasv {
    echo "Input files:"
    echo "SV file: $wf_sv"
    echo "SV index: $wf_sv_tbi"
-   echo "OCC fusions: $occ_fusions"
+   echo "OCC protein coding bed: $occ_protein_coding_bed"
    ls -la
 
-   intersectBed -a $wf_sv  -b $occ_fusions  -header > ${sample_id}_OCC_SVs.vcf
+   intersectBed -a $wf_sv  -b $occ_protein_coding_bed  -header > ${sample_id}_OCC_SVs.vcf
 
    # Check if intersection file is empty (excluding header)
    if [ \$(grep -v '^#' ${sample_id}_OCC_SVs.vcf | wc -l) -eq 0 ]; then
@@ -427,9 +427,9 @@ process annotatecnv {
     publishDir "${params.output_path}/cnv/", mode: "copy", overwrite: true
 
    input:
-    tuple val(sample_id), 
-          path(vcf_file), 
-          path(occ_fusions), 
+    tuple val(sample_id),
+          path(vcf_file),
+          path(occ_protein_coding_bed),
           path(calls_bed),
           path(seg_bed),
           val(threshold)  // Now explicitly receiving threshold
@@ -469,7 +469,7 @@ process annotatecnv {
     awk 'OFS="\\t" {if (NR > 13) \$1="chr"\$1; print}' $vcf_file > ${sample_id}_calls_fixed.vcf
     
     # Intersect and process
-    intersectBed -a ${sample_id}_calls_fixed.vcf -b $occ_fusions -wa -wb | \
+    intersectBed -a ${sample_id}_calls_fixed.vcf -b $occ_protein_coding_bed -wa -wb | \
         cut -f1,2,5,8,20 | awk '/protein_coding/' | \
         awk -v OFS=";" '\$1=\$1' | \
         awk 'BEGIN { FS=";"; OFS="\\t"} {\$1=\$1; print}' | \
@@ -477,19 +477,19 @@ process annotatecnv {
 
     # Generate plots and reports
    #cnv_html.R $calls_bed ${sample_id}_annotatedcnv.csv ${sample_id}_CNV_plot.pdf ${sample_id}_CNV_plot.html $sample_id
-    
+
     CNV_function_new_update.R $calls_bed ${sample_id}_annotatedcnv.csv $seg_bed \
-        ${sample_id}_cnv_plot_full.pdf ${sample_id}_cnv_chr9.pdf ${sample_id}_cnv_chr7.pdf $sample_id 
+        ${sample_id}_cnv_plot_full.pdf ${sample_id}_cnv_chr9.pdf ${sample_id}_cnv_chr7.pdf $sample_id
 
     # Process annotation files
     awk 'BEGIN { OFS="," } { gsub(/<[^>]+>/, substr(\$3, 2, length(\$3) - 2), \$3); print \$0 }' \
         ${sample_id}_annotatedcnv.csv > ${sample_id}_annotatedcnv_filter.csv
-    
+
     awk 'BEGIN {print "Chrom,Start,Type,End,SVLEN,Score,LOG2CNT,Gene"} 1' \
         ${sample_id}_annotatedcnv_filter.csv > ${sample_id}_annotatedcnv_filter_header.csv
 
     # Run CNV mapping with threshold
-    cnv_mapping_occfusion_update.py $seg_bed $occ_fusions \
+    cnv_mapping_occfusion_update.py $seg_bed $occ_protein_coding_bed \
         ${sample_id}_tumor_copy.txt ${sample_id}_bins_filter.bed ${threshold}
     
     cnv_mapping_occfusion_update_nofilter.py $seg_bed \
@@ -1026,18 +1026,18 @@ workflow analysis {
                 tuple(
                     sample_id,
                     segs_vcf,
-                    file(params.occ_fusions),
+                    file(params.occ_protein_coding_bed),
                     bins_bed,
                     segs_bed,
                     sample_thresholds[sample_id]
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id -> 
+                .map { sample_id ->
                     tuple(
-                        sample_id, 
+                        sample_id,
                         file("${params.segsfromepi2me_folder}/${sample_id}_segs.vcf"),
-                        file(params.occ_fusions),
+                        file(params.occ_protein_coding_bed),
                         file("${params.segsfromepi2me_folder}/${sample_id}_bins.bed"),
                         file("${params.segsfromepi2me_folder}/${sample_id}_segs.bed"),
                         sample_thresholds[sample_id]
@@ -1070,23 +1070,23 @@ workflow analysis {
                     sample_id,
                     sv,                    // SV VCF file from epi2me
                     sv_index,              // Index file
-                    file(params.occ_fusions)
+                    file(params.occ_protein_coding_bed)
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id -> 
+                .map { sample_id ->
                     //log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
                     def sv_file = file("${params.sv_folder}/${sample_id}.vcf.gz")
-                    
+
                     //if (!sv_file.exists()) {
                     //    error "SV file not found: ${sv_file}"
                     //}
-                    
+
                     tuple(
                         sample_id,
                         sv_file,
                         file("${sv_file}.tbi"),
-                        file(params.occ_fusions)
+                        file(params.occ_protein_coding_bed)
                     )
                 }
 
@@ -1598,7 +1598,7 @@ workflow analysis {
                         tuple(
                             sample_id,
                             file(segs_vcf_path),
-                            file(params.occ_fusions),
+                            file(params.occ_protein_coding_bed),
                             file(bins_bed_path),
                             file(segs_bed_path)
                         )
@@ -1606,12 +1606,12 @@ workflow analysis {
             } else {
                 // Use configured input folders when in standalone mode
                 annotatecnv_input = Channel.fromList(sample_thresholds.keySet().collect())
-                    .map { sample_id -> 
+                    .map { sample_id ->
                         println "Processing sample: ${sample_id} from configured folders"
                         tuple(
                             sample_id,
                             file("${params.segsfromepi2me_folder}/${sample_id}_segs.vcf"),
-                            file(params.occ_fusions),
+                            file(params.occ_protein_coding_bed),
                             file("${params.segsfromepi2me_folder}/${sample_id}_bins.bed"),
                             file("${params.segsfromepi2me_folder}/${sample_id}_segs.bed")
                         )
@@ -1620,50 +1620,50 @@ workflow analysis {
 
             // Combine with thresholds and prepare final input
             // For run_mode_order and run_mode_epianalyse, we use calculated thresholds from ACE
-            def annotatecnv_with_provided = (params.run_mode_order || params.run_mode_epianalyse) ? 
+            def annotatecnv_with_provided = (params.run_mode_order || params.run_mode_epianalyse) ?
                 annotatecnv_input.combine(ace_thresholds, by: 0).map { args ->
                     def sample_id = args[0]
                     def segs_vcf = args[1]
-                    def occ_fusions = args[2]
+                    def occ_protein_coding_bed = args[2]
                     def bins_bed = args[3]
                     def segs_bed = args[4]
                     def threshold = args[5]
-                    
+
                     println "Preparing annotatecnv input for ${sample_id} with ACE threshold: ${threshold}"
                     tuple(
                         sample_id,
                         segs_vcf,
-                        occ_fusions,
+                        occ_protein_coding_bed,
                         bins_bed,
                         segs_bed,
                         threshold.toString()
                     )
                 } :
                 annotatecnv_input
-                    .filter { args -> 
+                    .filter { args ->
                         def sample_id = args[0]
                         def segs_vcf = args[1]
-                        def occ_fusions = args[2]
+                        def occ_protein_coding_bed = args[2]
                         def bins_bed = args[3]
                         def segs_bed = args[4]
-                        
+
                         // Check if this sample has a provided threshold
                         def has_threshold = final_thresholds.containsKey(sample_id)
                         println "Sample ${sample_id} has provided threshold: ${has_threshold}"
                         has_threshold
                     }
-                    .map { args -> 
+                    .map { args ->
                         def sample_id = args[0]
                         def segs_vcf = args[1]
-                        def occ_fusions = args[2]
+                        def occ_protein_coding_bed = args[2]
                         def bins_bed = args[3]
                         def segs_bed = args[4]
-                        
+
                         // Add the threshold to the tuple
                         tuple(
                             sample_id,
                             segs_vcf,
-                            occ_fusions,
+                            occ_protein_coding_bed,
                             bins_bed,
                             segs_bed,
                             final_thresholds[sample_id]
@@ -1671,22 +1671,22 @@ workflow analysis {
                     }
 
             // For samples with calculated thresholds, combine with ace_thresholds
-            def annotatecnv_with_calculated = (params.run_mode_order || params.run_mode_epianalyse) ? 
+            def annotatecnv_with_calculated = (params.run_mode_order || params.run_mode_epianalyse) ?
                 Channel.empty() :  // Skip this in run_mode_order/run_mode_epianalyse since we handle it above
                 annotatecnv_input
-                    .filter { args -> 
+                    .filter { args ->
                         def sample_id = args[0]
                         def segs_vcf = args[1]
-                        def occ_fusions = args[2]
+                        def occ_protein_coding_bed = args[2]
                         def bins_bed = args[3]
                         def segs_bed = args[4]
                         !final_thresholds.containsKey(sample_id)
                     }
                     .combine(ace_thresholds, by: 0)
-                    .map { args -> 
+                    .map { args ->
                         def sample_id = args[0]
                         def segs_vcf = args[1]
-                        def occ_fusions = args[2]
+                        def occ_protein_coding_bed = args[2]
                         def bins_bed = args[3]
                         def segs_bed = args[4]
                         def threshold = args[5]
@@ -1694,7 +1694,7 @@ workflow analysis {
                         tuple(
                             sample_id,              // sample_id
                             segs_vcf,               // segs_vcf
-                            occ_fusions,            // occ_fusions
+                            occ_protein_coding_bed, // occ_protein_coding_bed
                             bins_bed,               // bins_bed
                             segs_bed,               // segs_bed
                             threshold.toString()    // threshold value as string
