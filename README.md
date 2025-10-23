@@ -214,7 +214,7 @@ The following reference files must be downloaded and placed in the `data/referen
 
 **nanoDX script and files (place in `data/reference/`):**
 
-The nanoDX folder in the pipeline root should be moved into the `data/reference` folder and copy the following downloded files into `nanoDx/static/`:
+The nanoDX folder in the pipeline root should be moved into the `data/reference` folder and copy the following downloded files from https://zenodo.org/records/14006255 into `nanoDx/static/`:
 - `Capper_et_al.h5` (model file)
 - `Capper_et_al.h5.md5` (checksum)
 - `Capper_et_al_NN.pkl` (neural network)
@@ -223,7 +223,7 @@ The nanoDX folder in the pipeline root should be moved into the `data/reference`
 - `r1041_e82_400bps_sup_v420/`  # Required by ClairS-TO; used via `clairsto_models`
 
 **Assembly folder (included in Zenodo download, place in `data/reference/`):**
-- `Assembly/` - Assembly reference folder required for vcfcircos visualization (included in Zenodo download)
+- `Assembly/` - Assembly reference folder required for vcfcircos visualization (included in Zenodo download. The file need to be unzip after download)
   - **Important:** Ensure the correct path to the reference directory is configured in your `option.json` file
   - The "Static" parameter in `option.json` should point to your `data/reference` directory path
 
