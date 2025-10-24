@@ -62,6 +62,7 @@ pull_if_not_exists "vilhelmmagnuslab/crossnnumap"
 pull_if_not_exists "vilhelmmagnuslab/markdown_images_28feb2025"
 pull_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
 pull_if_not_exists "vilhelmmagnuslab/gviz_amd64"
+pull_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
 
 # Epi2me images
 echo "Pulling Epi2me analysis images..."
