@@ -426,6 +426,4 @@ If you use this pipeline in your research, please cite:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
-This nanopore whole genome sequencing (nWGS) pipleine is a research tool currently under development. It has not been
-clinically validated in sufficiently large cohorts. Interpretation and implementation of the results in a clinical setting is in the
-sole responsibility of the treating physician.
+This nanopore whole genome sequencing (nWGS) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician.
