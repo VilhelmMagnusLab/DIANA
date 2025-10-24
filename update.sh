@@ -28,8 +28,8 @@ else
   git remote add upstream "$UPSTREAM_URL"
 fi
 
-echo "[update] Fetching latest changes (including upstream)..."
-git fetch --all --tags --prune >/dev/null
+echo "[update] Fetching latest changes from upstream..."
+git fetch upstream --tags --prune >/dev/null
 
 # Detect upstream default branch (fallback to main)
 upstream_default_branch="$(git symbolic-ref -q --short refs/remotes/upstream/HEAD 2>/dev/null | cut -d'/' -f2 || true)"
@@ -45,12 +45,8 @@ if ! git diff-index --quiet HEAD --; then
   git stash push -u -m "$msg" >/dev/null
 fi
 
-echo "[update] Rebasing '$current_branch' onto 'upstream/$upstream_default_branch'..."
-if ! git pull --rebase upstream "$upstream_default_branch"; then
-  echo "[update] Rebase failed. Attempting to abort rebase and merge instead..."
-  git rebase --abort >/dev/null 2>&1 || true
-  git pull upstream "$upstream_default_branch"
-fi
+echo "[update] Pulling latest changes from 'upstream/$upstream_default_branch'..."
+git pull upstream "$upstream_default_branch"
 
 if [ "$stashed" -eq 1 ]; then
   echo "[update] Restoring stashed changes..."
