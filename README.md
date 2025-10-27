@@ -387,6 +387,26 @@ You can specify a custom log directory using the `--log-dir` flag.
 
 **Note:** Logs include execution reports, timelines, traces, and Nextflow logs, automatically organized by sample ID.
 
+## Automated Sample Monitoring
+
+The pipeline includes `smart_sample_monitor.sh` for automated monitoring and processing of ONT sequencing runs. This script continuously monitors sample directories and automatically triggers the pipeline when sequencing completes.
+
+### Features:
+- **Real-time Monitoring**: Watches for `final_summary_*_*_*.txt` files indicating completed sequencing
+- **Intelligent Detection**: Automatically detects data directories and sample files from configuration
+- **Parallel Processing**: Supports running multiple samples simultaneously (configurable)
+- **Robust Handling**: Includes timeout management, error handling, and progress tracking
+
+### Basic Usage:
+```bash
+# Start monitoring with auto-detection
+./smart_sample_monitor.sh
+
+```
+
+### Use Case:
+This script is particularly useful for processing ONT sequencing runs where samples complete at different times. Instead of manually checking and starting the pipeline for each sample, the monitor automatically detects completion and starts processing immediately, maximizing throughput and reducing manual intervention. Make sure thta all the path is updated (output path, input path, etc) 
+
 ## Troubleshooting
 
 ### Common Issues
