@@ -393,9 +393,6 @@ The pipeline includes `smart_sample_monitor.sh` for automated monitoring and pro
 
 ### Features:
 - **Real-time Monitoring**: Watches for `final_summary_*_*_*.txt` files indicating completed sequencing
-- **Intelligent Detection**: Automatically detects data directories and sample files from configuration
-- **Parallel Processing**: Supports running multiple samples simultaneously (configurable)
-- **Robust Handling**: Includes timeout management, error handling, and progress tracking
 
 ### Basic Usage:
 ```bash
