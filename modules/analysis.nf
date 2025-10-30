@@ -61,6 +61,7 @@ process extract_epic {
     path("${sample_id}_MGMT.bed")
     tuple val(sample_id), path("${sample_id}_MGMT_header.bed"), emit: MGMTheaderout
     tuple val(sample_id), path("${sample_id}_wf_mods.bedmethyl_intersect.bed"), emit: sturgeonbedinput
+    tuple val(sample_id), path("${sample_id}_EpicSelect_m_header.bed")
 
     script:
     """
@@ -71,6 +72,8 @@ process extract_epic {
     intersectBed -a $bedmethyl -b $epicsites -wb | awk -v OFS="\\t" '\$1=\$1' | awk -F'\\t' 'BEGIN{ OFS="\\t" } {print \$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9, \$10, \$11, \$12, \$13, \$14, \$15, \$16, \$17, \$18}' > ${sample_id}_wf_mods.bedmethyl_intersect.bed
 
     awk 'BEGIN {print "Chromosome\\tStart\\tEnd\\tmodBase\\tCoverage\\tMethylation_frequency\\tIllumina_ID"} 1' ${sample_id}_EpicSelect.bed > ${sample_id}_EpicSelect_header.bed
+
+    grep -w 'm'  ${sample_id}_EpicSelect_header.bed >  ${sample_id}_EpicSelect_m_header.bed
 
     intersectBed -a $bedmethyl -b $mgmt_cpg_island_hg38 | \
     awk -v OFS="\\t" '\$1=\$1' | awk -F'\\t' 'BEGIN{ OFS="\\t" }{print \$1,\$2,\$3,\$4,\$5,\$11,\$12,\$13,\$14,\$15,\$16}'  > ${sample_id}_MGMT.bed

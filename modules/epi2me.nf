@@ -14,7 +14,7 @@ process run_epi2me_modkit {
     publishDir "${params.path}/results/epi2me/modkit/", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai), path(epimodkit)
+    tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai)
 
     output:
     tuple val(sample_id), path("${sample_id}.wf_mods.bedmethyl.gz")
@@ -42,7 +42,9 @@ process run_epi2me_modkit {
       ${sample_id}.wf_mods.bedmethyl \
       --ref ${reference_genome} \
       --interval-size ${params.interval_size} \
-      --log-filepath ${sample_id}_modkit.log 
+      --log-filepath ${sample_id}_modkit.log \
+      --cpg \
+      --combine-strands
 
     gzip ${sample_id}.wf_mods.bedmethyl
     
@@ -85,7 +87,7 @@ process run_epi2me_cnv {
     publishDir "${params.path}/results/epi2me/epicnv/", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai), path(epicnv)
+    tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai)
 
     output:
     tuple val(sample_id), path("${sample_id}_segs.bed"), path("${sample_id}_bins.bed"), path("${sample_id}_segs.vcf"), path("${sample_id}_copyNumbersCalled.rds"), path("${sample_id}_calls.bed"), path("${sample_id}_calls.vcf"), path("${sample_id}_raw_bins.bed"), path("${sample_id}_plots.pdf"), path("${sample_id}_isobar_plot.png"), path("${sample_id}_cov.png")
@@ -104,24 +106,13 @@ R_HOME=
 RENVEOF
 
     # Clear all R environment variables to prevent host library conflicts
+    # Use unset to completely remove the variables
     unset R_HOME R_LIBS R_LIBS_USER R_LIBS_SITE R_USER_CACHE_DIR R_PROFILE_USER R_ENVIRON_USER
-    export R_LIBS_USER=""
-    export R_LIBS_SITE=""
-    export R_USER_CACHE_DIR=""
-    export HOME="/tmp"
 
     echo "R environment cleared for container isolation"
 
-    # Check if Rscript is available
-    which Rscript || echo "Rscript not found in PATH"
-
-    # Check if the R script exists
-    if [ ! -f "${workflow.projectDir}/bin/run_qdnaseq_rds.r" ]; then
-        echo "ERROR: R script not found"
-        exit 1
-    fi
-
-    Rscript --vanilla ${workflow.projectDir}/bin/run_qdnaseq_rds.r \
+    # Run QDNAseq R script with explicit --vanilla flag to ignore R environment
+    Rscript --no-site-file --no-init-file --no-environ $baseDir/bin/run_qdnaseq_rds.r \
         --bam ${bam} \
         --binsize ${params.binsize} \
         --out_prefix ${sample_id}
@@ -221,30 +212,12 @@ workflow epi2me {
 
         if (params.run_mode in ['modkit', 'all']) {
             println "Running modkit..."
-            modkit_ch = input_channel.map { sid, bam, bai, ref, ref_bai ->
-                tuple(
-                    sid, 
-                    bam, 
-                    bai, 
-                    ref, 
-                    ref_bai, 
-                    file("${params.epimodkit}")
-                )
-            } | run_epi2me_modkit
+            modkit_ch = run_epi2me_modkit(input_channel)
         }
 
         if (params.run_mode in ['cnv', 'all']) {
             println "Running cnv..."
-            cnv_ch = input_channel.map { sid, bam, bai, ref, ref_bai ->
-                tuple(
-                    sid, 
-                    bam, 
-                    bai, 
-                    ref, 
-                    ref_bai, 
-                    file("${params.epicnv}")
-                )
-            } | run_epi2me_cnv
+            cnv_ch = run_epi2me_cnv(input_channel)
         }
 
         if (params.run_mode in ['sv', 'all']) {

@@ -60,7 +60,7 @@ echo "Using Singularity image: $SINGULARITY_IMAGE"
 samples_file="/home/chbope/extension/nWGS_manuscript_data/data/testdata/sample_ids.txt"
 
 # RMarkdown template file path
-rmd_template="/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_finalexecsummarytest.Rmd"
+rmd_template="/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/bin/nextflow_markdown_pipeline_update_final.Rmd"
 
 # Define base paths to avoid repetition
 BASE_DATA_PATH="/home/chbope/extension/nWGS_manuscript_data/data"
@@ -143,7 +143,17 @@ while read -r sample_id tumor_content; do
     # Clean up temporary R files
     rm -rf /tmp/Rtmp*
 
-    echo "Finished sample: $sample_id"
+    # Clean up RMarkdown temporary files and folders in the output directory
+    output_dir="$(dirname "$output_file")"
+    output_basename="${sample_id}_markdown_pipeline_report_finalexecsummary"
+
+    # Remove temporary files created by RMarkdown
+    rm -rf "${output_dir}/${output_basename}_files"
+    rm -f "${output_dir}/${output_basename}.tex"
+    rm -f "${output_dir}/${output_basename}.log"
+    rm -f "${output_dir}/${output_basename}.aux"
+
+    echo "Finished sample: $sample_id (temporary files cleaned up)"
 
 done < "${samples_file}"
 

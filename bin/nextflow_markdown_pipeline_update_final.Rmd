@@ -1047,17 +1047,17 @@ knitr::include_graphics(tertp_plot_file)
 
 ### *MGMT* methylation status
 
-Nanopore sequencing covers the methylation status on all 98 CpG sites in the *MGMT* promoter region as opposed to
-the 4 CpG sites (sites 76-79) previously reported. The table below summarizes the methylation level on all
-CpG sites in the *MGMT* promoter region (sites 1-98) and the four previously reported sites (sites 76-79) 
-and states how the sample classifies according to both methods.
 ```{r comment='', echo=FALSE, results='asis'}
 tryCatch({
     df_mgmt <- read.csv(mgmt_results_file, stringsAsFactors = FALSE)
 
     if (nrow(df_mgmt) == 0) {
-        cat("No MGMT methylation results available for this sample.\n")
+        cat("No *MGMT* methylation results available for this sample.\n")
     } else {
+        cat("Nanopore sequencing covers the methylation status on all 98 CpG sites in the *MGMT* promoter region as opposed to\n")
+        cat("the 4 CpG sites (sites 76-79) previously reported. The table below summarizes the methylation level on all\n")
+        cat("CpG sites in the *MGMT* promoter region (sites 1-98) and the four previously reported sites (sites 76-79)\n")
+        cat("and states how the sample classifies according to both methods.\n\n")
 
         # Continue with normal table processing
         df_mgmt$sample_id <- sample_id
