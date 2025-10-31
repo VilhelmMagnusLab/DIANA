@@ -25,14 +25,12 @@
 #   -c, --config FILE       Config file to parse (default: conf/mergebam.config)
 #   -i, --interval SEC      Check interval in seconds (default: 300)
 #   -t, --timeout SEC       Timeout per sample in seconds (default: 432000)
-#   --parallel              Run samples in parallel (default: sequential)
-#   --max-parallel N        Max parallel jobs (default: 3)
 #   -v, --verbose           Verbose logging
 #   -h, --help              Show help
 #
 # Examples:
 #   ./smart_sample_monitor.sh
-#   ./smart_sample_monitor.sh --parallel --max-parallel 5 -v
+#   ./smart_sample_monitor.sh -v
 #   ./smart_sample_monitor.sh -d /custom/data -s /custom/samples.txt
 #==============================================================================
 
@@ -49,7 +47,6 @@ readonly DEFAULT_PIPELINE_DIR="$(pwd)"
 readonly DEFAULT_NEXTFLOW_WORK_DIR="/home/chbope/extension/trash"
 readonly DEFAULT_CHECK_INTERVAL=300
 readonly DEFAULT_TIMEOUT=432000
-readonly DEFAULT_MAX_PARALLEL=3
 
 # Global variables
 CONFIG_FILE="$DEFAULT_CONFIG_FILE"
@@ -57,15 +54,12 @@ PIPELINE_DIR="$DEFAULT_PIPELINE_DIR"
 NEXTFLOW_WORK_DIR="$DEFAULT_NEXTFLOW_WORK_DIR"
 CHECK_INTERVAL="$DEFAULT_CHECK_INTERVAL"
 TIMEOUT="$DEFAULT_TIMEOUT"
-MAX_PARALLEL="$DEFAULT_MAX_PARALLEL"
 VERBOSE=false
-PARALLEL_MODE=false
 BASE_DATA_DIR=""
 SAMPLE_IDS_FILE=""
 
 # Tracking arrays
 declare -A SAMPLE_STATUS=()      # "pending", "ready", "running", "completed", "failed"
-declare -A SAMPLE_JOB_PIDS=()    # Process IDs for running jobs
 declare -A SAMPLE_START_TIME=()  # When sample monitoring started
 declare -A SAMPLE_READY_TIME=()  # When sample became ready
 
@@ -106,8 +100,6 @@ ${YELLOW}OPTIONS:${NC}
     -c, --config FILE       Configuration file to parse (default: conf/mergebam.config)
     -i, --interval SEC      Check interval in seconds (default: 300)
     -t, --timeout SEC       Maximum wait time per sample (default: 432000 = 5 days)
-    --parallel              Enable parallel sample processing
-    --max-parallel N        Maximum parallel jobs (default: 3)
     -v, --verbose           Enable verbose logging
     -h, --help              Show this help message
 
@@ -115,14 +107,14 @@ ${YELLOW}EXAMPLES:${NC}
     # Basic usage with auto-detection
     $0
 
-    # Parallel processing with verbose output
-    $0 --parallel --max-parallel 5 -v
+    # Verbose output
+    $0 -v
 
     # Custom paths
     $0 -d /path/to/data -s /path/to/samples.txt -w /tmp/work
 
     # Different config file
-    $0 -c conf/analysis.config --parallel -v
+    $0 -c conf/analysis.config -v
 
 ${YELLOW}DIRECTORY STRUCTURE:${NC}
     The script expects sample directories with final_summary files:
@@ -462,77 +454,44 @@ check_sample_ready() {
 run_sample_pipeline() {
     local sample_id="$1"
     local work_dir="$NEXTFLOW_WORK_DIR/${sample_id}_work"
-    
+
     # Create work directory
     mkdir -p "$work_dir"
-    
+
     SAMPLE_STATUS["$sample_id"]="running"
     log "INFO" "🚀 Starting pipeline for sample: $sample_id"
     log "INFO" "Work directory: $work_dir"
-    
+
     local log_file="$work_dir/pipeline.log"
     local status_file="$work_dir/status"
-    
-    if [[ "$PARALLEL_MODE" == true ]]; then
-        # Run in background
-        (
-            cd "$PIPELINE_DIR"
-            if bash run_pipeline_singularity.sh --run_mode_order -w "$work_dir" > "$log_file" 2>&1; then
-                echo "COMPLETED" > "$status_file"
-                log "SUCCESS" "Sample $sample_id pipeline completed successfully"
-            else
-                echo "FAILED" > "$status_file"
-                log "ERROR" "Sample $sample_id pipeline failed"
-            fi
-        ) &
-        
-        local job_pid=$!
-        SAMPLE_JOB_PIDS["$sample_id"]=$job_pid
-        log "INFO" "Sample $sample_id running in background (PID: $job_pid)"
-    else
-        # Run in foreground - show output directly on screen
-        cd "$PIPELINE_DIR"
-        log "INFO" "Running pipeline in foreground - output will be shown directly"
-        log "INFO" "Activating conda environment: nwgs_env"
-        
-        # Activate conda environment and run pipeline without containers
-        if source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate nwgs_env && \
-           nextflow run main.nf -c conf/analysis.config --run_mode_order -w "$work_dir" -with-report report.html -with-timeline timeline.html -with-trace trace.txt; then
+
+    # Run pipeline directly
+    cd "$PIPELINE_DIR"
+    log "INFO" "Running pipeline for sample: $sample_id"
+
+    # Run pipeline using singularity containers - output shown directly
+    if bash run_pipeline_singularity.sh --run_mode_order -w "$work_dir"; then
+
+        # Check if markdown report was generated successfully
+        local base_path=$(extract_config_value "$CONFIG_FILE" "path")
+        local report_pattern="${base_path}/results/${sample_id}/${sample_id}_markdown_pipeline_report_finalexecsummary.pdf"
+
+        if [[ -f "$report_pattern" ]]; then
             SAMPLE_STATUS["$sample_id"]="completed"
-            log "SUCCESS" "Sample $sample_id pipeline completed successfully"
+            echo "COMPLETED" > "$status_file"
+            log "SUCCESS" "Sample $sample_id pipeline completed successfully - markdown report generated"
         else
             SAMPLE_STATUS["$sample_id"]="failed"
-            log "ERROR" "Sample $sample_id pipeline failed"
+            echo "FAILED" > "$status_file"
+            log "ERROR" "Sample $sample_id pipeline failed - markdown report not found at $report_pattern"
         fi
+    else
+        SAMPLE_STATUS["$sample_id"]="failed"
+        echo "FAILED" > "$status_file"
+        log "ERROR" "Sample $sample_id pipeline failed - nextflow execution error"
     fi
 }
 
-check_running_jobs() {
-    if [[ "$PARALLEL_MODE" != true ]]; then
-        return
-    fi
-    
-    for sample_id in "${!SAMPLE_JOB_PIDS[@]}"; do
-        local job_pid="${SAMPLE_JOB_PIDS[$sample_id]}"
-        local work_dir="$NEXTFLOW_WORK_DIR/${sample_id}_work"
-        local status_file="$work_dir/status"
-        
-        # Check if job is still running
-        if ! kill -0 "$job_pid" 2>/dev/null; then
-            # Job finished
-            if [[ -f "$status_file" ]]; then
-                SAMPLE_STATUS["$sample_id"]=$(cat "$status_file")
-            else
-                SAMPLE_STATUS["$sample_id"]="failed"
-            fi
-            unset SAMPLE_JOB_PIDS["$sample_id"]
-        fi
-    done
-}
-
-get_running_job_count() {
-    echo ${#SAMPLE_JOB_PIDS[@]}
-}
 
 #==============================================================================
 # Main Monitoring Logic
@@ -578,7 +537,7 @@ monitor_samples() {
     done
     
     log "INFO" "🔍 Starting monitoring for ${#samples[@]} samples"
-    log "INFO" "Check interval: ${CHECK_INTERVAL}s | Max time: $((TIMEOUT/60))min | Parallel: $PARALLEL_MODE"
+    log "INFO" "Check interval: ${CHECK_INTERVAL}s | Max time: $((TIMEOUT/60))min"
     
     log "VERBOSE" "About to enter monitoring loop..."
     log "VERBOSE" "Max checks: $max_checks, Timeout: $TIMEOUT, Interval: $CHECK_INTERVAL"
@@ -595,26 +554,21 @@ monitor_samples() {
         log "INFO" "=== Check $check_count (${elapsed}s elapsed) ==="
         log "VERBOSE" "Current time: $current_time, Start time: $start_time, Elapsed: ${elapsed}s"
         
-        # Update running job statuses
-        check_running_jobs
-        
         # Check each pending sample
         local new_ready_count=0
         for sample_id in "${samples[@]}"; do
+            # Skip samples that are already running, completed, or failed
+            local current_status="${SAMPLE_STATUS[$sample_id]}"
+            if [[ "$current_status" == "running" || "$current_status" == "completed" || "$current_status" == "failed" ]]; then
+                log "VERBOSE" "Skipping sample $sample_id (status: $current_status)"
+                continue
+            fi
+
             log "VERBOSE" "Checking sample: $sample_id"
             if check_sample_ready "$sample_id"; then
                 log "VERBOSE" "Sample $sample_id is ready, incrementing count"
                 new_ready_count=$((new_ready_count + 1))
-                
-                # Check if we can start this sample (parallel limit)
-                if [[ "$PARALLEL_MODE" == true ]]; then
-                    local running_count=$(get_running_job_count)
-                    if [[ $running_count -ge $MAX_PARALLEL ]]; then
-                        log "INFO" "Parallel limit reached ($running_count/$MAX_PARALLEL), queuing sample $sample_id"
-                        continue
-                    fi
-                fi
-                
+
                 log "INFO" "About to start pipeline for sample: $sample_id"
                 run_sample_pipeline "$sample_id"
                 log "VERBOSE" "Pipeline start function completed for sample: $sample_id"
@@ -717,14 +671,6 @@ parse_arguments() {
                 TIMEOUT="$2"
                 shift 2
                 ;;
-            --parallel)
-                PARALLEL_MODE=true
-                shift
-                ;;
-            --max-parallel)
-                MAX_PARALLEL="$2"
-                shift 2
-                ;;
             -v|--verbose)
                 VERBOSE=true
                 shift
@@ -768,10 +714,6 @@ show_configuration() {
         log "INFO" "  Timeout: $((TIMEOUT/3600))h"
     else
         log "INFO" "  Timeout: $((TIMEOUT/60))min"
-    fi
-    log "INFO" "  Parallel mode: $PARALLEL_MODE"
-    if [[ "$PARALLEL_MODE" == true ]]; then
-        log "INFO" "  Max parallel: $MAX_PARALLEL"
     fi
     log "INFO" "  Verbose: $VERBOSE"
 }
