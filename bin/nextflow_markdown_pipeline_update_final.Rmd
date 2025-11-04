@@ -1265,6 +1265,11 @@ tryCatch({
                 ))
         }
 
+        if (all(c("Gene.refGene", "Chr", "Start", "End") %in% colnames(df_snv))) {
+            df_snv <- df_snv %>%
+                filter(!(Gene.refGene == "TERT" & Chr == "chr5" & Start == "1295957" & End == "1295957"))
+}
+
         # ---- 5. Reorder columns according to specified order ----
         # Desired order: "RefSeq" "Gene.refGene" "Nucleotide alteration" "Ref" "Alt" "Func.refGene" "AAChange.refGene" "CLNSIG" "COSMIC100" "GQ" "Depth" "AD" "GT" "AF" "Chr" "Start" "End" "Variant_caller"
         desired_order <- c("RefSeq", "Gene.refGene", "Nucleotide alteration", "Ref", "Alt", "Func.refGene", "AAChange.refGene", "CLNSIG", "COSMIC100", "GQ", "Depth", "AD", "GT", "AF", "Chr", "Start", "End", "Variant_caller")

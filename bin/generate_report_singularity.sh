@@ -115,7 +115,8 @@ while read -r sample_id tumor_content; do
     mkdir -p "$(dirname "$output_file")"
 
     # Now call the Rscript using Singularity container
-    singularity exec "$SINGULARITY_IMAGE" Rscript -e "rmarkdown::render('${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[23])" \
+    singularity exec --bind /data/nWGS:/data/nWGS --bind /data/pipeline:/data/pipeline --bind "${BASE_DATA_PATH}:${BASE_DATA_PATH}" "$SINGULARITY_IMAGE" \
+  	Rscript -e "rmarkdown::render('${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[23])" \
       "${sample_id}" \
       "${craminoreport}" \
       "${sample_ids_file}" \
