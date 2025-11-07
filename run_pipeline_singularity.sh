@@ -114,8 +114,25 @@ cd "${ORIGINAL_DIR}"
 
 # NEW: Add logging organization here
 if [ $? -eq 0 ]; then
-    echo " Pipeline completed successfully!"
-    
+    # Check if pipeline actually ran processes or just used cache
+    PROCESSES_RUN=false
+    if [ -f "${LOG_BASE_DIR}/trace.txt" ]; then
+        # Check if any processes actually ran (status != CACHED)
+        if grep -qE "COMPLETED|FAILED|ABORTED" "${LOG_BASE_DIR}/trace.txt" 2>/dev/null; then
+            PROCESSES_RUN=true
+        fi
+    fi
+
+    if [ "$PROCESSES_RUN" = true ]; then
+        echo " Pipeline completed successfully!"
+    else
+        echo " Pipeline completed but all processes were cached/skipped - no new work was performed"
+        echo " This may indicate:"
+        echo "   - Pipeline was already run with these exact inputs"
+        echo "   - Work directory contains cached results (-resume was used)"
+        echo "   - Run with fresh work directory if you need to re-run: -w /path/to/new/workdir"
+    fi
+
     # Wait a moment for files to be fully written
     sleep 2
     
@@ -212,13 +229,47 @@ if [ $? -eq 0 ]; then
         # Fallback to sample IDs file from configs per mode
         if [ -z "$SAMPLE_IDS" ]; then
             SAMPLE_FILE=""
-            if [ "$PROCESS_TYPE" = "analysis" ] || [[ "$PROCESS_TYPE" == analysis_* ]]; then
-                SAMPLE_FILE=$(awk -F'=' '/analyse_sample_id_file/ {gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/analysis.config" | head -1)
+            if [ "$PROCESS_TYPE" = "full_pipeline" ]; then
+                # For run_mode_order, try all config files to find sample IDs
+                # First try mergebam config (it runs first)
+                # Note: Remove comments (everything after //) and extra quotes
+                SAMPLE_FILE=$(awk -F'=' '/bam_sample_id_file/ {gsub(/\/\/.*$/,"",$2); gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/mergebam.config" | head -1)
+            elif [ "$PROCESS_TYPE" = "analysis" ] || [[ "$PROCESS_TYPE" == analysis_* ]]; then
+                SAMPLE_FILE=$(awk -F'=' '/analyse_sample_id_file/ {gsub(/\/\/.*$/,"",$2); gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/analysis.config" | head -1)
             elif [ "$PROCESS_TYPE" = "epi2me" ]; then
-                SAMPLE_FILE=$(awk -F'=' '/epi2me_sample_id_file/ {gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/epi2me.config" | head -1)
+                SAMPLE_FILE=$(awk -F'=' '/epi2me_sample_id_file/ {gsub(/\/\/.*$/,"",$2); gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/epi2me.config" | head -1)
             elif [ "$PROCESS_TYPE" = "mergebam" ]; then
-                SAMPLE_FILE=$(awk -F'=' '/bam_sample_id_file/ {gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/mergebam.config" | head -1)
+                SAMPLE_FILE=$(awk -F'=' '/bam_sample_id_file/ {gsub(/\/\/.*$/,"",$2); gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/mergebam.config" | head -1)
             fi
+
+            # Resolve any variable references in the sample file path
+            if [ -n "$SAMPLE_FILE" ]; then
+                # Extract base path from the config to resolve variables (also remove comments)
+                if [ "$PROCESS_TYPE" = "full_pipeline" ] || [ "$PROCESS_TYPE" = "mergebam" ]; then
+                    BASE_PATH=$(awk -F'=' '/^[[:space:]]*path_output[[:space:]]*=/ {gsub(/\/\/.*$/,"",$2); gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/mergebam.config" | head -1)
+                elif [ "$PROCESS_TYPE" = "epi2me" ]; then
+                    BASE_PATH=$(awk -F'=' '/^[[:space:]]*output_path[[:space:]]*=/ {gsub(/\/\/.*$/,"",$2); gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/epi2me.config" | head -1)
+                else
+                    BASE_PATH=$(awk -F'=' '/^[[:space:]]*path[[:space:]]*=/ {gsub(/\/\/.*$/,"",$2); gsub(/^[ \t"]+|[ \t"]+$/,"",$2); print $2}' "${ORIGINAL_DIR}/conf/analysis.config" | head -1)
+                fi
+
+                # Replace variable references in SAMPLE_FILE path
+                # Handle various forms: ${params.path_output}, ${params.output_path}, ${params.path}, ${path_output}, ${output_path}, ${path}
+                if [[ "$SAMPLE_FILE" =~ \$\{params\.path_output\} ]]; then
+                    SAMPLE_FILE="${SAMPLE_FILE//\$\{params.path_output\}/$BASE_PATH}"
+                elif [[ "$SAMPLE_FILE" =~ \$\{params\.output_path\} ]]; then
+                    SAMPLE_FILE="${SAMPLE_FILE//\$\{params.output_path\}/$BASE_PATH}"
+                elif [[ "$SAMPLE_FILE" =~ \$\{params\.path\} ]]; then
+                    SAMPLE_FILE="${SAMPLE_FILE//\$\{params.path\}/$BASE_PATH}"
+                elif [[ "$SAMPLE_FILE" =~ \$\{path_output\} ]]; then
+                    SAMPLE_FILE="${SAMPLE_FILE//\$\{path_output\}/$BASE_PATH}"
+                elif [[ "$SAMPLE_FILE" =~ \$\{output_path\} ]]; then
+                    SAMPLE_FILE="${SAMPLE_FILE//\$\{output_path\}/$BASE_PATH}"
+                elif [[ "$SAMPLE_FILE" =~ \$\{path\} ]]; then
+                    SAMPLE_FILE="${SAMPLE_FILE//\$\{path\}/$BASE_PATH}"
+                fi
+            fi
+
             if [ -n "$SAMPLE_FILE" ] && [ -f "$SAMPLE_FILE" ]; then
                 SAMPLE_IDS=$(awk -F'[,\t ]+' 'NF {print $1}' "$SAMPLE_FILE" | grep -E '^[A-Za-z0-9._-]+' | sort -u | tr '\n' ' ')
             fi

@@ -207,9 +207,8 @@ workflow.onComplete {
         """
     if (workflow.success) {
         log.info msg
-        if (params.run_mode_analysis == 'rmd' || params.run_mode_order || params.run_mode_epianalyse) {
-            log.info "RMD report generated successfully"
-        }
+        // Note: Don't print "RMD report generated successfully" here as it may be misleading
+        // when processes are cached. The run script will validate actual results.
     } else {
         log.error msg
     }
