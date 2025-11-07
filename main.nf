@@ -102,8 +102,8 @@ workflow {
                 def sample_id = fields[0].trim()
 
                 // Try exact match first
-                def bam = file("${params.merge_bam_folder}/${sample_id}.bam")
-                def bai = file("${params.merge_bam_folder}/${sample_id}.bam.bai")
+                def bam = file("${params.merge_bam_folder}/${sample_id}.merged.bam")
+                def bai = file("${params.merge_bam_folder}/${sample_id}.merged.bam.bai")
 
                 // If exact match doesn't exist, try wildcard pattern
                 if (!bam.exists()) {
@@ -139,11 +139,11 @@ workflow {
                 def fields = line.tokenize("\t")
                 def sample_id = fields[0].trim()
 
-                def bam = file("${params.occ_bam_folder}/${sample_id}.occ.bam")
-                def bai = file("${params.occ_bam_folder}/${sample_id}.occ.bam.bai")
+                def bam = file("${params.occ_bam_folder}/${sample_id}.roi.bam")
+                def bai = file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai")
 
                 if (!bam.exists() || !bai.exists()) {
-                    error "OCC BAM file or index not found for sample ID: ${sample_id}"
+                    error "ROI BAM file or index not found for sample ID: ${sample_id}"
                 }
 
                 tuple(sample_id, file(bam), file(bai))

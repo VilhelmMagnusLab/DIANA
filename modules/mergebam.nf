@@ -29,7 +29,7 @@ process merge_bam_files {
     tuple val(sample_id), path(bam_files) // Expecting a tuple of sample_id and a list of BAM file paths
 
     output:
-    tuple val(sample_id), path("${sample_id}.bam"), path("${sample_id}.bam.bai"), emit: mergebamout
+    tuple val(sample_id), path("${sample_id}.merged.bam"), path("${sample_id}.merged.bam.bai"), emit: mergebamout
 
     script:
     """
@@ -38,8 +38,8 @@ process merge_bam_files {
     for bam in ${bam_files}; do
         echo "Processing file: \${bam}" # Print each BAM file being merged
     done
-    samtools merge -@ ${params.threads} -f ${sample_id}.bam ${bam_files.join(' ')}
-    samtools index -@ ${params.threads} ${sample_id}.bam
+    samtools merge -@ ${params.threads} -f ${sample_id}.merged.bam ${bam_files.join(' ')}
+    samtools index -@ ${params.threads} ${sample_id}.merged.bam
     """
 }
 
@@ -51,12 +51,12 @@ process extract_roi {
     tuple val(sample_id), path(bam), path(bai), path(roi_bed)
 
     output:
-    tuple val(sample_id), path("${sample_id}.occ.bam"), path("${sample_id}.occ.bam.bai"), emit: occ_bam
+    tuple val(sample_id), path("${sample_id}.roi.bam"), path("${sample_id}.roi.bam.bai"), emit: occ_bam
 
     script:
     """
-    intersectBed -a ${bam} -b ${roi_bed} > ${sample_id}.occ.bam
-    samtools index -@ ${params.threads} ${sample_id}.occ.bam
+    intersectBed -a ${bam} -b ${roi_bed} > ${sample_id}.roi.bam
+    samtools index -@ ${params.threads} ${sample_id}.roi.bam
     """
 }
 

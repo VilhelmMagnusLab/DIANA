@@ -179,9 +179,9 @@ workflow epi2me {
                 def fields = line.tokenize("\t")
                 def sample_id = fields[0].trim()
                 // Try exact match first, then wildcard pattern
-                def bam = file("${params.merge_bam_folder}/${sample_id}.bam")
-                def bai = file("${params.merge_bam_folder}/${sample_id}.bam.bai")
-                
+                def bam = file("${params.merge_bam_folder}/${sample_id}.merged.bam")
+                def bai = file("${params.merge_bam_folder}/${sample_id}.merged.bam.bai")
+
                 // If exact match doesn't exist, try wildcard pattern
                 if (!bam.exists()) {
                     bam = file("${params.merge_bam_folder}/${sample_id}.*.bam")
@@ -193,7 +193,7 @@ workflow epi2me {
                 }
 
                 if (!bam || !bai || !bam.exists() || !bai.exists()) {
-                    error "BAM file or index file not found for sample ID: ${sample_id}. Tried both exact match (${sample_id}.bam) and wildcard pattern (${sample_id}.*.bam)"
+                    error "BAM file or index file not found for sample ID: ${sample_id}. Tried both exact match (${sample_id}.merged.bam) and wildcard pattern (${sample_id}.*.bam)"
                 }
 
                 return tuple(

@@ -1148,8 +1148,8 @@ workflow analysis {
                 .map { sample_id -> 
                     tuple(
                         sample_id, 
-                        file("${params.occ_bam_folder}/${sample_id}.occ.bam"),
-                        file("${params.occ_bam_folder}/${sample_id}.occ.bam.bai"),
+                        file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
+                        file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
                         file(params.reference_genome), 
                         file(params.reference_genome_bai),
                         file(params.refgene),
@@ -1195,8 +1195,8 @@ workflow analysis {
                 .map { sample_id -> 
                     tuple(
                         sample_id, 
-                        file("${params.occ_bam_folder}/${sample_id}.occ.bam"),
-                        file("${params.occ_bam_folder}/${sample_id}.occ.bam.bai"),
+                        file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
+                        file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
                         file(params.reference_genome),
                         file(params.reference_genome_bai),
                         file(params.refgene),
@@ -1265,8 +1265,8 @@ workflow analysis {
                     tuple(
                         sample_id, 
                         file(params.gviz_data),
-                        file("${params.occ_bam_folder}/${sample_id}.occ.bam"),
-                        file("${params.occ_bam_folder}/${sample_id}.occ.bam.bai"),
+                        file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
+                        file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
                         file(params.cytoband_file)
                     )
                 }
@@ -1296,39 +1296,39 @@ workflow analysis {
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id -> 
-                    // Try exact match first, then wildcard pattern (avoid .occ.bam files)
-                    def bam_file = file("${params.merge_bam_folder}/${sample_id}.bam")
-                    def bai_file = file("${params.merge_bam_folder}/${sample_id}.bam.bai")
-                    
-                    // If exact match doesn't exist, try .merge.bam specifically
+                    // Try exact match first, then wildcard pattern (avoid .roi.bam files)
+                    def bam_file = file("${params.merge_bam_folder}/${sample_id}.merged.bam")
+                    def bai_file = file("${params.merge_bam_folder}/${sample_id}.merged.bam.bai")
+
+                    // If exact match doesn't exist, try .merge.bam specifically (legacy)
                     if (!bam_file.exists()) {
                         bam_file = file("${params.merge_bam_folder}/${sample_id}.merge.bam")
                         bai_file = file("${params.merge_bam_folder}/${sample_id}.merge.bam.bai")
                     }
-                    
-                    // If still not found, try wildcard but exclude .occ.bam files
+
+                    // If still not found, try wildcard but exclude .roi.bam files
                     if (!bam_file.exists()) {
                         def pattern_files = file("${params.merge_bam_folder}/${sample_id}.*.bam")
                         def potential_bams = pattern_files instanceof List ? pattern_files : [pattern_files]
-                        // Filter out .occ.bam files
-                        def filtered_bams = potential_bams.findAll { !it.name.contains('.occ.') }
+                        // Filter out .roi.bam files
+                        def filtered_bams = potential_bams.findAll { !it.name.contains('.roi.') }
                         if (filtered_bams.size() > 0) {
                             bam_file = filtered_bams[0]
                             bai_file = file("${bam_file}.bai")
                         }
                     }
-                    
+
                     // Only process samples that have corresponding BAM files
                     if (bam_file.exists() && bai_file.exists()) {
                         tuple(
-                            sample_id, 
+                            sample_id,
                             bam_file,
                             bai_file,
                             file(params.reference_genome, checkIfExists: true),
                             file("${params.reference_genome}.fai", checkIfExists: true)
                         )
                     } else {
-                        println "WARNING: Skipping sample ${sample_id} - BAM file not found. Tried: ${sample_id}.bam, ${sample_id}.merge.bam, ${sample_id}.*.bam (excluding .occ.bam)"
+                        println "WARNING: Skipping sample ${sample_id} - BAM file not found. Tried: ${sample_id}.merged.bam, ${sample_id}.merge.bam, ${sample_id}.*.bam (excluding .roi.bam)"
                         null
                     }
                 }
