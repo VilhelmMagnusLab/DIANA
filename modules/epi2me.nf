@@ -11,7 +11,7 @@ nextflow.enable.dsl=2
 
 process run_epi2me_modkit {
     label 'modkit'
-    publishDir "${params.path}/results/epi2me/modkit/", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai)
@@ -55,7 +55,7 @@ process run_epi2me_modkit {
 
 process run_epi2me_sv {
     label 'pipeline1'
-    publishDir "${params.path}/results/epi2me/episv/", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(bam), path(bai)
@@ -84,13 +84,13 @@ process run_epi2me_sv {
 
 process run_epi2me_cnv {
     label 'epi2me'
-    publishDir "${params.path}/results/epi2me/epicnv/", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai)
 
     output:
-    tuple val(sample_id), path("${sample_id}_segs.bed"), path("${sample_id}_bins.bed"), path("${sample_id}_segs.vcf"), path("${sample_id}_copyNumbersCalled.rds"), path("${sample_id}_calls.bed"), path("${sample_id}_calls.vcf"), path("${sample_id}_raw_bins.bed"), path("${sample_id}_plots.pdf"), path("${sample_id}_isobar_plot.png"), path("${sample_id}_cov.png")
+    tuple val(sample_id), path("${sample_id}_segs.bed"), path("${sample_id}_bins.bed"), path("${sample_id}_segs.vcf"), path("${sample_id}_copyNumbersCalled.rds"), path("${sample_id}_calls.bed"), path("${sample_id}_calls.vcf")
     
     script:
     """

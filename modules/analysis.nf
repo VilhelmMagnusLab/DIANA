@@ -52,6 +52,7 @@ process extract_epic {
     label 'epic'
     tag "${sample_id}"
     publishDir "${params.output_path}/methylation/", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_mnpflex_input.bed"
 
     input:
     tuple val(sample_id), file(bedmethyl), file(epicsites), file(mgmt_cpg_island_hg38)
@@ -82,7 +83,7 @@ process extract_epic {
     }
     {
     if (\$1 ~ /^chr/) {
-        printf "\\"%s\"\\t%s\t%s\\t%s\\t%s\\t\\"%s\\"\\n", \$1, \$2, \$3, \$5, \$6, \$7
+        printf "\\"%s\\"\\t%s\t%s\\t%s\\t%s\\t\\"%s\\"\\n", \$1, \$2, \$3, \$5, \$6, \$7
     }
     }   ' ${sample_id}_EpicSelect_m.bed > ${sample_id}_mnpflex_input.bed
 
@@ -118,12 +119,14 @@ process sturgeon {
     memory '2 GB'
     label 'epic'
     publishDir "${params.output_path}/classifier/sturgeon", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_bedmethyl_sturgeon_general.pdf"
 
     input:
     tuple val(sample_id), path(sturgeon_bed), path(sturgeon_model)
 
     output:
     tuple path("${sample_id}_bedmethyl_sturgeon.bed"), path("${sample_id}_bedmethyl_sturgeon")
+    path("${sample_id}_bedmethyl_sturgeon_general.pdf"), optional: true
 
 
     """
@@ -131,6 +134,10 @@ process sturgeon {
 
     /sturgeon/venv/bin/sturgeon predict -i ${sample_id}_bedmethyl_sturgeon.bed   -o  ${sample_id}_bedmethyl_sturgeon --model-files $sturgeon_model  --plot-results
 
+    # Copy the PDF file to the work directory for publishDir to find it
+    if [ -f "${sample_id}_bedmethyl_sturgeon/${sample_id}_bedmethyl_sturgeon_general.pdf" ]; then
+        cp "${sample_id}_bedmethyl_sturgeon/${sample_id}_bedmethyl_sturgeon_general.pdf" .
+    fi
     """
 }
 
@@ -193,6 +200,7 @@ EOF
 process tsne_plot {
     label 'tsne'
     publishDir "${params.output_path}/classifier/nanodx", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_tsne_plot.html"
     
     input:
     tuple val(sample_id), path(epic_bed)
@@ -201,6 +209,7 @@ process tsne_plot {
     
     output:
     tuple val(sample_id), path("${sample_id}_tsne_plot.pdf"), emit: tsne_out
+    tuple val(sample_id), path("${sample_id}_tsne_plot.html")
     
     script:
     """
@@ -273,6 +282,7 @@ process svannasv {
 
     label 'svannasv'
    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
+   publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_occ_svanna_annotation.html"
 
    input:
    tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(occ_protein_coding_bed)
@@ -515,7 +525,7 @@ process annotatecnv {
 // SNV calling and annotation using Clair3 for OCC (regions of interest) regions
 process clair3 {
     label 'clair3'
-    publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
    
     input:
     tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai),  path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex),path(hg38_cosmic100),path(hg38_cosmic100index)
@@ -601,7 +611,7 @@ table_annovar.pl occ_merge_snv_avinpt \
 // Somatic variant calling using ClairS-TO for tumor-only samples
 process clairs_to {
     label 'clairsto'
-    publishDir "${params.output_path}/OCC/$sample_id", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai),  path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex),path(hg38_cosmic100),path(hg38_cosmic100index), path(occ_protein_coding_bed)
@@ -672,8 +682,8 @@ process merge_annotation {
     tuple val(sample_id), path(merge_file), path(pileup_file), path(clairsto_file), path(occ_genes)
     
     output:
-    tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv"), emit: occmergeout
-    tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall.csv")
+    //tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall_filter.csv")
+    tuple val(sample_id), path("${sample_id}_merge_annotation_filter_snvs_allcall.csv"), emit: occmergeout
     
 
     script:
@@ -798,7 +808,7 @@ process plot_genomic_regions {
 
 // Comprehensive PDF report generation using R Markdown
 process markdown_report {
-    publishDir "${params.output_path}/report", mode: "copy", overwrite: true, pattern: "*.pdf"
+    publishDir "${params.result_path}/", mode: "copy", overwrite: true, pattern: "*.pdf"
 
     input:
     tuple val(sample_id),
@@ -1051,10 +1061,10 @@ workflow analysis {
                 .map { sample_id ->
                     tuple(
                         sample_id,
-                        file("${params.segsfromepi2me_folder}/${sample_id}_segs.vcf"),
+                        file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.vcf"),
                         file(params.occ_protein_coding_bed),
-                        file("${params.segsfromepi2me_folder}/${sample_id}_bins.bed"),
-                        file("${params.segsfromepi2me_folder}/${sample_id}_segs.bed"),
+                        file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_bins.bed"),
+                        file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.bed"),
                         sample_thresholds[sample_id]
                     )
                 }
@@ -1076,14 +1086,14 @@ workflow analysis {
                 
                 //log.info "Creating Svanna input for sample: ${sample_id} (order mode)"
                 //log.info "SV file path: ${sv}"
-                
-                // Create index file path from the SV file path
-                def sv_path = sv.toString()
-                def sv_index = file("${sv_path}.tbi")
-                
+
+                // Create index file path from the published SV file location
+                def sv_file = file("${params.path}/routine_epi2me/${sample_id}/${sample_id}.vcf.gz")
+                def sv_index = file("${params.path}/routine_epi2me/${sample_id}/${sample_id}.vcf.gz.tbi")
+
                 tuple(
                     sample_id,
-                    sv,                    // SV VCF file from epi2me
+                    sv_file,               // SV VCF file from epi2me
                     sv_index,              // Index file
                     file(params.occ_protein_coding_bed)
                 )
@@ -1091,7 +1101,7 @@ workflow analysis {
             Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id ->
                     //log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
-                    def sv_file = file("${params.sv_folder}/${sample_id}.vcf.gz")
+                    def sv_file = file("${params.sv_folder}/${sample_id}/${sample_id}.vcf.gz")
 
                     //if (!sv_file.exists()) {
                     //    error "SV file not found: ${sv_file}"
@@ -1355,7 +1365,7 @@ workflow analysis {
                     .map { sample_id -> 
                         tuple(
                             sample_id,
-                            file("${params.bedmethyl_folder}/${sample_id}.wf_mods.bedmethyl.gz"),
+                            file("${params.bedmethyl_folder}/${sample_id}/${sample_id}.wf_mods.bedmethyl.gz"),
                             file(params.epicsites),
                             file(params.mgmt_cpg_island_hg38)
                         )
@@ -1543,7 +1553,7 @@ workflow analysis {
                 .filter { it != null }
         } else {
             ace_input = Channel
-                .fromPath("${params.cnv_rds}/*_copyNumbersCalled.rds")
+                .fromPath("${params.cnv_rds}/**/*_copyNumbersCalled.rds")
                 .map { rds_file ->
                     // Extract sample ID: everything before "_copyNumbersCalled.rds"
                     def sample_id = rds_file.name.toString().replaceAll(/_copyNumbersCalled\.rds$/, '')
@@ -1599,17 +1609,17 @@ workflow analysis {
                 def rds_file = args[10]
                         def sv = args[11]
                         println "Processing epi2me results for sample: ${sample_id} from epi2me output"
-                        
-                        // Debug: Check if files exist
-                        def segs_vcf_path = "${params.path}/results/epi2me/epicnv/${sample_id}_segs.vcf"
-                        def bins_bed_path = "${params.path}/results/epi2me/epicnv/${sample_id}_bins.bed"
-                        def segs_bed_path = "${params.path}/results/epi2me/epicnv/${sample_id}_segs.bed"
-                        
+
+                        // Use published epi2me output directory
+                        def segs_vcf_path = "${params.path}/routine_epi2me/${sample_id}/${sample_id}_segs.vcf"
+                        def bins_bed_path = "${params.path}/routine_epi2me/${sample_id}/${sample_id}_bins.bed"
+                        def segs_bed_path = "${params.path}/routine_epi2me/${sample_id}/${sample_id}_segs.bed"
+
                         println "Checking file existence:"
                         println "  segs_vcf_path: ${segs_vcf_path}"
                         println "  bins_bed_path: ${bins_bed_path}"
                         println "  segs_bed_path: ${segs_bed_path}"
-                        
+
                         tuple(
                             sample_id,
                             file(segs_vcf_path),
@@ -1625,10 +1635,10 @@ workflow analysis {
                         println "Processing sample: ${sample_id} from configured folders"
                         tuple(
                             sample_id,
-                            file("${params.segsfromepi2me_folder}/${sample_id}_segs.vcf"),
+                            file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.vcf"),
                             file(params.occ_protein_coding_bed),
-                            file("${params.segsfromepi2me_folder}/${sample_id}_bins.bed"),
-                            file("${params.segsfromepi2me_folder}/${sample_id}_segs.bed")
+                            file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_bins.bed"),
+                            file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.bed")
                         )
                     }
             }
@@ -1780,7 +1790,7 @@ workflow analysis {
                     .map { sample_id -> 
                         tuple(
                             sample_id,
-                            file("${params.bedmethyl_folder}/${sample_id}.wf_mods.bedmethyl.gz"),
+                            file("${params.bedmethyl_folder}/${sample_id}/${sample_id}.wf_mods.bedmethyl.gz"),
                             file(params.epicsites),
                             file(params.mgmt_cpg_island_hg38)
                         )

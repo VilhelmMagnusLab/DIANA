@@ -44,7 +44,7 @@ readonly SCRIPT_DATE="2025-01-14"
 # Default configuration
 readonly DEFAULT_CONFIG_FILE="conf/mergebam.config"
 readonly DEFAULT_PIPELINE_DIR="$(pwd)"
-readonly DEFAULT_NEXTFLOW_WORK_DIR="/home/chbope/extension/trash"
+readonly DEFAULT_NEXTFLOW_WORK_DIR="/data/trash"
 readonly DEFAULT_CHECK_INTERVAL=300
 readonly DEFAULT_TIMEOUT=432000
 
@@ -470,11 +470,22 @@ run_sample_pipeline() {
     log "INFO" "Running pipeline for sample: $sample_id"
 
     # Run pipeline using singularity containers - output shown directly
-    if bash run_pipeline_singularity.sh --run_mode_order -w "$work_dir"; then
+    if bash run_pipeline_singularity.sh --run_mode_order -w "$work_dir" -resume ; then
 
         # Check if markdown report was generated successfully
-        local base_path=$(extract_config_value "$CONFIG_FILE" "path")
-        local report_pattern="${base_path}/results/${sample_id}/${sample_id}_markdown_pipeline_report_finalexecsummary.pdf"
+        # The markdown report is published using result_path from analysis.config
+        # Try to get result_path from analysis.config, or construct it
+        local analysis_config="${PIPELINE_DIR}/conf/analysis.config"
+        local result_path=$(extract_config_value "$analysis_config" "result_path")
+
+        # If result_path has variables, resolve them
+        if [[ "$result_path" =~ \$\{ ]]; then
+            local analysis_base_path=$(extract_config_value "$analysis_config" "path")
+            result_path="${result_path//\$\{params.path\}/$analysis_base_path}"
+            result_path="${result_path//\$\{path\}/$analysis_base_path}"
+        fi
+
+        local report_pattern="${result_path}/${sample_id}_markdown_pipeline_report.pdf"
 
         if [[ -f "$report_pattern" ]]; then
             SAMPLE_STATUS["$sample_id"]="completed"
