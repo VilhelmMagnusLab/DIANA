@@ -61,7 +61,7 @@ process run_epi2me_sv {
     tuple val(sample_id), path(bam), path(bai)
 
     output:
-    tuple val(sample_id), path("${sample_id}.vcf.gz"), path("${sample_id}.vcf.gz.tbi"), emit: svvcf
+    tuple val(sample_id), path("${sample_id}.sniffles.vcf.gz"), path("${sample_id}.sniffles.vcf.gz.tbi"), emit: svvcf
 
     script:
     """
@@ -75,10 +75,10 @@ process run_epi2me_sv {
     fi
     
     # Run Sniffles2
-    sniffles --input ${bam} --vcf ${sample_id}.vcf.gz
-    
+    sniffles --input ${bam} --vcf ${sample_id}.sniffles.vcf.gz
+
     # Check if output was created
-    ls -la ${sample_id}.vcf.gz
+    ls -la ${sample_id}.sniffles.vcf.gz
     """
 }
 
@@ -245,8 +245,8 @@ workflow epi2me {
             )
         }
         
-        default_sv = input_channel.map { sid, bam, bai, ref, ref_bai -> 
-            tuple(sid, file("${params.episv}/${sid}.vcf.gz"))
+        default_sv = input_channel.map { sid, bam, bai, ref, ref_bai ->
+            tuple(sid, file("${params.episv}/${sid}.sniffles.vcf.gz"))
         }
 
         // Mix actual results with defaults (but only for standalone mode, not for run_mode_order/epianalyse)

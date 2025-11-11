@@ -389,20 +389,53 @@ You can specify a custom log directory using the `--log-dir` flag.
 
 ## Automated Sample Monitoring
 
-The pipeline includes `smart_sample_monitor.sh` for automated monitoring and processing of ONT sequencing runs. This script continuously monitors sample directories and automatically triggers the pipeline when sequencing completes.
+The pipeline includes `smart_sample_monitor_v2.sh` for automated monitoring and processing of ONT sequencing runs. This script continuously monitors sample directories and automatically triggers the pipeline when sequencing completes.
 
 ### Features:
 - **Real-time Monitoring**: Watches for `final_summary_*_*_*.txt` files indicating completed sequencing
+- **Automatic Pipeline Triggering**: Starts processing immediately when samples are ready
+- **Data Directory Override**: Command-line option to override config input_dir
+- **Resume Control**: Optional flag to enable/disable Nextflow caching
+- **Global Command**: Can be installed system-wide for easy access
+
+### Version 2 Enhancements:
+- Hardcoded sample IDs file path: `/data/routine_nWGS/sample_ids_bam.txt`
+- Command-line `--data-dir` takes precedence over config
+- Resume disabled by default (use `-r` to enable)
+- Can be installed as global command: `smart_sample_monitor`
 
 ### Basic Usage:
 ```bash
-# Start monitoring with auto-detection
-./smart_sample_monitor.sh
+# From pipeline directory
+./smart_sample_monitor_v2.sh
 
+# With data directory override
+./smart_sample_monitor_v2.sh -d /data/WGS_Dummy
+
+# With resume enabled
+./smart_sample_monitor_v2.sh -d /data/WGS_Dummy -r
+
+# Verbose mode
+./smart_sample_monitor_v2.sh -d /data/WGS_Dummy -v
 ```
 
+### Global Command Setup:
+For easier access from any directory, install as a global command:
+
+```bash
+# User-level installation (no sudo required)
+mkdir -p ~/bin
+ln -sf /data/routine_nWGS_pipeline/nWGS_pipeline/smart_sample_monitor_v2.sh ~/bin/smart_sample_monitor
+source ~/.bashrc
+
+# Then use from anywhere
+smart_sample_monitor -d /data/WGS_Dummy -v
+```
+
+**See [docs/GLOBAL_COMMAND_SETUP.md](docs/GLOBAL_COMMAND_SETUP.md) for detailed installation and usage instructions.**
+
 ### Use Case:
-This script is particularly useful for processing ONT sequencing runs where samples complete at different times. Instead of manually checking and starting the pipeline for each sample, the monitor automatically detects completion and starts processing immediately, maximizing throughput and reducing manual intervention. Make sure thta all the path is updated (output path, input path, etc) 
+This script is particularly useful for processing ONT sequencing runs where samples complete at different times. Instead of manually checking and starting the pipeline for each sample, the monitor automatically detects completion and starts processing immediately, maximizing throughput and reducing manual intervention. Make sure that all the paths are updated (output path, input path, etc) 
 
 ## Troubleshooting
 
@@ -424,7 +457,10 @@ ls -la containers/*.sif                        # Singularity
 
 ## Support
 
-- **Documentation**: [DOCKER_SETUP.md](DOCKER_SETUP.md), [SINGULARITY_SETUP.md](SINGULARITY_SETUP.md)
+- **Documentation**:
+  - [DOCKER_SETUP.md](DOCKER_SETUP.md) - Docker installation and setup
+  - [SINGULARITY_SETUP.md](SINGULARITY_SETUP.md) - Singularity/Apptainer setup
+  - [docs/GLOBAL_COMMAND_SETUP.md](docs/GLOBAL_COMMAND_SETUP.md) - Global command installation
 - **Issues**: [GitHub Issues](https://github.com/VilhelmMagnusLab/nWGS_pipeline/issues)
 - **Contact**: 
   - Christian Domilongo Bope (chbope@ous-hf.no / christianbope@gmail.com)

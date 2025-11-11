@@ -51,8 +51,8 @@ process extract_epic {
     memory '2 GB'
     label 'epic'
     tag "${sample_id}"
-    publishDir "${params.output_path}/methylation/", mode: "copy", overwrite: true
-    publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_mnpflex_input.bed"
+    publishDir "${params.output_path}/${sample_id}/methylation/", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_mnpflex_input.bed"
 
     input:
     tuple val(sample_id), file(bedmethyl), file(epicsites), file(mgmt_cpg_island_hg38)
@@ -99,7 +99,7 @@ process extract_epic {
 // Prepare nanoDX input for methylation data processing and CpG site intersection
 process nanodx {
     label 'epic'
-    publishDir "${params.output_path}/classifier/nanodx", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(nanodx_bed), path(hg19_450model)
@@ -118,8 +118,8 @@ process sturgeon {
     cpus 4
     memory '2 GB'
     label 'epic'
-    publishDir "${params.output_path}/classifier/sturgeon", mode: "copy", overwrite: true
-    publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_bedmethyl_sturgeon_general.pdf"
+    publishDir "${params.output_path}/${sample_id}/classifier/sturgeon", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_bedmethyl_sturgeon_general.pdf"
 
     input:
     tuple val(sample_id), path(sturgeon_bed), path(sturgeon_model)
@@ -145,7 +145,7 @@ process sturgeon {
 // Neural network classification for tumor type prediction using NanoDx CrossNN classifier
 process run_nn_classifier {
     label 'nanodx'
-    publishDir "${params.output_path}/classifier/nanodx", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
     
     input:
     tuple val(sample_id), path(bed_file), path(model_file), path(snakefile), path(nn_model)
@@ -199,8 +199,8 @@ EOF
 // Dimensionality reduction plot generation using t-SNE/UMAP
 process tsne_plot {
     label 'tsne'
-    publishDir "${params.output_path}/classifier/nanodx", mode: "copy", overwrite: true
-    publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_tsne_plot.html"
+    publishDir "${params.output_path}/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
+    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_tsne_plot.html"
     
     input:
     tuple val(sample_id), path(epic_bed)
@@ -250,7 +250,7 @@ process tsne_plot {
 // MGMT promoter methylation analysis and quantification
 process mgmt_promoter {
     label 'epic'
-    publishDir "${params.output_path}/methylation/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/${sample_id}/methylation/", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(mgmt_bed)
@@ -281,7 +281,7 @@ process mgmt_promoter {
 process svannasv {
 
     label 'svannasv'
-   publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
+   publishDir "${params.output_path}/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
    publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_occ_svanna_annotation.html"
 
    input:
@@ -330,7 +330,7 @@ process svannasv {
 // Fusion event analysis and filtering from structural variants
 process svannasv_fusion_events {
     label 'svannasv'
-    publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(occ_svannavcf), path(genecode_bed), path(occ_fusions_genes)
@@ -404,7 +404,7 @@ process svannasv_fusion_events {
 // Circos plot generation for structural variant visualization
 process circosplot {
    label 'circos'
-   publishDir "${params.output_path}/structure_variant/svannasv/", mode: "copy", overwrite: true
+   publishDir "${params.output_path}/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
    
    input:
    tuple val(sample_id), path(svanna_output), path(vcf2circos_json)
@@ -449,7 +449,7 @@ process circosplot {
 // Copy number variant annotation and analysis with ACE
 process annotatecnv {
    label 'annotatecnv'
-    publishDir "${params.output_path}/cnv/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/${sample_id}/cnv/", mode: "copy", overwrite: true
 
    input:
     tuple val(sample_id),
@@ -532,10 +532,10 @@ process clair3 {
 
     output:
     tuple val(sample_id), path('output_clair3/')
-    tuple val(sample_id), path('occ_pileup_snvs_avinput')
+    tuple val(sample_id), path("${sample_id}_occ_pileup_snvs_avinput")
     tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), emit:occpileupannotateandfilterout
-    path('occ_merge_snv_avinpt')
-    path('occ_merge.hg38_multianno.txt')
+    tuple val(sample_id), path("${sample_id}_occ_merge_snv_avinpt")
+    tuple val(sample_id), path("${sample_id}_occ_merge.hg38_multianno.txt")
     tuple val(sample_id), path("${sample_id}_merge_annotateandfilter.csv"), emit:mergeannotateandfilterout
     tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), path("${sample_id}_merge_annotateandfilter.csv"), emit:clair3output 
 
@@ -556,7 +556,7 @@ process clair3 {
     --var_pct_phasing=1 \
     --platform="ont" \
     --no_phasing_for_fa \
-    --model_path=/opt/models/r1041_e82_400bps_sup_v420 \
+    --model_path=/data/routine_nWGS_pipeline/nWGS_pipeline/data/reference/r1041_e82_400bps_sup_v420 \
     --output=output_clair3
  
  convert2annovar.pl output_clair3/pileup.vcf.gz \
@@ -565,10 +565,10 @@ process clair3 {
 	--filter pass \
 	--fraction 0.1 \
 	--includeinfo \
-	--outfile occ_pileup_snvs_avinput
+	--outfile ${sample_id}_occ_pileup_snvs_avinput
 
    
-   table_annovar.pl occ_pileup_snvs_avinput \
+   table_annovar.pl  ${sample_id}_occ_pileup_snvs_avinput \
          -outfile occ_pileup \
          -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
          -operation g,f,f \
@@ -587,9 +587,9 @@ convert2annovar.pl \
     --filter pass \
     --fraction 0.1 \
     --includeinfo \
-    --outfile occ_merge_snv_avinpt
+    --outfile ${sample_id}_occ_merge_snv_avinpt
 
-table_annovar.pl occ_merge_snv_avinpt \
+table_annovar.pl ${sample_id}_occ_merge_snv_avinpt \
     -outfile occ_merge \
     -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
     -operation g,f,f \
@@ -597,11 +597,13 @@ table_annovar.pl occ_merge_snv_avinpt \
     -otherinfo
 
     awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /    frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/' \
-        occ_merge.hg38_multianno.txt \
+     occ_merge.hg38_multianno.txt \
     | awk '/exonic/ || /TERT/ || /Func.refGene/'  \
     | awk '!/dist=166/' \
     | cut -f1-16,26,28,29 \
-    > ${sample_id}_merge_annotateandfilter.csv 
+    > ${sample_id}_merge_annotateandfilter.csv
+
+    cp occ_merge.hg38_multianno.txt ${sample_id}_occ_merge.hg38_multianno.txt
 
     """
    }
@@ -618,8 +620,8 @@ process clairs_to {
     
     output:
     tuple val(sample_id), path('clairsto_output/')
-    tuple val(sample_id), path('clairS_To_snv_avinput')
-    tuple val(sample_id), path('ClairS_TO_snv.hg38_multianno.txt')
+    tuple val(sample_id), path("${sample_id}_clairS_To_snv_avinput")
+    tuple val(sample_id), path("${sample_id}_ClairS_TO_snv.hg38_multianno.txt")
     tuple val(sample_id), path("${sample_id}_annotateandfilter_clairsto.csv"), emit:annotateandfilter_clairstoout
     tuple val(sample_id), path("${sample_id}_merge_snv_indel_claisto.vcf.gz"), emit: clairsto_merged_vcf
 
@@ -652,10 +654,10 @@ process clairs_to {
    --format vcf4 \
    --filter pass \
    --includeinfo \
-   --outfile  clairS_To_snv_avinput
+   --outfile  ${sample_id}_clairS_To_snv_avinput
 
 
-  table_annovar.pl clairS_To_snv_avinput \
+  table_annovar.pl ${sample_id}_clairS_To_snv_avinput \
    -outfile ClairS_TO_snv \
    -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
    -operation g,f,f \
@@ -668,6 +670,7 @@ process clairs_to {
   | awk '!/dist=166/' \
   | cut -f1-16,25,26  > ${sample_id}_annotateandfilter_clairsto.csv
 
+   cp ClairS_TO_snv.hg38_multianno.txt ${sample_id}_ClairS_TO_snv.hg38_multianno.txt
 
     """
    }
@@ -676,7 +679,7 @@ process clairs_to {
 process merge_annotation {
     debug true
     label 'merge_annotation'
-    publishDir "${params.output_path}/merge_annot_clair3andclairsto/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/${sample_id}/merge_annot_clair3andclairsto/", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(merge_file), path(pileup_file), path(clairsto_file), path(occ_genes)
@@ -713,7 +716,7 @@ process merge_annotation {
 // TERT promoter variant visualization using IGV tools
 process igv_tools {
     label 'epic'
-    publishDir "${params.output_path}/coverage", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/${sample_id}/coverage", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(tertp_variants), path(ncbirefseq), path(reference_genome), path(reference_genome_bai)
@@ -736,7 +739,7 @@ process igv_tools {
 // Quality assessment and statistics using Cramino
 process cramino_report {
         label 'epic'
-        publishDir "${params.output_path}/cramino", mode: "copy", overwrite: true
+        publishDir "${params.output_path}/${sample_id}/cramino", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(merge_bam), path(merge_bam_bai), path(reference_genome), path(reference_genome_bai)
@@ -768,7 +771,7 @@ process cramino_report {
 
 // Genomic region coverage plotting for EGFR, IDH1, and TERTp
 process plot_genomic_regions {
-    publishDir "${params.output_path}/coverage", mode: 'copy'
+    publishDir "${params.output_path}/${sample_id}/coverage", mode: 'copy'
     label 'gviz'
     
     input:
@@ -808,7 +811,7 @@ process plot_genomic_regions {
 
 // Comprehensive PDF report generation using R Markdown
 process markdown_report {
-    publishDir "${params.result_path}/", mode: "copy", overwrite: true, pattern: "*.pdf"
+    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "*.pdf"
 
     input:
     tuple val(sample_id),
@@ -847,14 +850,14 @@ process markdown_report {
     if [ "${params.run_mode_order}" = "true" ]; then
         # For run_mode_order: Create sample_file.txt with sample_id and threshold_value
         THRESHOLD_VALUE=""
-        if [ -f "${params.output_path}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
-            THRESHOLD_VALUE=\$(cat "${params.output_path}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
+        if [ -f "${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
+            THRESHOLD_VALUE=\$(cat "${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
             # Create sample_file.txt
             echo -e "${sample_id}\\t\${THRESHOLD_VALUE}" > sample_file.txt
             echo "Created sample_file.txt for run_mode_order with: ${sample_id} \${THRESHOLD_VALUE}"
             SAMPLE_FILE="\${PWD}/sample_file.txt"
         else
-            echo "ERROR: ACE threshold file not found for ${sample_id}. Cannot proceed with markdown report."
+            echo "ERROR: ACE threshold file not found for ${sample_id} at ${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt"
             exit 1
         fi
     else
@@ -878,9 +881,9 @@ process markdown_report {
             SAMPLE_FILE="\${PWD}/sample_file.txt"
             echo "Created local sample_file.txt with user-provided tumor content:"
             cat "\${SAMPLE_FILE}"
-        elif [ -f "${params.output_path}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
+        elif [ -f "${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
             # User provided only 1 column, but ACE results available - use ACE-calculated value
-            THRESHOLD_VALUE=\$(cat "${params.output_path}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
+            THRESHOLD_VALUE=\$(cat "${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
             echo -e "${sample_id}\\t\${THRESHOLD_VALUE}" > sample_file.txt
             echo "Created sample_file.txt with ACE-calculated tumor content: ${sample_id} \${THRESHOLD_VALUE}"
             SAMPLE_FILE="\${PWD}/sample_file.txt"
@@ -965,7 +968,7 @@ process markdown_report {
 // ACE tumor content calculation and copy number analysis
 process ace_tmc {
     label 'ace_tmc'
-    publishDir "${params.output_path}/cnv/ace/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/${sample_id}/cnv/ace/", mode: "copy", overwrite: true
     
     input:
     tuple val(sample_id), path(rds_file)
@@ -1088,8 +1091,8 @@ workflow analysis {
                 //log.info "SV file path: ${sv}"
 
                 // Create index file path from the published SV file location
-                def sv_file = file("${params.path}/routine_epi2me/${sample_id}/${sample_id}.vcf.gz")
-                def sv_index = file("${params.path}/routine_epi2me/${sample_id}/${sample_id}.vcf.gz.tbi")
+                def sv_file = file("${params.path}/routine_epi2me/${sample_id}/${sample_id}.sniffles.vcf.gz")
+                def sv_index = file("${params.path}/routine_epi2me/${sample_id}/${sample_id}.sniffles.vcf.gz.tbi")
 
                 tuple(
                     sample_id,
@@ -1101,7 +1104,7 @@ workflow analysis {
             Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id ->
                     //log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
-                    def sv_file = file("${params.sv_folder}/${sample_id}/${sample_id}.vcf.gz")
+                    def sv_file = file("${params.sv_folder}/${sample_id}/${sample_id}.sniffles.vcf.gz")
 
                     //if (!sv_file.exists()) {
                     //    error "SV file not found: ${sv_file}"
