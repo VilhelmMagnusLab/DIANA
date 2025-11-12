@@ -160,10 +160,20 @@ if [ $? -eq 0 ]; then
     # Determine sample IDs from Nextflow log first; fallback to assets/sample_ids.txt; else T001
     SAMPLE_IDS=""
     if [ -n "$NEXTFLOW_LOG" ] && [ -f "$NEXTFLOW_LOG" ]; then
-        SAMPLE_IDS=$(grep -E "Processing (completed )?for sample:|Processing sample:|Sample ID:" "$NEXTFLOW_LOG" \
-            | sed -E 's/.*sample: *([A-Za-z0-9._-]+).*/\1/' \
+        # Try multiple extraction patterns for different run modes
+        # Pattern 1: "Processing for sample: T25-256" or "Sample_id T25-256"
+        SAMPLE_IDS=$(grep -E "Processing (completed )?for sample:|Processing sample:|Sample ID:|Sample_id " "$NEXTFLOW_LOG" \
+            | sed -E 's/.*(sample:?|Sample_id) *([A-Za-z0-9._-]+).*/\2/' \
             | grep -E '^[A-Za-z0-9._-]+' \
             | sort -u | tr '\n' ' ')
+
+        # Pattern 2: "Sample thresholds: [T25-256:null]" (for run_mode_analysis)
+        if [ -z "$SAMPLE_IDS" ]; then
+            SAMPLE_IDS=$(grep -E "Sample thresholds:" "$NEXTFLOW_LOG" \
+                | sed -E 's/.*\[([A-Za-z0-9._-]+):.*/\1/' \
+                | grep -E '^[A-Za-z0-9._-]+' \
+                | sort -u | tr '\n' ' ')
+        fi
     fi
     if [ -z "$SAMPLE_IDS" ] && [ -f "assets/sample_ids.txt" ]; then
         SAMPLE_IDS=$(grep -E '^[A-Za-z0-9._-]+' assets/sample_ids.txt | tr '\n' ' ')

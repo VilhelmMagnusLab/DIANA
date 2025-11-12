@@ -125,8 +125,9 @@ process sturgeon {
     tuple val(sample_id), path(sturgeon_bed), path(sturgeon_model)
 
     output:
-    tuple path("${sample_id}_bedmethyl_sturgeon.bed"), path("${sample_id}_bedmethyl_sturgeon")
+    path("${sample_id}_bedmethyl_sturgeon.bed")
     path("${sample_id}_bedmethyl_sturgeon_general.pdf"), optional: true
+    path("${sample_id}_bedmethyl_sturgeon_general.csv"), optional: true
 
 
     """
@@ -134,11 +135,17 @@ process sturgeon {
 
     /sturgeon/venv/bin/sturgeon predict -i ${sample_id}_bedmethyl_sturgeon.bed   -o  ${sample_id}_bedmethyl_sturgeon --model-files $sturgeon_model  --plot-results
 
-    # Copy the PDF file to the work directory for publishDir to find it
+    # Copy the PDF and CSV files to the work directory for publishDir to find them
     if [ -f "${sample_id}_bedmethyl_sturgeon/${sample_id}_bedmethyl_sturgeon_general.pdf" ]; then
         cp "${sample_id}_bedmethyl_sturgeon/${sample_id}_bedmethyl_sturgeon_general.pdf" .
     fi
+    if [ -f "${sample_id}_bedmethyl_sturgeon/${sample_id}_bedmethyl_sturgeon_general.csv" ]; then
+        cp "${sample_id}_bedmethyl_sturgeon/${sample_id}_bedmethyl_sturgeon_general.csv" .
+    fi
+    # Note: ${sample_id}_bedmethyl_sturgeon.bed is already in the work directory (created at line 134)
+    rm -rf ${sample_id}_bedmethyl_sturgeon
     """
+    
 }
 
 
@@ -282,7 +289,7 @@ process svannasv {
 
     label 'svannasv'
    publishDir "${params.output_path}/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
-   publishDir "${params.path}/routine_results/", mode: "copy", overwrite: true, pattern: "*_occ_svanna_annotation.html"
+   publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_occ_svanna_annotation.html"
 
    input:
    tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(occ_protein_coding_bed)
