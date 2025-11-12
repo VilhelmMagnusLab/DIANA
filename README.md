@@ -172,16 +172,58 @@ sample_id2   flowcell_id2
 ```
 
 ### Directory Structure
+
+The pipeline uses a standardized directory structure with separate input and output paths:
+
 ```
-/path/to/data/
-├── reference/                    # Reference files
-├── humandb/                      # Annotation files
-├── testdata/                     # Input data
-│   ├── sample_ids.txt           # Sample ID file
-│   └── single_bam_folder/
-│       ├── merge_bam/           # Merged BAM inputs
-│       └── occ_bam/             # ROI BAMs
-└── results/                      # Output (auto-created)
+Pipeline directory:
+/data/routine_nWGS_pipeline/nWGS_pipeline/
+├── conf/                         # Configuration files
+│   ├── mergebam.config          # Mergebam module config
+│   ├── epi2me.config            # Epi2me module config
+│   └── analysis.config          # Analysis module config
+├── modules/                      # Nextflow modules
+├── containers/                   # Singularity container images
+├── bin/                         # Helper scripts
+├── docs/                        # Documentation
+└── smart_sample_monitor_v2.sh  # Automated monitoring script
+
+Pipeline data directory (configured via params.path):
+/data/routine_nWGS_pipeline/nWGS_pipeline/data/
+├── reference/                    # Reference files (GRCh38, BED files, etc.)
+└── humandb/                      # Annotation databases
+
+Input data directory (configured via params.input_dir in mergebam.config):
+/data/WGS_[DATE]/                # Oxford Nanopore sequencing output
+├── SAMPLE_01/                    # Sample directory
+│   └── [subdirectory]/          # Any subdirectory structure
+│       ├── *.bam                # BAM files from ONT sequencing
+│       ├── *.bam.bai            # BAM index files
+│       └── final_summary_*_*_*.txt  # Completion marker file
+├── SAMPLE_02/
+│   └── [subdirectory]/
+│       ├── *.bam
+│       ├── *.bam.bai
+│       └── final_summary_*_*_*.txt
+└── ...
+
+Output directory (configured via params.path_output):
+/data/routine_nWGS/
+├── sample_ids_bam.txt           # Sample IDs for BAM merging
+├── routine_bams/                # Processed BAM files
+│   ├── merge_bams/              # Merged BAM files per sample
+│   └── roi_bams/                # Region of interest extracted BAMs
+├── routine_epi2me/              # Epi2me analysis results
+│   └── [sample_id]/
+│       ├── *.wf_mods.bedmethyl.gz  # Methylation calls
+│       ├── *.sniffles.vcf.gz       # Structural variants
+│       └── *_segs.bed              # CNV segments
+└── routine_results/             # Analysis results and reports
+    └── [sample_id]/
+        ├── cnv/                 # CNV analysis
+        ├── sv/                  # SV annotation
+        ├── methylation/         # MGMT analysis
+        └── *.pdf                # Final report
 ```
 
 ## Required Reference Data
@@ -312,14 +354,42 @@ The `generate_report.sh` script is provided for **additional report generation**
 ## Configuration
 
 ### Path Configuration
-Update the base path in all configuration files to point to your data directory:
 
+The pipeline uses three main path parameters that must be configured:
+
+**1. Pipeline Data Path (`params.path`)** - Reference files and databases
 ```groovy
 // conf/analysis.config, conf/epi2me.config, conf/mergebam.config
 params {
-    path = "/path/to/your/data/directory"  // ← Update this to your data directory
+    path = "/data/routine_nWGS_pipeline/nWGS_pipeline/data"
+    // Contains: reference/, humandb/ directories
 }
 ```
+
+**2. Input Data Path (`params.input_dir`)** - ONT sequencing output
+```groovy
+// conf/mergebam.config
+params {
+    input_dir = "/data/WGS_27102025"
+    // Contains: Sample directories with BAM files
+    // Can be overridden via CLI: --input_dir or smart_sample_monitor -d
+}
+```
+
+**3. Output Path (`params.path_output`)** - Pipeline results
+```groovy
+// conf/mergebam.config, conf/epi2me.config, conf/analysis.config
+params {
+    path_output = "/data/routine_nWGS"
+    // Contains: sample_ids_bam.txt, routine_bams/, routine_epi2me/, routine_results/
+}
+```
+
+**Key Points:**
+- `params.path`: Reference data (rarely changes)
+- `params.input_dir`: ONT sequencing input (changes per run)
+- `params.path_output`: Where all results are stored (consistent location)
+- The `input_dir` can be overridden using `--input_dir` flag or `smart_sample_monitor_v2.sh -d`
 
 ### Container Configuration
 Choose your preferred container engine:
@@ -389,53 +459,122 @@ You can specify a custom log directory using the `--log-dir` flag.
 
 ## Automated Sample Monitoring
 
-The pipeline includes `smart_sample_monitor_v2.sh` for automated monitoring and processing of ONT sequencing runs. This script continuously monitors sample directories and automatically triggers the pipeline when sequencing completes.
+The pipeline includes `smart_sample_monitor_v2.sh` for **automated monitoring and processing** of Oxford Nanopore sequencing runs. This intelligent script continuously monitors sample directories and automatically triggers the pipeline when sequencing completes.
 
-### Features:
+### Key Features:
+
+**Monitoring & Execution:**
 - **Real-time Monitoring**: Watches for `final_summary_*_*_*.txt` files indicating completed sequencing
 - **Automatic Pipeline Triggering**: Starts processing immediately when samples are ready
-- **Data Directory Override**: Command-line option to override config input_dir
-- **Resume Control**: Optional flag to enable/disable Nextflow caching
-- **Global Command**: Can be installed system-wide for easy access
+- **Sequential Processing**: Processes one sample at a time, queuing others
+- **Markdown Report Validation**: Verifies successful completion before marking as done
 
-### Version 2 Enhancements:
-- Hardcoded sample IDs file path: `/data/routine_nWGS/sample_ids_bam.txt`
-- Command-line `--data-dir` takes precedence over config
-- Resume disabled by default (use `-r` to enable)
-- Can be installed as global command: `smart_sample_monitor`
+**Version 2 Enhancements:**
+- **Hardcoded Sample IDs**: `/data/routine_nWGS/sample_ids_bam.txt` (no CLI parameter needed)
+- **CLI Data Directory Override**: `--data-dir` takes precedence over `mergebam.config`
+- **Resume Control**: Disabled by default for fresh runs; use `-r` to enable caching
+- **Symlink Resolution**: Works correctly when installed as global command
+- **Portable Execution**: Automatically finds pipeline directory from any location
 
 ### Basic Usage:
+
 ```bash
-# From pipeline directory
+# Run from pipeline directory with default config
 ./smart_sample_monitor_v2.sh
 
-# With data directory override
-./smart_sample_monitor_v2.sh -d /data/WGS_Dummy
+# Monitor specific data directory (overrides config)
+./smart_sample_monitor_v2.sh -d /data/WGS_27102025
 
-# With resume enabled
-./smart_sample_monitor_v2.sh -d /data/WGS_Dummy -r
+# Enable resume for cached results
+./smart_sample_monitor_v2.sh -d /data/WGS_27102025 -r
 
-# Verbose mode
-./smart_sample_monitor_v2.sh -d /data/WGS_Dummy -v
+# Verbose logging
+./smart_sample_monitor_v2.sh -d /data/WGS_27102025 -v
+
+# Combination: resume + verbose
+./smart_sample_monitor_v2.sh -d /data/WGS_27102025 -r -v
 ```
 
-### Global Command Setup:
-For easier access from any directory, install as a global command:
+### Global Command Installation:
 
+Install the monitor as a global command accessible from any directory:
+
+**User-level installation (Recommended - No sudo required):**
 ```bash
-# User-level installation (no sudo required)
+# Create user bin directory and symbolic link
 mkdir -p ~/bin
 ln -sf /data/routine_nWGS_pipeline/nWGS_pipeline/smart_sample_monitor_v2.sh ~/bin/smart_sample_monitor
+
+# Add ~/bin to PATH (run once)
+cat >> ~/.bashrc << 'EOF'
+
+# Add user's bin directory to PATH
+if [ -d "$HOME/bin" ]; then
+    export PATH="$HOME/bin:$PATH"
+fi
+EOF
+
+# Activate changes
 source ~/.bashrc
 
-# Then use from anywhere
-smart_sample_monitor -d /data/WGS_Dummy -v
+# Verify installation
+which smart_sample_monitor
 ```
 
-**See [docs/GLOBAL_COMMAND_SETUP.md](docs/GLOBAL_COMMAND_SETUP.md) for detailed installation and usage instructions.**
+**System-wide installation (Requires sudo):**
+```bash
+sudo ln -sf /data/routine_nWGS_pipeline/nWGS_pipeline/smart_sample_monitor_v2.sh /usr/local/bin/smart_sample_monitor
+```
+
+**Then use from anywhere:**
+```bash
+# Run from any directory
+cd /tmp
+smart_sample_monitor -d /data/WGS_27102025 -v
+
+# Monitor with custom work directory
+smart_sample_monitor -d /data/WGS_27102025 -w /data/trash -r
+```
+
+### Command-Line Options:
+
+| Option | Long Form | Description | Default |
+|--------|-----------|-------------|---------|
+| `-d` | `--data-dir` | Base data directory (overrides config) | Auto-detect from config |
+| `-p` | `--pipeline` | Pipeline base directory | Auto-detected |
+| `-w` | `--workdir` | Nextflow work directory | `/data/trash` |
+| `-c` | `--config` | Config file to parse | `conf/mergebam.config` |
+| `-i` | `--interval` | Check interval in seconds | 300 (5 min) |
+| `-t` | `--timeout` | Maximum wait time in seconds | 432000 (5 days) |
+| `-r` | `--resume` | Enable Nextflow resume | Disabled |
+| `-v` | `--verbose` | Enable verbose logging | Disabled |
+| `-h` | `--help` | Show help message | - |
+
+### Workflow:
+
+1. **Initialize**: Load sample IDs from `/data/routine_nWGS/sample_ids_bam.txt`
+2. **Monitor**: Check each sample directory for `final_summary_*_*_*.txt`
+3. **Queue**: Mark ready samples for processing
+4. **Execute**: Run `--run_mode_order` for each sample sequentially
+5. **Validate**: Check for markdown report generation
+6. **Report**: Display final status summary
 
 ### Use Case:
-This script is particularly useful for processing ONT sequencing runs where samples complete at different times. Instead of manually checking and starting the pipeline for each sample, the monitor automatically detects completion and starts processing immediately, maximizing throughput and reducing manual intervention. Make sure that all the paths are updated (output path, input path, etc) 
+
+This script is essential for **routine ONT sequencing workflows** where:
+- Multiple samples complete sequencing at different times
+- Immediate processing is desired upon completion
+- Manual monitoring would be time-consuming and error-prone
+- Consistent processing workflow is required
+
+Instead of manually checking and starting the pipeline for each sample, the monitor **automatically detects completion** and starts processing immediately, **maximizing throughput** and **reducing manual intervention**.
+
+**Important:** Ensure all paths are correctly configured in `conf/mergebam.config`:
+- `params.path`: Reference data directory
+- `params.input_dir`: Default input directory (can be overridden with `-d`)
+- `params.path_output`: Output results directory
+
+**See [docs/GLOBAL_COMMAND_SETUP.md](docs/GLOBAL_COMMAND_SETUP.md) for detailed installation, troubleshooting, and advanced usage.** 
 
 ## Troubleshooting
 
