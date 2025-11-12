@@ -62,7 +62,7 @@ Three independent analysis types:
 | Analysis | Tool | Purpose | Output |
 |----------|------|---------|---------|
 | **Modified Base Calling** | Modkit | DNA modifications (5mC, 5hmC) | `*_wf_mods.bedmethyl.gz` |
-| **Structural Variants** | Sniffles2 | Structural variant detection | `*.vcf.gz` |
+| **Structural Variants** | Sniffles2 | Structural variant detection | `*.sniffles.vcf.gz` |
 | **Copy Number Variation** | QDNAseq | CNV detection | `*_segs.bed`, `*_bins.bed`, `*_segs.vcf` |
 
 ### 3. **Analysis Pipeline** (`--run_mode_analysis`)
@@ -210,20 +210,55 @@ Input data directory (configured via params.input_dir in mergebam.config):
 Output directory (configured via params.path_output):
 /data/routine_nWGS/
 ├── sample_ids_bam.txt           # Sample IDs for BAM merging
-├── routine_bams/                # Processed BAM files
+│
+├── routine_bams/                # Processed BAM files (Mergebam module)
 │   ├── merge_bams/              # Merged BAM files per sample
 │   └── roi_bams/                # Region of interest extracted BAMs
-├── routine_epi2me/              # Epi2me analysis results
+│
+├── routine_epi2me/              # Epi2me module results
 │   └── [sample_id]/
-│       ├── *.wf_mods.bedmethyl.gz  # Methylation calls
-│       ├── *.sniffles.vcf.gz       # Structural variants
-│       └── *_segs.bed              # CNV segments
-└── routine_results/             # Analysis results and reports
+│       ├── *.wf_mods.bedmethyl.gz     # Methylation calls (modkit)
+│       ├── *.sniffles.vcf.gz          # Structural variants (Sniffles2)
+│       ├── *_segs.bed                 # CNV segments (QDNAseq)
+│       ├── *_bins.bed                 # CNV bins
+│       ├── *_copyNumbersCalled.rds    # CNV RDS file for ACE
+│       ├── clair3/                    # Germline SNV calling (Clair3)
+│       │   └── *.vcf.gz
+│       └── clairs-to/                 # Somatic SNV calling (ClairS-TO)
+│           └── *.vcf.gz
+│
+├── routine_analysis/            # Analysis module results (detailed outputs)
+│   └── [sample_id]/
+│       ├── classifier/          # Tumor classification
+│       │   ├── nanodx/         # NanoDx neural network results
+│       │   └── sturgeon/       # Sturgeon methylation classifier
+│       ├── cnv/                 # CNV analysis
+│       │   ├── ace/            # ACE tumor content estimation
+│       │   ├── annotatedcnv/   # Annotated CNV calls
+│       │   └── *.pdf           # CNV plots (chr7, chr9, full genome)
+│       ├── coverage/            # IGV coverage snapshots
+│       │   ├── *_egfr_coverage.pdf
+│       │   ├── *_idh1_coverage.pdf
+│       │   ├── *_idh2_coverage.pdf
+│       │   └── *_tertp_coverage.pdf
+│       ├── cramino/             # BAM statistics
+│       │   └── *_cramino_statistics.txt
+│       ├── merge_annot_clair3andclairsto/  # Variant annotation
+│       │   └── *_merge_annotation_filter_snvs_allcall.csv
+│       ├── methylation/         # MGMT methylation analysis
+│       │   └── *_MGMT_results.csv
+│       └── structure_variant/   # SV annotation
+│           ├── *_circos.pdf    # Circos plot
+│           ├── *_fusion_events.tsv  # Fusion events
+│           └── *_svanna_annotation.html  # Svanna SV annotation
+│
+└── routine_results/             # Final published reports (per sample)
     └── [sample_id]/
-        ├── cnv/                 # CNV analysis
-        ├── sv/                  # SV annotation
-        ├── methylation/         # MGMT analysis
-        └── *.pdf                # Final report
+        ├── [sample_id]_bedmethyl_sturgeon_general.pdf  # Sturgeon classification
+        ├── [sample_id]_markdown_pipeline_report.pdf    # Main comprehensive report
+        ├── [sample_id]_mnpflex_input.bed               # MNP-Flex input format
+        ├── [sample_id]_occ_svanna_annotation.html      # SV annotation HTML
+        └── [sample_id]_tsne_plot.html                  # t-SNE visualization
 ```
 
 ## Required Reference Data
@@ -470,11 +505,11 @@ The pipeline includes `smart_sample_monitor_v2.sh` for **automated monitoring an
 - **Markdown Report Validation**: Verifies successful completion before marking as done
 
 **Version 2 Enhancements:**
-- **Hardcoded Sample IDs**: `/data/routine_nWGS/sample_ids_bam.txt` (no CLI parameter needed)
 - **CLI Data Directory Override**: `--data-dir` takes precedence over `mergebam.config`
 - **Resume Control**: Disabled by default for fresh runs; use `-r` to enable caching
 - **Symlink Resolution**: Works correctly when installed as global command
 - **Portable Execution**: Automatically finds pipeline directory from any location
+- **Sample IDs File**: Hardcoded to `/data/routine_nWGS/sample_ids_bam.txt`
 
 ### Basic Usage:
 
