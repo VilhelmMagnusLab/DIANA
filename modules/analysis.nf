@@ -1282,28 +1282,51 @@ workflow analysis {
                 }
 
         boosts_cramino = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.map { args -> 
+            input_data.map { args ->
                 def sample_id = args[0]
-                def bam = args[1]
-                def bai = args[2]
+                def occ_bam = args[1]    
+                def occ_bai = args[2]
                 def ref = args[3]
                 def ref_bai = args[4]
-                def tr_bed = args[5]
-                def modkit = args[6]
-                def segs_bed = args[7]
-                def bins_bed = args[8]
-                def segs_vcf = args[9]
-                def rds_file = args[10]
-                def sv = args[11]
-                
-                tuple(
-                    sample_id, 
-                    bam, 
-                    bai,
-                    ref,
-                    ref_bai
-                )
-            } :
+
+                // IMPORTANT: Cramino should analyze the FULL merged BAM, not the ROI BAM
+                // Read merged BAM from published directory
+                def bam_file = file("${params.merge_bam_folder}/${sample_id}.merged.bam")
+                def bai_file = file("${params.merge_bam_folder}/${sample_id}.merged.bam.bai")
+
+                // If exact match doesn't exist, try .merge.bam specifically (legacy)
+                if (!bam_file.exists()) {
+                    bam_file = file("${params.merge_bam_folder}/${sample_id}.merged.bam")
+                    bai_file = file("${params.merge_bam_folder}/${sample_id}.merged.bam.bai")
+                }
+
+                // If still not found, try wildcard but exclude .roi.bam files
+                if (!bam_file.exists()) {
+                    def pattern_files = file("${params.merge_bam_folder}/${sample_id}.*.bam")
+                    def potential_bams = pattern_files instanceof List ? pattern_files : [pattern_files]
+                    // Filter out .roi.bam files
+                    def filtered_bams = potential_bams.findAll { !it.name.contains('.roi.') }
+                    if (filtered_bams.size() > 0) {
+                        bam_file = filtered_bams[0]
+                        bai_file = file("${bam_file}.bai")
+                    }
+                }
+
+                // Only return valid tuples
+                if (bam_file.exists() && bai_file.exists()) {
+                    tuple(
+                        sample_id,
+                        bam_file,    // ← Now using merged BAM
+                        bai_file,
+                        ref,
+                        ref_bai
+                    )
+                } else {
+                    println "WARNING: Cramino - Merged BAM file not found for ${sample_id}. Tried: ${sample_id}.merged.bam, ${sample_id}.merge.bam, ${sample_id}.*.bam"
+                    null
+                }
+            }
+            .filter { it != null } :
             Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id -> 
                     // Try exact match first, then wildcard pattern (avoid .roi.bam files)
