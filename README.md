@@ -267,16 +267,15 @@ Output directory (configured via params.path_output):
 The following reference files must be downloaded and placed in the `data/reference/` directory:
 
 **Analysis-specific files:**
-- `OCC.fusions.bed` - Fusion genes
 - `EPIC_sites_NEW.bed` - Methylation sites
 - `MGMT_CpG_Island.hg38.bed` - MGMT CpG islands
-- `OCC.protein_coding.bed` - Protein-coding gene regions for SNV screening and BAM extraction (must be proper 10-field BED format)
+- `OCC.protein_coding.bed` - Region of interest BED file (protein-coding genes for SNV screening and BAM extraction; must be proper 10-field BED format)
 - `TERTp_variants.bed` - TERT promoter variants
 - `human_GRCh38_trf.bed` - Tandem repeat regions
 - `Others` file downloaded from Zenodo should be put into `data/reference/`
 
-**Note:** The `OCC.protein_coding.bed` file is used throughout the pipeline for:
-  - Extracting protein-coding regions during BAM merging (mergebam module)
+**Note:** The `OCC.protein_coding.bed` is a region of interest (ROI) BED file. For this pipeline, OCC (Onco-Comprehensive-Coverage) genes are used, but any custom ROI BED file can be substituted. This file is used for:
+  - Extracting regions of interest during BAM merging (mergebam module)
   - SNV screening regions for variant calling (ClairS-TO analysis)
   - Ensure this file is properly formatted with exactly 10 tab-separated fields per line
 
@@ -316,23 +315,18 @@ data/
 │   ├── GRCh38.fa.fai
 │   ├── gencode.v48.annotation.gff3
 │   ├── Assembly/                # Assembly folder for vcfcircos (from Zenodo)
-│   ├── OCC.fusions.bed
 │   ├── EPIC_sites_NEW.bed
 │   ├── MGMT_CpG_Island.hg38.bed
 │   ├── OCC.protein_coding.bed
 │   ├── TERTp_variants.bed
-│   └── human_GRCh38_trf.bed
+│   ├── human_GRCh38_trf.bed
 │   └── etc
-
-├── humandb/                     # Annotation databases
-│   ├── hg38_refGene.txt
-│   ├── hg38_refGeneMrna.fa
-│   ├── hg38_clinvar_20240611.txt
-│   └── hg38_cosmic100coding2024.txt
-├── testdata/                    # Your input data
-│   ├── sample_ids.txt
-│   └── single_bam_folder/       # BAM files
-└── results/                     # Output (auto-created)
+│
+└── humandb/                     # Annotation databases
+    ├── hg38_refGene.txt
+    ├── hg38_refGeneMrna.fa
+    ├── hg38_clinvar_20240611.txt
+    └── hg38_cosmic100coding2024.txt
 ```
 
 ### External Downloads Required
@@ -348,24 +342,6 @@ The pipeline intelligently handles tumor content:
 - **Multiple estimates**: ACE provides several estimates and selects the best fit
 - **Results**: Saved in `${sample_id}_ace_results/threshold_value.txt`
 
-## Output Structure
-
-```
-results/
-├── mergebam/
-│   ├── merge_bam/               # Merged BAM files
-│   └── occ_bam/                 # Regions of interest BAMs
-├── epi2me/
-│   ├── episv/                   # Structural variants
-│   ├── modkit/                  # Modified base calling
-│   └── epicnv/                  # Copy number variations
-└── analysis/
-    ├── cnv/                     # CNV analysis with ACE
-    ├── sv/                      # Structural variant annotation
-    ├── methylation/             # MGMT methylation analysis
-    └── reports/                 # Comprehensive reports
-```
-
 ## Report Generation
 
 ### Standard Report Generation
@@ -376,7 +352,7 @@ results/
 - `--run_mode_order` - Run complete pipeline sequentially and generate reports
 - `--run_mode_epianalyse` - Run Epi2me and Analysis modules and generate reports
 
-The reports are automatically created in the `results/report/` directory with the name `{sample_id}_markdown_pipeline_report.pdf`.
+The reports are automatically created in the `routine_results/{sample_id}/` directory with the name `{sample_id}_markdown_pipeline_report.pdf`.
 
 ### Additional Report Generation
 
