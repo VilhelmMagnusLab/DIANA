@@ -325,9 +325,10 @@ tryCatch({
                 ))
         }
 
-        if (all(c("Gene.refGene", "Chr", "Start", "End") %in% colnames(df_snv))) {
-            df_snv <- df_snv %>%
+        if (all(c("Gene.refGene", "Chr", "Start", "End") %in% colnames(df_snv_all))) {
+            df_snv_all <- df_snv_all %>%
                 filter(!(Gene.refGene == "TERT" & Chr == "chr5" & Start == "1295957" & End == "1295957"))
+        }
 
         # ---- 5. Filter for target genes OR pathogenic variants ----
         if ("Gene.refGene" %in% colnames(df_snv_all)) {
