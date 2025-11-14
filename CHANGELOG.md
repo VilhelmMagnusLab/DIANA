@@ -3,7 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-10-22
+## [Unreleased]
+
+### `Added`
+
+### `Changed`
+
+### `Fixed`
+
+## [1.0.1] - 2024-11-14
 
 ### `Added`
 - Added `--run_mode_epianalyse` pipeline execution mode to run Epi2me and Analysis modules sequentially when merged BAM files already exist
@@ -101,4 +109,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added crossnnumap container image for enhanced t-SNE plotting
 - Updated R package dependencies for improved visualization
 
-### `Deprecated` 
+### `Deprecated`
+
+---
+
+## Release Links
+
+[Unreleased]: https://github.com/VilhelmMagnusLab/nWGS_pipeline/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/VilhelmMagnusLab/nWGS_pipeline/compare/v1.0dev...v1.0.1
+[1.0dev]: https://github.com/VilhelmMagnusLab/nWGS_pipeline/releases/tag/v1.0dev 
