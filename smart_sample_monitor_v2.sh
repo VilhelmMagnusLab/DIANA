@@ -498,7 +498,7 @@ run_sample_pipeline() {
             result_path="${result_path//\$\{path\}/$analysis_base_path}"
         fi
 
-        local report_pattern="${result_path}/${sample_id}_markdown_pipeline_report.pdf"
+        local report_pattern="${result_path}/${sample_id}/${sample_id}_markdown_pipeline_report.pdf"
 
         if [[ -f "$report_pattern" ]]; then
             SAMPLE_STATUS["$sample_id"]="completed"
