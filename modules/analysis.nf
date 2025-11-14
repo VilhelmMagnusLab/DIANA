@@ -655,7 +655,7 @@ process clairs_to {
         --bed_fn=${occ_protein_coding_bed} \
         --conda_prefix /opt/micromamba/envs/clairs-to
 
-    bcftools merge --force-samples clairsto_output/snv.vcf.gz clairsto_output/indel.vcf.gz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
+    bcftools concat -a -d all clairsto_output/snv.vcf.gz clairsto_output/indel.vcf.gz -Oz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
 
     convert2annovar.pl ${sample_id}_merge_snv_indel_claisto.vcf.gz \
    --format vcf4 \
