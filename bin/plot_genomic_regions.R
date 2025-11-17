@@ -86,7 +86,7 @@ sTrack <- SequenceTrack(Hsapiens, chromosome = "2")
 Sample_track <- AlignmentsTrack(bam_file, name = "IDH1 p.R132", reverseStacking = TRUE)
 ht <- HighlightTrack(
     trackList = list(sTrack, Sample_track),
-    start = c(208248388),
+    start = c(208248387),
     width = 2,
     chromosome = "2"
 )
