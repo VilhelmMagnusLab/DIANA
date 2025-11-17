@@ -447,17 +447,22 @@ check_sample_ready() {
 
 run_sample_pipeline() {
     local sample_id="$1"
-    local work_dir="$NEXTFLOW_WORK_DIR/${sample_id}_work"
+    # Use shared work directory for all samples to enable caching across samples
+    local work_dir="$NEXTFLOW_WORK_DIR"
 
     # Create work directory
     mkdir -p "$work_dir"
 
+    # Use sample-specific log directory for organization
+    local log_dir="$work_dir/logs/${sample_id}"
+    mkdir -p "$log_dir"
+
     SAMPLE_STATUS["$sample_id"]="running"
     log "INFO" "🚀 Starting pipeline for sample: $sample_id"
-    log "INFO" "Work directory: $work_dir"
+    log "INFO" "Work directory: $work_dir (shared for caching)"
 
-    local log_file="$work_dir/pipeline.log"
-    local status_file="$work_dir/status"
+    local log_file="$log_dir/pipeline.log"
+    local status_file="$log_dir/status"
 
     # Run pipeline directly
     cd "$PIPELINE_DIR"
