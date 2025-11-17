@@ -603,7 +603,7 @@ table_annovar.pl ${sample_id}_occ_merge_snv_avinpt \
     ${params.humandb_dir} \
     -otherinfo
 
-    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /    frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/' \
+    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/' \
      occ_merge.hg38_multianno.txt \
     | awk '/exonic/ || /TERT/ || /Func.refGene/'  \
     | awk '!/dist=166/' \
@@ -671,7 +671,7 @@ process clairs_to {
     ${params.humandb_dir} \
    -otherinfo  
 
-   awk '/exonic/ && /nonsynonymous/ && !/Benign/ || /upstream/ || /Func.refGene/' \
+   awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/' \
    ClairS_TO_snv.hg38_multianno.txt \
    | awk '/exonic/ || /TERT/ || /Func.refGene/'  \
   | awk '!/dist=166/' \
@@ -1015,6 +1015,38 @@ process ace_tmc {
 }
 
 //---------------------------------------------------------------------
+// Static Reference File Channels (Module Level - Created Once)
+//---------------------------------------------------------------------
+// Create value channels for static reference files at module level
+// to prevent cache invalidation. These are created ONCE when the module
+// is loaded, not every time the workflow runs for a new sample.
+
+def occ_protein_coding_bed_ch = Channel.value(file(params.occ_protein_coding_bed))
+def nanodx_450model_ch = Channel.value(file(params.nanodx_450model))
+def snakefile_nanodx_ch = Channel.value(file(params.snakefile_nanodx))
+def nn_model_ch = Channel.value(file(params.nn_model))
+def nanodxcolormap_ch = Channel.value(file(params.nanodxcolormap))
+def nanodxh5_ch = Channel.value(file(params.nanodxh5))
+def hg19_450model_ch = Channel.value(file(params.hg19_450model))
+def vcf2circos_json_ch = Channel.value(file(params.vcf2circos_json))
+def genecode_bed_ch = Channel.value(file(params.genecode_bed))
+def occ_fusion_genes_list_ch = Channel.value(file(params.occ_fusion_genes_list))
+def occ_genes_ch = Channel.value(file(params.occ_genes))
+def refgene_ch = Channel.value(file(params.refgene))
+def hg38_refgenemrna_ch = Channel.value(file(params.hg38_refgenemrna))
+def clinvar_ch = Channel.value(file(params.clinvar))
+def clinvarindex_ch = Channel.value(file(params.clinvarindex))
+def hg38_cosmic100_ch = Channel.value(file(params.hg38_cosmic100))
+def hg38_cosmic100index_ch = Channel.value(file(params.hg38_cosmic100index))
+def tertp_variants_ch = Channel.value(file(params.tertp_variants))
+def ncbirefseq_ch = Channel.value(file(params.ncbirefseq))
+def gviz_data_ch = Channel.value(file(params.gviz_data))
+def cytoband_file_ch = Channel.value(file(params.cytoband_file))
+def epicsites_ch = Channel.value(file(params.epicsites))
+def mgmt_cpg_island_hg38_ch = Channel.value(file(params.mgmt_cpg_island_hg38))
+def sturgeon_model_ch = Channel.value(file(params.sturgeon_model))
+
+//---------------------------------------------------------------------
 // Workflow definition
 //---------------------------------------------------------------------
 
@@ -1024,11 +1056,11 @@ workflow analysis {
 
     main:
         validateParameters()
-        
+
         // Define fusion events channel conditionally to avoid undefined output errors
         def fusion_events_channel = Channel.empty()
-        
-        
+
+
         // Initialize channels as empty by default
         def annotatecnv_out = Channel.empty()
         def merge_annotation_out = Channel.empty()
@@ -1037,14 +1069,17 @@ workflow analysis {
         def svannasv_out = Channel.empty()
         def igv_tools_out = Channel.empty()
         def cramino_report_out = Channel.empty()
-        
+
+        // NOTE: Static reference file channels are now defined at module level (before workflow block)
+        // to ensure they're created once and reused across all samples for optimal caching
+
         // Initialize sample_thresholds based on run mode
         def sample_thresholds = (params.run_mode_order || params.run_mode_epianalyse) ? [:] : loadSampleThresholds()
         println "Sample thresholds: ${sample_thresholds}"
 
         // Create segsfromepi2me channel based on mode
         boosts_segsfromepi2me_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.map { args ->
+            input_data.combine(occ_protein_coding_bed_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -1057,22 +1092,24 @@ workflow analysis {
                 def segs_vcf = args[9]
                 def rds_file = args[10]
                 def sv = args[11]
+                def occ_bed = args[12]
 
                 tuple(
                     sample_id,
                     segs_vcf,
-                    file(params.occ_protein_coding_bed),
+                    occ_bed,
                     bins_bed,
                     segs_bed,
                     sample_thresholds[sample_id]
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id ->
+                .combine(occ_protein_coding_bed_ch)
+                .map { sample_id, occ_bed ->
                     tuple(
                         sample_id,
                         file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.vcf"),
-                        file(params.occ_protein_coding_bed),
+                        occ_bed,
                         file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_bins.bed"),
                         file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.bed"),
                         sample_thresholds[sample_id]
@@ -1080,7 +1117,7 @@ workflow analysis {
                 }
 
         boosts_svanna_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.map { args -> 
+            input_data.combine(occ_protein_coding_bed_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -1093,7 +1130,8 @@ workflow analysis {
                 def segs_vcf = args[9]
                 def rds_file = args[10]
                 def sv = args[11]
-                
+                def occ_bed = args[12]
+
                 //log.info "Creating Svanna input for sample: ${sample_id} (order mode)"
                 //log.info "SV file path: ${sv}"
 
@@ -1105,11 +1143,12 @@ workflow analysis {
                     sample_id,
                     sv_file,               // SV VCF file from epi2me
                     sv_index,              // Index file
-                    file(params.occ_protein_coding_bed)
+                    occ_bed
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id ->
+                .combine(occ_protein_coding_bed_ch)
+                .map { sample_id, occ_bed ->
                     //log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
                     def sv_file = file("${params.sv_folder}/${sample_id}/${sample_id}.sniffles.vcf.gz")
 
@@ -1121,12 +1160,14 @@ workflow analysis {
                         sample_id,
                         sv_file,
                         file("${sv_file}.tbi"),
-                        file(params.occ_protein_coding_bed)
+                        occ_bed
                     )
                 }
 
         boosts_clair3_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.map { args -> 
+            input_data.combine(refgene_ch).combine(hg38_refgenemrna_ch).combine(clinvar_ch)
+                .combine(clinvarindex_ch).combine(hg38_cosmic100_ch).combine(hg38_cosmic100index_ch)
+                .map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -1139,89 +1180,109 @@ workflow analysis {
                 def segs_vcf = args[9]
                 def rds_file = args[10]
                 def sv = args[11]
-                
-                tuple(
-                    sample_id, 
-                    bam, 
-                    bai, 
-                    ref, 
-                    ref_bai,
-                    file(params.refgene),
-                    file(params.hg38_refgenemrna),
-                    file(params.clinvar), 
-                    file(params.clinvarindex),
-                    file(params.hg38_cosmic100), 
-                    file(params.hg38_cosmic100index)
-                )
-            } :
-            Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id -> 
-                    tuple(
-                        sample_id, 
-                        file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
-                        file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
-                        file(params.reference_genome), 
-                        file(params.reference_genome_bai),
-                        file(params.refgene),
-                        file(params.hg38_refgenemrna),
-                        file(params.clinvar), 
-                        file(params.clinvarindex),
-                        file(params.hg38_cosmic100), 
-                        file(params.hg38_cosmic100index)
-                    )
-                }
+                def refgene = args[12]
+                def refgenemrna = args[13]
+                def clinvar = args[14]
+                def clinvarindex = args[15]
+                def cosmic100 = args[16]
+                def cosmic100index = args[17]
 
-        boosts_clairSTo_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.map { args -> 
-                def sample_id = args[0]
-                def bam = args[1]
-                def bai = args[2]
-                def ref = args[3]
-                def ref_bai = args[4]
-                def tr_bed = args[5]
-                def modkit = args[6]
-                def segs_bed = args[7]
-                def bins_bed = args[8]
-                def segs_vcf = args[9]
-                def rds_file = args[10]
-                def sv = args[11]
-                
                 tuple(
-                    sample_id, 
-                    bam, 
-                    bai, 
-                    ref, 
+                    sample_id,
+                    bam,
+                    bai,
+                    ref,
                     ref_bai,
-                    file(params.refgene),
-                    file(params.hg38_refgenemrna),
-                    file(params.clinvar), 
-                    file(params.clinvarindex),
-                    file(params.hg38_cosmic100), 
-                    file(params.hg38_cosmic100index),
-                    file(params.occ_protein_coding_bed)
+                    refgene,
+                    refgenemrna,
+                    clinvar,
+                    clinvarindex,
+                    cosmic100,
+                    cosmic100index
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id -> 
+                .combine(refgene_ch).combine(hg38_refgenemrna_ch).combine(clinvar_ch)
+                .combine(clinvarindex_ch).combine(hg38_cosmic100_ch).combine(hg38_cosmic100index_ch)
+                .map { sample_id, refgene, refgenemrna, clinvar, clinvarindex, cosmic100, cosmic100index ->
                     tuple(
-                        sample_id, 
+                        sample_id,
                         file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
                         file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
                         file(params.reference_genome),
                         file(params.reference_genome_bai),
-                        file(params.refgene),
-                        file(params.hg38_refgenemrna),
-                        file(params.clinvar), 
-                        file(params.clinvarindex),
-                        file(params.hg38_cosmic100), 
-                        file(params.hg38_cosmic100index),
-                        file(params.occ_protein_coding_bed)
+                        refgene,
+                        refgenemrna,
+                        clinvar,
+                        clinvarindex,
+                        cosmic100,
+                        cosmic100index
+                    )
+                }
+
+        boosts_clairSTo_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
+            input_data.combine(refgene_ch).combine(hg38_refgenemrna_ch).combine(clinvar_ch)
+                .combine(clinvarindex_ch).combine(hg38_cosmic100_ch).combine(hg38_cosmic100index_ch)
+                .combine(occ_protein_coding_bed_ch).map { args ->
+                def sample_id = args[0]
+                def bam = args[1]
+                def bai = args[2]
+                def ref = args[3]
+                def ref_bai = args[4]
+                def tr_bed = args[5]
+                def modkit = args[6]
+                def segs_bed = args[7]
+                def bins_bed = args[8]
+                def segs_vcf = args[9]
+                def rds_file = args[10]
+                def sv = args[11]
+                def refgene = args[12]
+                def refgenemrna = args[13]
+                def clinvar = args[14]
+                def clinvarindex = args[15]
+                def cosmic100 = args[16]
+                def cosmic100index = args[17]
+                def occ_bed = args[18]
+
+                tuple(
+                    sample_id,
+                    bam,
+                    bai,
+                    ref,
+                    ref_bai,
+                    refgene,
+                    refgenemrna,
+                    clinvar,
+                    clinvarindex,
+                    cosmic100,
+                    cosmic100index,
+                    occ_bed
+                )
+            } :
+            Channel.fromList(sample_thresholds.keySet().collect())
+                .combine(refgene_ch).combine(hg38_refgenemrna_ch).combine(clinvar_ch)
+                .combine(clinvarindex_ch).combine(hg38_cosmic100_ch).combine(hg38_cosmic100index_ch)
+                .combine(occ_protein_coding_bed_ch)
+                .map { sample_id, refgene, refgenemrna, clinvar, clinvarindex, cosmic100, cosmic100index, occ_bed ->
+                    tuple(
+                        sample_id,
+                        file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
+                        file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
+                        file(params.reference_genome),
+                        file(params.reference_genome_bai),
+                        refgene,
+                        refgenemrna,
+                        clinvar,
+                        clinvarindex,
+                        cosmic100,
+                        cosmic100index,
+                        occ_bed
 
                     )
                 }
 
         boosts_igv_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.map { args -> 
+            input_data.combine(tertp_variants_ch).combine(ncbirefseq_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -1234,21 +1295,24 @@ workflow analysis {
                 def segs_vcf = args[9]
                 def rds_file = args[10]
                 def sv = args[11]
-                
-                tuple(sample_id, bam, bai, file(params.tertp_variants), file(params.ncbirefseq), ref, ref_bai)
+                def tertp_var = args[12]
+                def ncbi = args[13]
+
+                tuple(sample_id, bam, bai, tertp_var, ncbi, ref, ref_bai)
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id -> 
+                .combine(tertp_variants_ch).combine(ncbirefseq_ch)
+                .map { sample_id, tertp_var, ncbi ->
                     tuple(sample_id, file("${params.occ_bam_folder}/${sample_id}.occ.bam"),
                           file("${params.occ_bam_folder}/${sample_id}.occ.bam.bai"),
-                          file(params.tertp_variants),
-                          file(params.ncbirefseq),
+                          tertp_var,
+                          ncbi,
                           file(params.reference_genome),
                           file("${params.reference_genome}.fai"))
                 }
 
         boosts_plot_genomic_regions_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.map { args -> 
+            input_data.combine(gviz_data_ch).combine(cytoband_file_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -1261,23 +1325,26 @@ workflow analysis {
                 def segs_vcf = args[9]
                 def rds_file = args[10]
                 def sv = args[11]
-                
+                def gviz = args[12]
+                def cytoband = args[13]
+
                 tuple(
-                    sample_id, 
-                    file(params.gviz_data),
+                    sample_id,
+                    gviz,
                     bam,
                     bai,
-                    file(params.cytoband_file)
+                    cytoband
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .map { sample_id -> 
+                .combine(gviz_data_ch).combine(cytoband_file_ch)
+                .map { sample_id, gviz, cytoband ->
                     tuple(
-                        sample_id, 
-                        file(params.gviz_data),
+                        sample_id,
+                        gviz,
                         file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
                         file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
-                        file(params.cytoband_file)
+                        cytoband
                     )
                 }
 
@@ -1372,8 +1439,8 @@ workflow analysis {
             println "Running MGMT Analysis..."
             
             // Create MGMT channel that works for combined modes (order and epianalyse)
-            mgmt_ch = (params.run_mode_order || params.run_mode_epianalyse) ? 
-                input_data.map { args -> 
+            mgmt_ch = (params.run_mode_order || params.run_mode_epianalyse) ?
+                input_data.combine(epicsites_ch).combine(mgmt_cpg_island_hg38_ch).map { args ->
                     def sample_id = args[0]
                     def bam = args[1]
                     def bai = args[2]
@@ -1386,21 +1453,24 @@ workflow analysis {
                     def segs_vcf = args[9]
                 def rds_file = args[10]
                     def sv = args[11]
-                    
+                    def epicsites = args[12]
+                    def mgmt_cpg = args[13]
+
                     tuple(
-                        sample_id, 
+                        sample_id,
                         modkit,
-                        file(params.epicsites),
-                        file(params.mgmt_cpg_island_hg38)
+                        epicsites,
+                        mgmt_cpg
                     )
                 } :
                 Channel.fromList(sample_thresholds.keySet().collect())
-                    .map { sample_id -> 
+                    .combine(epicsites_ch).combine(mgmt_cpg_island_hg38_ch)
+                    .map { sample_id, epicsites, mgmt_cpg ->
                         tuple(
                             sample_id,
                             file("${params.bedmethyl_folder}/${sample_id}/${sample_id}.wf_mods.bedmethyl.gz"),
-                            file(params.epicsites),
-                            file(params.mgmt_cpg_island_hg38)
+                            epicsites,
+                            mgmt_cpg
                         )
                     }
             
@@ -1411,44 +1481,41 @@ workflow analysis {
             MGMT_output = extract_epic.out.MGMTheaderout
             
             MGMT_sturgeon = extract_epic.out.sturgeonbedinput
-                 .map { args -> 
-                     def sample_id = args[0]
-                     def sturgeoninput = args[1]
-                     tuple(sample_id, sturgeoninput, file(params.sturgeon_model)) 
+                 .combine(sturgeon_model_ch)
+                 .map { sample_id, sturgeoninput, sturgeon_model ->
+                     tuple(sample_id, sturgeoninput, sturgeon_model)
                  }
-            
+
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
-                .map { args -> 
-                    def sample_id = args[0]
-                    def epicselectnanodxinput = args[1]
-                    tuple(sample_id, epicselectnanodxinput, file(params.hg19_450model)) 
+                .combine(hg19_450model_ch)
+                .map { sample_id, epicselectnanodxinput, hg19_model ->
+                    tuple(sample_id, epicselectnanodxinput, hg19_model)
                 }
 
             // Run the processes
             sturgeon(MGMT_sturgeon)
             mgmt_promoter(MGMT_output)
             nanodx(mgmt_nanodx)
-            
+
             nanodx_out = nanodx.out.nanodx450out
-                .map { args -> 
-                    def sample_id = args[0]
-                    def nanodx450out = args[1]
+                .combine(nanodx_450model_ch).combine(snakefile_nanodx_ch).combine(nn_model_ch)
+                .map { sample_id, nanodx450out, nanodx_model, snakefile, nn_model ->
                     tuple(
-                        sample_id, 
-                        nanodx450out, 
-                        file(params.nanodx_450model),
-                        file(params.snakefile_nanodx),
-                        file(params.nn_model)
-                    ) 
+                        sample_id,
+                        nanodx450out,
+                        nanodx_model,
+                        snakefile,
+                        nn_model
+                    )
                 }
-            
+
             run_nn_classifier(nanodx_out)
-            
+
             // Generate t-SNE plot using EPIC bed files
             tsne_plot(
                 extract_epic.out.epicselectnanodxinput,
-                file(params.nanodxcolormap),
-                file(params.nanodxh5)
+                nanodxcolormap_ch,
+                nanodxh5_ch
             )
         }
 
@@ -1457,17 +1524,17 @@ workflow analysis {
             println "Running Svanna Analysis..."
             
             svannasv(boosts_svanna_channel)
-            svannasv_out = svannasv.out.occsvannaannotationannotationvcf.map{ args -> 
-                def sample_id = args[0]
-                def svannavcfoutput = args[1]
-                [sample_id, svannavcfoutput, params.vcf2circos_json]
+            svannasv_out = svannasv.out.occsvannaannotationannotationvcf
+                .combine(vcf2circos_json_ch)
+                .map{ sample_id, svannavcfoutput, vcf2circos ->
+                [sample_id, svannavcfoutput, vcf2circos]
             }
             circosplot(svannasv_out)
             circosplot_out=circosplot.out.circosout
-            svannaoutfusion_events= svannasv.out.occsvannavcfout.map{ args -> 
-                def sample_id = args[0]
-                def occsvannavcfout = args[1]
-                [sample_id, occsvannavcfout, params.genecode_bed, params.occ_fusion_genes_list]
+            svannaoutfusion_events= svannasv.out.occsvannavcfout
+                .combine(genecode_bed_ch).combine(occ_fusion_genes_list_ch)
+                .map{ sample_id, occsvannavcfout, genecode, fusion_genes ->
+                [sample_id, occsvannavcfout, genecode, fusion_genes]
             }
             svannasv_fusion_events(svannaoutfusion_events)
             
@@ -1500,18 +1567,15 @@ workflow analysis {
             // Combine results and create input for merge_annotation
             combine_file = clair3_results
                 .combine(clairsto_results, by: 0)
-                .map { args -> 
-                    def sample_id = args[0]
-                    def pileup_file = args[1]
-                    def merge_file = args[2]
-                    def clairsto_file = args[3]
+                .combine(occ_genes_ch)
+                .map { sample_id, pileup_file, merge_file, clairsto_file, occ_genes ->
                     println "Creating merge input for sample: $sample_id"
                     tuple(
                         sample_id,
                         merge_file,
                         pileup_file,
                         clairsto_file,
-                        file(params.occ_genes)
+                        occ_genes
                     )
                 }
                 .view { "Merge annotation input: $it" }
@@ -1813,62 +1877,61 @@ workflow analysis {
                     def sv = args[11]
                     
                     tuple(
-                        sample_id, 
+                        sample_id,
                         modkit,
-                        file(params.epicsites),
-                        file(params.mgmt_cpg_island_hg38)
+                        epicsites,
+                        mgmt_cpg
                     )
                 } :
                 Channel.fromList(sample_thresholds.keySet().collect())
-                    .map { sample_id -> 
+                    .combine(epicsites_ch).combine(mgmt_cpg_island_hg38_ch)
+                    .map { sample_id, epicsites, mgmt_cpg ->
                         tuple(
                             sample_id,
                             file("${params.bedmethyl_folder}/${sample_id}/${sample_id}.wf_mods.bedmethyl.gz"),
-                            file(params.epicsites),
-                            file(params.mgmt_cpg_island_hg38)
+                            epicsites,
+                            mgmt_cpg
                         )
                     }
-            
+
             // Run MGMT related processes
             extract_epic(mgmt_ch)
-            
+
             // Create channels for downstream processes
             MGMT_output = extract_epic.out.MGMTheaderout
-            
-        
+
+
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
-                .map { args -> 
-                    def sample_id = args[0]
-                    def epicselectnanodxinput = args[1]
-                    tuple(sample_id, epicselectnanodxinput, file(params.hg19_450model)) 
+                .combine(hg19_450model_ch)
+                .map { sample_id, epicselectnanodxinput, hg19_model ->
+                    tuple(sample_id, epicselectnanodxinput, hg19_model)
                 }
 
             // Run the processes
             //sturgeon(MGMT_sturgeon)
             mgmt_promoter(MGMT_output)
             nanodx(mgmt_nanodx)
-            
+
             nanodx_out = nanodx.out.nanodx450out
-                .map { args -> 
-                    def sample_id = args[0]
-                    def nanodx450out = args[1]
+                .combine(nanodx_450model_ch).combine(snakefile_nanodx_ch).combine(nn_model_ch)
+                .map { sample_id, nanodx450out, nanodx_model, snakefile, nn_model ->
                     tuple(
-                        sample_id, 
-                        nanodx450out, 
-                        file(params.nanodx_450model),
-                        file(params.snakefile_nanodx),
-                        file(params.nn_model)
-                    ) 
+                        sample_id,
+                        nanodx450out,
+                        nanodx_model,
+                        snakefile,
+                        nn_model
+                    )
                 }
-            
+
             run_nn_classifier(nanodx_out)
             rmd_nanodx_out = run_nn_classifier.out.rmdnanodx
-            
+
             // Generate t-SNE plot using EPIC bed files
             tsne_plot(
                 extract_epic.out.epicselectnanodxinput,
-                file(params.nanodxcolormap),
-                file(params.nanodxh5)
+                nanodxcolormap_ch,
+                nanodxh5_ch
             )
             } else {
                 println "Reusing MGMT outputs from earlier analysis"
@@ -1881,19 +1944,17 @@ workflow analysis {
         svannasv(boosts_svanna_channel)
         rmd_svanna_html = svannasv.out.rmdsvannahtml
             svannasv_out = svannasv.out.occsvannaannotationannotationvcf
-                .map { args -> 
-                    def sample_id = args[0]
-                    def svannavcfoutput = args[1]
-                    [sample_id, svannavcfoutput, params.vcf2circos_json]
+                .combine(vcf2circos_json_ch)
+                .map { sample_id, svannavcfoutput, vcf2circos ->
+                    [sample_id, svannavcfoutput, vcf2circos]
                 }
         circosplot(svannasv_out)
-        
+
         // Also run fusion events analysis for RMD mode
         svannaoutfusion_events = svannasv.out.occsvannavcfout
-            .map { args -> 
-                def sample_id = args[0]
-                def occsvannavcfout = args[1]
-                [sample_id, occsvannavcfout, file(params.genecode_bed), file(params.occ_fusion_genes_list)]
+                .combine(genecode_bed_ch).combine(occ_fusion_genes_list_ch)
+                .map { sample_id, occsvannavcfout, genecode, fusion_genes ->
+                [sample_id, occsvannavcfout, genecode, fusion_genes]
             }
         svannasv_fusion_events(svannaoutfusion_events)
         
@@ -1913,12 +1974,9 @@ workflow analysis {
         clairs_to(boosts_clairSTo_channel)
         clairs_to_out = clairs_to.out.annotateandfilter_clairstoout
             combine_file = clair3_out.combine(clairs_to_out, by: 0)
-                .map { args ->
-                    def sample_id = args[0]
-                    def pileup_file = args[1]
-                    def merge_file = args[2]
-                    def clairsto_file = args[3]
-                    tuple(sample_id, merge_file, pileup_file, clairsto_file, file(params.occ_genes))
+                .combine(occ_genes_ch)
+                .map { sample_id, pileup_file, merge_file, clairsto_file, occ_genes ->
+                    tuple(sample_id, merge_file, pileup_file, clairsto_file, occ_genes)
     }
         merge_annotation(combine_file)
             } else {
