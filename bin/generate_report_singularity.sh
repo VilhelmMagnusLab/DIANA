@@ -27,8 +27,8 @@
 #   - R Markdown template file
 #
 # INPUT FILES:
-#   - sample_ids_bam.txt: Two-column file with sample ID and tumor content (decimal)
-#     Location: /data/routine_nWGS/sample_ids_bam.txt
+#   - sample_ids.txt: Two-column file with sample ID and tumor content (decimal)
+#     Location: /data/routine_nWGS/sample_ids.txt
 #   - Various analysis result files from routine_analysis/{sample_id}/ directories
 #   - The PATH for each analysis result file is configured in the script.
 #
@@ -64,7 +64,7 @@ REFERENCE_PATH="${PIPELINE_DIR}/data/reference"
 OUTPUT_PATH="/data/routine_nWGS"
 
 # Sample IDs file path (hardcoded location for routine processing)
-samples_file="${OUTPUT_PATH}/sample_ids_bam.txt"
+samples_file="${OUTPUT_PATH}/sample_ids.txt"
 
 # RMarkdown template file path
 rmd_template="${PIPELINE_DIR}/bin/nextflow_markdown_pipeline_update_final.Rmd"
@@ -94,14 +94,14 @@ while read -r sample_id tumor_content; do
     logo="${REFERENCE_PATH}/log_update.pdf"
     cnv_plot="${ANALYSIS_PATH}/cnv/${sample_id}_cnv_plot_full.pdf"
     tumor_number="${ANALYSIS_PATH}/cnv/${sample_id}_tumor_copy_number.txt"
-    annotatecnv="${ANALYSIS_PATH}/cnv/annotatedcnv/${sample_id}_annotatedcnv_filter_header.csv"
+    annotatecnv="${ANALYSIS_PATH}/cnv/${sample_id}_annotatedcnv_filter_header.csv"
     cnv_chr9="${ANALYSIS_PATH}/cnv/${sample_id}_cnv_chr9.pdf"
     cnv_chr7="${ANALYSIS_PATH}/cnv/${sample_id}_cnv_chr7.pdf"
     mgmt_results="${ANALYSIS_PATH}/methylation/${sample_id}_MGMT_results.csv"
     merge_results="${ANALYSIS_PATH}/merge_annot_clair3andclairsto/${sample_id}_merge_annotation_filter_snvs_allcall.csv"
-    fusion_events="${ANALYSIS_PATH}/structure_variant/${sample_id}_fusion_events.tsv"
+    fusion_events="${ANALYSIS_PATH}/structure_variant/svannasv/${sample_id}_filter_fusion_event.tsv"
     tertphtml="${ANALYSIS_PATH}/coverage/${sample_id}_tertp_id1.html"
-    svannahtml="${ANALYSIS_PATH}/structure_variant/${sample_id}_occ_svanna_annotation.html"
+    svannahtml="${ANALYSIS_PATH}/structure_variant/svannasv/${sample_id}_occ_svanna_annotation.html"
     egfr_coverage="${ANALYSIS_PATH}/coverage/${sample_id}_egfr_coverage.pdf"
     idh1_coverage="${ANALYSIS_PATH}/coverage/${sample_id}_idh1_coverage.pdf"
     idh2_coverage="${ANALYSIS_PATH}/coverage/${sample_id}_idh2_coverage.pdf"

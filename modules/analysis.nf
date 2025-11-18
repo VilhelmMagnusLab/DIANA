@@ -172,7 +172,10 @@ process run_nn_classifier {
     source /opt/conda/etc/profile.d/conda.sh
     conda activate base
     conda activate nanodx_env2feb
-    
+
+    # Remove symlinked Snakefile to avoid overwriting the reference file
+    rm -f Snakefile
+
     # Create Snakefile with correct paths and reduced memory
     cat << EOF > Snakefile
 rule all:
@@ -188,7 +191,7 @@ rule NN_classifier:
         txt = "${sample_id}_nanodx_classifier.txt",
         votes = "${sample_id}_nanodx_classifier.tsv"
     threads: 2
-    resources: 
+    resources:
         mem_mb = 2048
     script: "${params.nanodx_workflow_dir}/scripts/classify_NN_bedMethyl.py"
 EOF
@@ -206,27 +209,28 @@ EOF
 // Dimensionality reduction plot generation using t-SNE/UMAP
 process tsne_plot {
     label 'tsne'
+    stageInMode 'copy'
     publishDir "${params.output_path}/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
     publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_tsne_plot.html"
-    
+
     input:
     tuple val(sample_id), path(epic_bed)
     path(color_map)
     path(training_set)
-    
+
     output:
     tuple val(sample_id), path("${sample_id}_tsne_plot.pdf"), emit: tsne_out
     tuple val(sample_id), path("${sample_id}_tsne_plot.html")
-    
+
     script:
     """
     #!/bin/bash
     set -e
-    
+
     # Activate conda environment to access Rscript
     source /opt/conda/etc/profile.d/conda.sh
     conda activate tsneenv
-    
+
     # Verify Rscript is available
     if ! command -v Rscript >/dev/null 2>&1; then
         echo "ERROR: Rscript not found after activating tsneenv"
@@ -235,9 +239,9 @@ process tsne_plot {
         echo "PATH: \$PATH"
         exit 1
     fi
-    
+
     echo "Using Rscript from: \$(which Rscript)"
-    
+
     # Run the memory-optimized t-SNE script (uses 30k probes instead of 100k to reduce RAM usage)
     Rscript ${params.nWGS_dir}/bin/crossnn_tsne_fixed.R \\
         --color-map ${color_map} \\
@@ -249,7 +253,7 @@ process tsne_plot {
         --umap-pca-dim 100 \\
         --pdf ${sample_id}_tsne_plot.pdf \\
         --html ${sample_id}_tsne_plot.html
-    
+
     echo "t-SNE plot generated for ${sample_id}"
     """
 }
@@ -1303,8 +1307,8 @@ workflow analysis {
             Channel.fromList(sample_thresholds.keySet().collect())
                 .combine(tertp_variants_ch).combine(ncbirefseq_ch)
                 .map { sample_id, tertp_var, ncbi ->
-                    tuple(sample_id, file("${params.occ_bam_folder}/${sample_id}.occ.bam"),
-                          file("${params.occ_bam_folder}/${sample_id}.occ.bam.bai"),
+                    tuple(sample_id, file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
+                          file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
                           tertp_var,
                           ncbi,
                           file(params.reference_genome),

@@ -503,9 +503,11 @@ run_sample_pipeline() {
     # Run pipeline using singularity containers - output shown directly
     if eval "$pipeline_cmd" ; then
 
-        # Check if markdown report was generated successfully
-        # The markdown report is published using result_path from analysis.config
-        # Try to get result_path from analysis.config, or construct it
+        # IMPORTANT: Nextflow --run_mode_order processes ALL samples in sample_ids file at once,
+        # not just the single sample we think we're running. We need to check ALL samples
+        # and mark them as completed if they have markdown reports.
+
+        # Get result_path from analysis.config
         local analysis_config="${PIPELINE_DIR}/conf/analysis.config"
         local result_path=$(extract_config_value "$analysis_config" "result_path")
 
@@ -516,16 +518,32 @@ run_sample_pipeline() {
             result_path="${result_path//\$\{path\}/$analysis_base_path}"
         fi
 
-        local report_pattern="${result_path}/${sample_id}/${sample_id}_markdown_pipeline_report.pdf"
+        # Check ALL samples (not just the one we think we're running)
+        # because Nextflow processes all samples in the sample_ids file
+        local samples_processed=0
+        for check_sample_id in "${!SAMPLE_STATUS[@]}"; do
+            # Skip samples that are already completed or failed
+            local current_status="${SAMPLE_STATUS[$check_sample_id]}"
+            if [[ "$current_status" == "completed" || "$current_status" == "failed" ]]; then
+                continue
+            fi
 
-        if [[ -f "$report_pattern" ]]; then
-            SAMPLE_STATUS["$sample_id"]="completed"
-            echo "COMPLETED" > "$status_file"
-            log "SUCCESS" "Sample $sample_id pipeline completed successfully - markdown report generated"
-        else
+            local report_file="${result_path}/${check_sample_id}/${check_sample_id}_markdown_pipeline_report.pdf"
+
+            if [[ -f "$report_file" ]]; then
+                SAMPLE_STATUS["$check_sample_id"]="completed"
+                log "SUCCESS" "Sample $check_sample_id pipeline completed successfully - markdown report generated"
+                ((samples_processed++))
+            fi
+        done
+
+        # If no samples were marked as completed, mark the requested sample as failed
+        if [[ $samples_processed -eq 0 ]]; then
             SAMPLE_STATUS["$sample_id"]="failed"
             echo "FAILED" > "$status_file"
-            log "ERROR" "Sample $sample_id pipeline failed - markdown report not found at $report_pattern"
+            log "ERROR" "Sample $sample_id pipeline failed - markdown report not found"
+        else
+            log "INFO" "Pipeline run completed - marked $samples_processed sample(s) as completed"
         fi
     else
         SAMPLE_STATUS["$sample_id"]="failed"
