@@ -25,12 +25,41 @@ fi
 
 echo "Using: $SINGULARITY_CMD"
 
-# Create necessary directories
-echo "Creating necessary directories..."
+# Ask user for working directory location
+echo ""
+echo "=========================================="
+echo "Working Directory Setup"
+echo "=========================================="
+echo "The pipeline requires a working directory structure for processing data."
+echo "This will create the following directories:"
+echo "  - routine_bams/       (Processed BAM files)"
+echo "  - routine_epi2me/     (Epi2me module results)"
+echo "  - routine_analysis/   (Analysis module results)"
+echo "  - routine_results/    (Final results)"
+echo ""
+read -p "Enter the parent directory path [default: ~/Documents]: " WORK_DIR_PARENT
+WORK_DIR_PARENT=${WORK_DIR_PARENT:-~/Documents}
+
+# Expand tilde to home directory
+WORK_DIR_PARENT="${WORK_DIR_PARENT/#\~/$HOME}"
+
+# Create the main working directory
+WORK_DIR="${WORK_DIR_PARENT}/routine_nWGS"
+echo "Creating working directory structure at: $WORK_DIR"
+
+mkdir -p "$WORK_DIR/routine_bams/merge_bams"
+mkdir -p "$WORK_DIR/routine_bams/roi_bams"
+mkdir -p "$WORK_DIR/routine_epi2me"
+mkdir -p "$WORK_DIR/routine_analysis"
+mkdir -p "$WORK_DIR/routine_results"
+
+echo "✓ Working directory structure created successfully"
+echo ""
+
+# Create necessary directories in the package
+echo "Creating package directories..."
 mkdir -p data/reference
 mkdir -p data/humandb
-mkdir -p data/testdata
-mkdir -p data/results
 mkdir -p containers
 
 # Pull Singularity/Apptainer images
@@ -142,10 +171,6 @@ set -e
 
 echo " Running quick pipeline test with Singularity/Apptainer..."
 
-# Create a minimal test sample file
-mkdir -p data/testdata
-echo "test_sample" > data/testdata/sample_ids.txt
-
 # Run with test profile (if available)
 if [ -f "conf/test.config" ]; then
     ./run_pipeline_singularity.sh -profile test
@@ -164,18 +189,32 @@ echo "=========================================="
 echo "Setup Complete!"
 echo "=========================================="
 echo ""
+echo "Working directory created at: $WORK_DIR"
+echo "Directory structure:"
+echo "  $WORK_DIR/"
+echo "  ├── routine_bams/         # Processed BAM files"
+echo "  │   ├── merge_bams/       # Merged BAM files per sample"
+echo "  │   └── roi_bams/         # Region of interest extracted BAMs"
+echo "  ├── routine_epi2me/       # Epi2me module results"
+echo "  ├── routine_analysis/     # Analysis module results"
+echo "  └── routine_results/      # Final results"
+echo ""
 echo "Next steps:"
 echo "1. Place your reference files in: data/reference/"
-echo "2. Place your input data in: data/testdata/"
-echo "3. Update the configuration in: conf/analysis.config, conf/epi2me.config and conf/mergebam.config"
-echo "4. Run the pipeline with: ./run_pipeline_singularity.sh"
-echo "5. Test the setup with: ./test_pipeline_singularity.sh"
-echo "6. If you want to use the Mergebam mode, run the pipeline with: ./run_pipeline_singularity.sh --run_mode_mergebam"
-echo "7. If you want to use the Epi2me mode, run the pipeline with: ./run_pipeline_singularity.sh --run_mode_epi2me"
-echo "8. If you want to use the analysis mode, run the pipeline with: ./run_pipeline_singularity.sh --run_mode_analysis"
-echo "9. If you want to use the analysis mode, run the pipeline with: ./run_pipeline_singularity.sh --run_mode_analysis"
+echo "2. Update the configuration files with your working directory paths:"
+echo "   - conf/analysis.config"
+echo "   - conf/epi2me.config"
+echo "   - conf/mergebam.config"
+echo "3. Run the pipeline with: ./run_pipeline_singularity.sh"
+echo "4. Test the setup with: ./test_pipeline_singularity.sh"
 echo ""
-echo "Before starting the pipeline, make sure that all paths for each mode are correctly set in the appropriate config files: conf/analysis.config, conf/epi2me.config, and conf/mergebam.config"
+echo "Pipeline modes:"
+echo "  - Mergebam:  ./run_pipeline_singularity.sh --run_mode_mergebam"
+echo "  - Epi2me:    ./run_pipeline_singularity.sh --run_mode_epi2me"
+echo "  - Analysis:  ./run_pipeline_singularity.sh --run_mode_analysis"
+echo ""
+echo "Before starting the pipeline, make sure that all paths for each mode are correctly"
+echo "set in the appropriate config files: conf/analysis.config, conf/epi2me.config, and conf/mergebam.config"
 echo "For more information, see the README.md file."
 echo ""
 echo "Happy analyzing! 🧬" 
