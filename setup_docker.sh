@@ -64,12 +64,27 @@ mkdir -p data/humandb
 pull_if_not_exists() {
     local image_name=$1
     local image_with_tag="${image_name}:latest"
-    
+
     if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "^${image_with_tag}$"; then
         echo "   ✓ $image_with_tag already exists, skipping..."
     else
         echo "   Pulling $image_with_tag..."
+
+        # Temporarily disable Docker authentication for public images
+        # by hiding the Docker config file
+        local docker_config_backup=""
+        if [ -f "$HOME/.docker/config.json" ]; then
+            docker_config_backup="$HOME/.docker/config.json.docker_backup_$$"
+            mv "$HOME/.docker/config.json" "$docker_config_backup"
+        fi
+
+        # Pull the image without authentication (for public images)
         docker pull "$image_with_tag"
+
+        # Restore Docker config if it was backed up
+        if [ -n "$docker_config_backup" ] && [ -f "$docker_config_backup" ]; then
+            mv "$docker_config_backup" "$HOME/.docker/config.json"
+        fi
     fi
 }
 

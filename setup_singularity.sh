@@ -72,12 +72,29 @@ pull_if_not_exists() {
     # Extract just the image name from the repository path (e.g., "vilhelmmagnuslab/nwgs_default_images" -> "nwgs_default_images")
     local image_basename=$(basename "$image_name")
     local image_file="containers/${image_basename}_latest.sif"
-    
+
     if [ -f "$image_file" ]; then
         echo "   ✓ $image_name already exists, skipping..."
     else
         echo "   Pulling $image_name..."
+
+        # Temporarily disable Docker authentication for public images
+        # by hiding the Docker config file
+        local docker_config_backup=""
+        if [ -f "$HOME/.docker/config.json" ]; then
+            docker_config_backup="$HOME/.docker/config.json.apptainer_backup_$$"
+            mv "$HOME/.docker/config.json" "$docker_config_backup"
+        fi
+
+        # Pull the image without authentication
+        SINGULARITY_DOCKER_USERNAME="" SINGULARITY_DOCKER_PASSWORD="" \
+        APPTAINER_DOCKER_USERNAME="" APPTAINER_DOCKER_PASSWORD="" \
         $SINGULARITY_CMD pull --dir containers/ docker://$image_name:latest
+
+        # Restore Docker config if it was backed up
+        if [ -n "$docker_config_backup" ] && [ -f "$docker_config_backup" ]; then
+            mv "$docker_config_backup" "$HOME/.docker/config.json"
+        fi
     fi
 }
 

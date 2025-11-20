@@ -28,8 +28,9 @@ else
   git remote add upstream "$UPSTREAM_URL"
 fi
 
-echo "[update] Fetching latest changes from upstream..."
-git fetch upstream --tags --prune >/dev/null
+echo "[update] Fetching latest changes from upstream (shallow fetch for speed)..."
+# Use shallow fetch to only get the latest changes, reducing download time
+git fetch upstream --depth=1 --tags --prune
 
 # Detect upstream default branch (fallback to main)
 upstream_default_branch="$(git symbolic-ref -q --short refs/remotes/upstream/HEAD 2>/dev/null | cut -d'/' -f2 || true)"
@@ -46,7 +47,8 @@ if ! git diff-index --quiet HEAD --; then
 fi
 
 echo "[update] Pulling latest changes from 'upstream/$upstream_default_branch'..."
-git pull upstream "$upstream_default_branch"
+# Use fast-forward only to ensure clean updates without merge commits
+git pull --ff-only upstream "$upstream_default_branch"
 
 if [ "$stashed" -eq 1 ]; then
   echo "[update] Restoring stashed changes..."

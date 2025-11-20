@@ -426,6 +426,25 @@ merge_variant_caller_output <- function(Merged_file, Pileup_file, Somatic_file, 
   }
 
   # Continue with the rest of the pipeline - select relevant columns
+  # Handle ClairS-TO only variants: coalesce ClairS-specific columns with general columns
+  if ("ClairS_AF" %in% colnames(All_calls) && !"AF" %in% colnames(All_calls)) {
+    All_calls$AF <- All_calls$ClairS_AF
+  } else if ("ClairS_AF" %in% colnames(All_calls) && "AF" %in% colnames(All_calls)) {
+    All_calls <- All_calls %>% mutate(AF = coalesce(AF, ClairS_AF))
+  }
+
+  if ("ClairS_Depth" %in% colnames(All_calls) && !"Depth" %in% colnames(All_calls)) {
+    All_calls$Depth <- All_calls$ClairS_Depth
+  } else if ("ClairS_Depth" %in% colnames(All_calls) && "Depth" %in% colnames(All_calls)) {
+    All_calls <- All_calls %>% mutate(Depth = coalesce(Depth, ClairS_Depth))
+  }
+
+  if ("ClairS_AD" %in% colnames(All_calls) && !"AD" %in% colnames(All_calls)) {
+    All_calls$AD <- All_calls$ClairS_AD
+  } else if ("ClairS_AD" %in% colnames(All_calls) && "AD" %in% colnames(All_calls)) {
+    All_calls <- All_calls %>% mutate(AD = coalesce(AD, ClairS_AD))
+  }
+
   # Select only user-specified columns in the requested order
   required_columns <- c("ClairS_Depth", "Gene.refGene", "Chr", "Start", "End",
                        "Ref", "Alt", "Func.refGene", "ExonicFunc.refGene",
