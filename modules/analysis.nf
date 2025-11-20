@@ -291,7 +291,7 @@ process mgmt_promoter {
 // Structural variant annotation using Svanna for region of interest genes (occ genes)
 process svannasv {
 
-    label 'svannasv'
+  label 'svannasv'
    publishDir "${params.output_path}/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_occ_svanna_annotation.html"
 
@@ -299,13 +299,11 @@ process svannasv {
    tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(occ_protein_coding_bed)
 
    output:
-   //file("${sample_id}_OCC_SVs.vcf")
-   tuple val(sample_id), path("${sample_id}_OCC_SVs.vcf"), emit: occsvannavcfout
+   
    tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.html"), emit:rmdsvannahtml
    tuple val(sample_id), path("${sample_id}_occ_svanna_annotation.vcf.gz"), emit: occsvannaannotationannotationvcf
+   tuple val(sample_id), path("${sample_id}_sniffles2_under30mb.vcf.gz")
 
-//   export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-//   export PATH=$JAVA_HOME/bin:$PATH
    script:
    """
    # Debug: List input files
@@ -315,20 +313,13 @@ process svannasv {
    echo "OCC protein coding bed: $occ_protein_coding_bed"
    ls -la
 
-   intersectBed -a $wf_sv  -b $occ_protein_coding_bed  -header > ${sample_id}_OCC_SVs.vcf
+   bcftools view -O z -o ${sample_id}_sniffles2_under30mb.vcf.gz   -i '(INFO/SVTYPE="DUP" || INFO/SVTYPE="INV" || INFO/SVTYPE="INS") && INFO/SVLEN < 30000000 || (INFO/SVTYPE="DEL" && INFO/SVLEN > -30000000)'   $wf_sv
+   bcftools index -t ${sample_id}_sniffles2_under30mb.vcf.gz
 
-   # Check if intersection file is empty (excluding header)
-   if [ \$(grep -v '^#' ${sample_id}_OCC_SVs.vcf | wc -l) -eq 0 ]; then
-      # If empty, use original wf_sv file
-      INPUT_FILE=$wf_sv
-   else
-      # If not empty, use intersection file
-      INPUT_FILE=${sample_id}_OCC_SVs.vcf
-   fi
- 
+
    java -jar ${params.svanna_bin_dir}/svanna-cli-1.0.4.jar prioritize  \
    -d ${params.ref_dir}/svanna-data  \
-   --vcf \$INPUT_FILE \
+   --vcf ${sample_id}_sniffles2_under30mb.vcf.gz\
    --phenotype-term HP:0100836 \
    --output-format html,vcf \
    --prefix ${sample_id}_occ_svanna_annotation
@@ -356,9 +347,11 @@ process svannasv_fusion_events {
 
     """
     # Create enhanced GFF3 with both exons and introns
+    gunzip -c $occ_svannavcf > ${sample_id}_occ_svanna_annotation.vcf
+   
     create_gff3_with_introns.py --gff3 $genecode_bed --out ${sample_id}_genecode_with_introns.gff3
 
-    breaking_point_bed_translocation_exon.py --vcf $occ_svannavcf --out  ${sample_id}_breaking_bedpoints.bed
+    breaking_point_bed_translocation_exon.py --vcf ${sample_id}_occ_svanna_annotation.vcf --out ${sample_id}_breaking_bedpoints.bed
 
     awk 'BEGIN{OFS="\t"} {if (\$1 !~ /^chr/) \$1 = "chr"\$1; print}' ${sample_id}_breaking_bedpoints.bed > ${sample_id}_breaking_bedpoints_sort.bed
 
@@ -410,6 +403,7 @@ process svannasv_fusion_events {
     fi
 
     """
+
 }
 
 // Circos plot generation for structural variant visualization
@@ -1535,10 +1529,10 @@ workflow analysis {
             }
             circosplot(svannasv_out)
             circosplot_out=circosplot.out.circosout
-            svannaoutfusion_events= svannasv.out.occsvannavcfout
+            svannaoutfusion_events= svannasv.out.occsvannaannotationannotationvcf
                 .combine(genecode_bed_ch).combine(occ_fusion_genes_list_ch)
-                .map{ sample_id, occsvannavcfout, genecode, fusion_genes ->
-                [sample_id, occsvannavcfout, genecode, fusion_genes]
+                .map{ sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes ->
+                [sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes]
             }
             svannasv_fusion_events(svannaoutfusion_events)
             
