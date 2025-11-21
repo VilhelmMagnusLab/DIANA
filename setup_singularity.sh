@@ -72,29 +72,12 @@ pull_if_not_exists() {
     # Extract just the image name from the repository path (e.g., "vilhelmmagnuslab/nwgs_default_images" -> "nwgs_default_images")
     local image_basename=$(basename "$image_name")
     local image_file="containers/${image_basename}_latest.sif"
-
+    
     if [ -f "$image_file" ]; then
         echo "   ✓ $image_name already exists, skipping..."
     else
         echo "   Pulling $image_name..."
-
-        # Temporarily disable Docker authentication for public images
-        # by hiding the Docker config file
-        local docker_config_backup=""
-        if [ -f "$HOME/.docker/config.json" ]; then
-            docker_config_backup="$HOME/.docker/config.json.apptainer_backup_$$"
-            mv "$HOME/.docker/config.json" "$docker_config_backup"
-        fi
-
-        # Pull the image without authentication
-        SINGULARITY_DOCKER_USERNAME="" SINGULARITY_DOCKER_PASSWORD="" \
-        APPTAINER_DOCKER_USERNAME="" APPTAINER_DOCKER_PASSWORD="" \
         $SINGULARITY_CMD pull --dir containers/ docker://$image_name:latest
-
-        # Restore Docker config if it was backed up
-        if [ -n "$docker_config_backup" ] && [ -f "$docker_config_backup" ]; then
-            mv "$docker_config_backup" "$HOME/.docker/config.json"
-        fi
     fi
 }
 
@@ -188,6 +171,10 @@ set -e
 
 echo " Running quick pipeline test with Singularity/Apptainer..."
 
+# Create a minimal test sample file
+mkdir -p data/testdata
+echo "test_sample" > data/testdata/sample_ids.txt
+
 # Run with test profile (if available)
 if [ -f "conf/test.config" ]; then
     ./run_pipeline_singularity.sh -profile test
@@ -234,4 +221,4 @@ echo "Before starting the pipeline, make sure that all paths for each mode are c
 echo "set in the appropriate config files: conf/analysis.config, conf/epi2me.config, and conf/mergebam.config"
 echo "For more information, see the README.md file."
 echo ""
-echo "Happy analyzing! 🧬" 
+echo "Happy analyzing! 🧬 with nWGS pipeline" 

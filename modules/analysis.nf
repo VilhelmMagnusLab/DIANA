@@ -1949,10 +1949,10 @@ workflow analysis {
         circosplot(svannasv_out)
 
         // Also run fusion events analysis for RMD mode
-        svannaoutfusion_events = svannasv.out.occsvannavcfout
+        svannaoutfusion_events = svannasv.out.occsvannaannotationannotationvcf
                 .combine(genecode_bed_ch).combine(occ_fusion_genes_list_ch)
-                .map { sample_id, occsvannavcfout, genecode, fusion_genes ->
-                [sample_id, occsvannavcfout, genecode, fusion_genes]
+                .map { sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes ->
+                [sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes]
             }
         svannasv_fusion_events(svannaoutfusion_events)
         
