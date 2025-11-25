@@ -561,7 +561,7 @@ process clair3 {
     --var_pct_phasing=1 \
     --platform="ont" \
     --no_phasing_for_fa \
-    --model_path=/data/routine_nWGS_pipeline/nWGS_pipeline/data/reference/r1041_e82_400bps_sup_v420 \
+    --model_path=/home/godzilla/nWGS_pipeline/data/reference/r1041_e82_400bps_sup_v420 \
     --output=output_clair3
  
  convert2annovar.pl output_clair3/pileup.vcf.gz \
@@ -1943,16 +1943,16 @@ workflow analysis {
         rmd_svanna_html = svannasv.out.rmdsvannahtml
             svannasv_out = svannasv.out.occsvannaannotationannotationvcf
                 .combine(vcf2circos_json_ch)
-                .map { sample_id, svannavcfoutput, vcf2circos ->
-                    [sample_id, svannavcfoutput, vcf2circos]
+                .map { sample_id, occsvannaannotationannotationvcf, vcf2circos ->
+                    [sample_id, occsvannaannotationannotationvcf, vcf2circos]
                 }
         circosplot(svannasv_out)
 
         // Also run fusion events analysis for RMD mode
-        svannaoutfusion_events = svannasv.out.occsvannavcfout
+        svannaoutfusion_events = svannasv.out.occsvannaannotationannotationvcf
                 .combine(genecode_bed_ch).combine(occ_fusion_genes_list_ch)
-                .map { sample_id, occsvannavcfout, genecode, fusion_genes ->
-                [sample_id, occsvannavcfout, genecode, fusion_genes]
+                .map { sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes ->
+                [sample_id, occsvannaannotationannotationvcf, genecode, fusion_genes]
             }
         svannasv_fusion_events(svannaoutfusion_events)
         
