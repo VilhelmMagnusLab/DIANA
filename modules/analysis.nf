@@ -319,7 +319,7 @@ process svannasv {
 
    java -jar ${params.svanna_bin_dir}/svanna-cli-1.0.4.jar prioritize  \
    -d ${params.ref_dir}/svanna-data  \
-   --vcf ${sample_id}_sniffles2_under30mb.vcf.gz\
+   --vcf  $wf_sv \
    --phenotype-term HP:0100836 \
    --output-format html,vcf \
    --prefix ${sample_id}_occ_svanna_annotation
@@ -609,7 +609,10 @@ table_annovar.pl ${sample_id}_occ_merge_snv_avinpt \
     > ${sample_id}_merge_annotateandfilter.csv
 
     cp occ_merge.hg38_multianno.txt ${sample_id}_occ_merge.hg38_multianno.txt
+    
+    # remove tmp folder
 
+    rm -rf output_clair3/tmp*
     """
    }
 
@@ -676,7 +679,10 @@ process clairs_to {
   | cut -f1-16,25,26  > ${sample_id}_annotateandfilter_clairsto.csv
 
    cp ClairS_TO_snv.hg38_multianno.txt ${sample_id}_ClairS_TO_snv.hg38_multianno.txt
+ 
+    # remove tmp folder
 
+   rm -rf clairsto_output/tmp*
     """
    }
 
@@ -1898,6 +1904,11 @@ workflow analysis {
             // Create channels for downstream processes
             MGMT_output = extract_epic.out.MGMTheaderout
 
+            MGMT_sturgeon = extract_epic.out.sturgeonbedinput
+                 .combine(sturgeon_model_ch)
+                 .map { sample_id, sturgeoninput, sturgeon_model ->
+                     tuple(sample_id, sturgeoninput, sturgeon_model)
+                 }
 
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
                 .combine(hg19_450model_ch)
@@ -1906,7 +1917,7 @@ workflow analysis {
                 }
 
             // Run the processes
-            //sturgeon(MGMT_sturgeon)
+            sturgeon(MGMT_sturgeon)
             mgmt_promoter(MGMT_output)
             nanodx(mgmt_nanodx)
 

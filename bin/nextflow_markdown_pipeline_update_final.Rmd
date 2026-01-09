@@ -260,7 +260,7 @@ tryCatch({
                 filter(as.numeric(Depth) >= 10)
         }
 
-        # ---- 3.6. Filter by variant caller consensus (at least 2 callers or pathogenic) ----
+        # ---- 3.6. Filter by variant caller consensus (at least 2 callers or pathogenic or in target genes) ----
         if ("Variant_caller" %in% colnames(df_snv_all)) {
             df_snv_all <- df_snv_all %>%
                 rowwise() %>%
@@ -274,10 +274,16 @@ tryCatch({
                         CLNSIG == "Pathogenic"
                     } else {
                         FALSE
+                    },
+                    # Check if gene is in target list - if so, always include it
+                    in_target_genes = if ("Gene.refGene" %in% colnames(df_snv_all)) {
+                        Gene.refGene %in% target_genes
+                    } else {
+                        FALSE
                     }
                 ) %>%
-                filter(caller_count >= 2 | is_pathogenic) %>%
-                select(-caller_count, -is_pathogenic) %>%
+                filter(caller_count >= 2 | is_pathogenic | in_target_genes) %>%
+                select(-caller_count, -is_pathogenic, -in_target_genes) %>%
                 ungroup()
         }
 
@@ -321,6 +327,9 @@ tryCatch({
                 mutate(`Nucleotide alteration` = case_when(
                     Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295113" ~ "C228T",
                     Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295135" ~ "C250T",
+                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295114" ~ "C229T",
+                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295138" ~ "C253T",
+                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295127" ~ "C242T",
                     TRUE ~ `Nucleotide alteration`
                 ))
         }
@@ -363,6 +372,40 @@ tryCatch({
             if (nrow(df_snv_filtered) == 0) {
                 cat("No SNV detected in target genes or pathogenic variants.\n")
             } else {
+                # ---- 5.5. Remove duplicate variants, keeping the one with most callers ----
+                if ("Variant_caller" %in% colnames(df_snv_filtered) && all(c("Gene.refGene", "Chr", "Start", "End", "Ref", "Alt", "Nucleotide alteration") %in% colnames(df_snv_filtered))) {
+                    df_snv_filtered <- df_snv_filtered %>%
+                        # Group by variant identity (same gene, position, ref, alt, and nucleotide change)
+                        group_by(Gene.refGene, Chr, Start, End, Ref, Alt, `Nucleotide alteration`) %>%
+                        mutate(
+                            # Merge all unique caller names from all duplicate entries
+                            merged_callers = {
+                                # Extract all callers from all rows in this group
+                                all_callers <- unlist(strsplit(Variant_caller, ",\\s*"))
+                                # Get unique callers and sort them
+                                unique_callers <- unique(trimws(all_callers))
+                                # Sort in standard order: Pileup, Merged, ClairS_TO
+                                caller_order <- c("Pileup", "Merged", "ClairS_TO")
+                                sorted_callers <- unique_callers[order(match(unique_callers, caller_order))]
+                                # Combine back into a single string
+                                paste(sorted_callers, collapse = ", ")
+                            },
+                            # Count how many variant callers detected this variant
+                            caller_count = sum(c(
+                                grepl("Pileup", Variant_caller, ignore.case = TRUE),
+                                grepl("Merged", Variant_caller, ignore.case = TRUE),
+                                grepl("ClairS_TO", Variant_caller, ignore.case = TRUE)
+                            ))
+                        ) %>%
+                        # Keep only the row with the maximum caller count for each variant
+                        slice_max(order_by = caller_count, n = 1, with_ties = FALSE) %>%
+                        ungroup() %>%
+                        # Replace Variant_caller with the merged callers
+                        mutate(Variant_caller = merged_callers) %>%
+                        # Remove the helper columns
+                        select(-caller_count, -merged_callers)
+                }
+
                 # ---- 6. Select only required columns ----
                 # Rename Gene.refGene to Gene Name for display
                 df_snv_display <- df_snv_filtered %>%
@@ -1266,6 +1309,9 @@ tryCatch({
                 mutate(`Nucleotide alteration` = case_when(
                     Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295113" ~ "C228T",
                     Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295135" ~ "C250T",
+                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295114" ~ "C229T",
+                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295138" ~ "C253T",
+                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295127" ~ "C242T",
                     TRUE ~ `Nucleotide alteration`
                 ))
         }
@@ -1274,6 +1320,40 @@ tryCatch({
             df_snv <- df_snv %>%
                 filter(!(Gene.refGene == "TERT" & Chr == "chr5" & Start == "1295957" & End == "1295957"))
 }
+
+        # ---- 4.7. Remove duplicate variants, keeping the one with most callers ----
+        if ("Variant_caller" %in% colnames(df_snv) && all(c("Gene.refGene", "Chr", "Start", "End", "Ref", "Alt", "Nucleotide alteration") %in% colnames(df_snv))) {
+            df_snv <- df_snv %>%
+                # Group by variant identity (same gene, position, ref, alt, and nucleotide change)
+                group_by(Gene.refGene, Chr, Start, End, Ref, Alt, `Nucleotide alteration`) %>%
+                mutate(
+                    # Merge all unique caller names from all duplicate entries
+                    merged_callers = {
+                        # Extract all callers from all rows in this group
+                        all_callers <- unlist(strsplit(Variant_caller, ",\\s*"))
+                        # Get unique callers and sort them
+                        unique_callers <- unique(trimws(all_callers))
+                        # Sort in standard order: Pileup, Merged, ClairS_TO
+                        caller_order <- c("Pileup", "Merged", "ClairS_TO")
+                        sorted_callers <- unique_callers[order(match(unique_callers, caller_order))]
+                        # Combine back into a single string
+                        paste(sorted_callers, collapse = ", ")
+                    },
+                    # Count how many variant callers detected this variant
+                    caller_count = sum(c(
+                        grepl("Pileup", Variant_caller, ignore.case = TRUE),
+                        grepl("Merged", Variant_caller, ignore.case = TRUE),
+                        grepl("ClairS_TO", Variant_caller, ignore.case = TRUE)
+                    ))
+                ) %>%
+                # Keep only the row with the maximum caller count for each variant
+                slice_max(order_by = caller_count, n = 1, with_ties = FALSE) %>%
+                ungroup() %>%
+                # Replace Variant_caller with the merged callers
+                mutate(Variant_caller = merged_callers) %>%
+                # Remove the helper columns
+                select(-caller_count, -merged_callers)
+        }
 
         # ---- 5. Reorder columns according to specified order ----
         # Desired order: "RefSeq" "Gene.refGene" "Nucleotide alteration" "Ref" "Alt" "Func.refGene" "AAChange.refGene" "CLNSIG" "COSMIC100" "GQ" "Depth" "AD" "GT" "AF" "Chr" "Start" "End" "Variant_caller"
