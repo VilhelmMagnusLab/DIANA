@@ -847,6 +847,7 @@ process markdown_report {
           path(tsne_plot_file),
           path(nanodx_classifier),
           path(snv_target_genes),
+          path(protein_coding_bed),
           path(rmd_template)
 
     output:
@@ -933,7 +934,7 @@ process markdown_report {
     
     echo "Using Rscript at: \$RSCRIPT_PATH"
 
-    \$RSCRIPT_PATH -e "rmarkdown::render('\${PWD}/${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[23])" \
+    \$RSCRIPT_PATH -e "rmarkdown::render('\${PWD}/${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[24])" \
       "${sample_id}" \
       "\${PWD}/${craminoreport}" \
       "\${SAMPLE_FILE}" \
@@ -956,7 +957,9 @@ process markdown_report {
       "\${PWD}/${tertp_coverage}" \
       "\${PWD}/${tsne_plot_file}" \
       "\${PWD}/${snv_target_genes}" \
-      "\${PWD}/\${output_file}"
+      "\${PWD}/${protein_coding_bed}" \
+      "\${PWD}/\${output_file}" \
+      "${workflow.manifest.version}"
 
     # Clean up intermediate files and folders created by R Markdown (belt and suspenders)
     echo "Cleaning up intermediate R Markdown files..."
@@ -2104,6 +2107,7 @@ workflow analysis {
                     tsne_plot_file,
                     nanodx_classifier,
                     file("${params.ref_dir}/snv_target_genes.txt"),
+                    file(params.occ_protein_coding_bed),
                     file("${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd")
                 ]
             }.view()

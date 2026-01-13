@@ -11,7 +11,7 @@ nextflow.enable.dsl=2
 
 process run_epi2me_modkit {
     label 'modkit'
-    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai)
@@ -55,7 +55,7 @@ process run_epi2me_modkit {
 
 process run_epi2me_sv {
     label 'pipeline1'
-    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(bam), path(bai)
@@ -84,7 +84,7 @@ process run_epi2me_sv {
 
 process run_epi2me_cnv {
     label 'epi2me'
-    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(bam), path(bai), path(reference_genome), path(reference_genome_bai)

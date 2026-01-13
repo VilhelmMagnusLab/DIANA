@@ -50,8 +50,8 @@ library(htmltools)
 
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) < 22) {
-  stop("Usage: Rscript report.R <sample_id> <cramino_stat> <sample_ids_file> <votes_file> <dictionary_file> <logo_file> <copy_number_plot_file> <tumor_copy_number_file> <cnv_filter_file> <cnv_chr9> <cnv_chr7> <mgmt_results_file> <snv_results_file> <structure_variant_file> <terp_html>  <svanna_html> <egfr_plot_file> <idh1_plot_file> <idh2_plot_file> <tertp_plot_file> <tsneplot> <snv_target_genes> <output_pdf_file>")
+if (length(args) < 24) {
+  stop("Usage: Rscript report.R <sample_id> <cramino_stat> <sample_ids_file> <votes_file> <dictionary_file> <logo_file> <copy_number_plot_file> <tumor_copy_number_file> <cnv_filter_file> <cnv_chr9> <cnv_chr7> <mgmt_results_file> <snv_results_file> <structure_variant_file> <terp_html>  <svanna_html> <egfr_plot_file> <idh1_plot_file> <idh2_plot_file> <tertp_plot_file> <tsneplot> <snv_target_genes> <protein_coding_bed> <output_pdf_file> <pipeline_version>")
 }
 
 
@@ -78,7 +78,9 @@ idh2_plot_file         <- args[19]
 tertp_plot_file        <- args[20]
 tsneplot               <- args[21]
 snv_target_genes       <- args[22]
-output_pdf_file        <- args[23]
+protein_coding_bed     <- args[23]
+output_pdf_file        <- args[24]
+pipeline_version       <- args[25]
 
 # Read in the votes and dictionary files
 if (!file.exists(votes_file)) {
@@ -488,11 +490,11 @@ tryCatch({
     
     # Define essential columns for structural variants (excluding ID)
     essential_columns <- c("chr", "star", "end", "svtype", "breaking", "Genes")
-    
+
     # Keep only essential columns that exist in the data
     available_essential <- essential_columns[essential_columns %in% colnames(df_sv)]
     df_sv <- df_sv[, available_essential, drop = FALSE]
-    
+
     # Check if the file is empty or has only headers
     if (!is_empty_file(df_sv)) {
         # Add explanatory text for structure variants
@@ -1078,7 +1080,7 @@ if (!cdk2na_hemi && !cdk2na_homo && !cdk2nb_hemi && !cdk2nb_homo) {
 ### *IDH1* p.R132 and *IDH2* p.R172
 
 
-Sequenced coverage of *IDH1* p.R132 and *IDH2* p.R172 (red horizontal line) for visual inspection.
+Sequenced coverage of *IDH1* p.R132 and *IDH2* p.R172 (red vertical line) for visual inspection.
 
 ```{r, out.width="0.49\\linewidth", out.height="0.3\\textheight", fig.show='hold', echo=FALSE}
 knitr::include_graphics(c(idh1_plot_file, idh2_plot_file))
@@ -1102,10 +1104,9 @@ tryCatch({
     if (nrow(df_mgmt) == 0) {
         cat("No *MGMT* methylation results available for this sample.\n")
     } else {
-        cat("Nanopore sequencing covers the methylation status on all 98 CpG sites in the *MGMT* promoter region as opposed to\n")
-        cat("the 4 CpG sites (sites 76-79) previously reported. The table below summarizes the methylation level on all\n")
-        cat("CpG sites in the *MGMT* promoter region (sites 1-98) and the four previously reported sites (sites 76-79)\n")
-        cat("and states how the sample classifies according to both methods.\n\n")
+        cat("Samples with methylation above 30% in either context are considered *MGMT* methylated with high confidence.\n")
+        cat("Samples with methylation below 10% at CpGs 76-79 or below 25% at CpGs 1-98 are considered *MGMT* unmethylated with high confidence.\n")
+        cat("*Grey-zone* indicates that MGMT methylation status can not be determined with high confidence and should be interpreted in context with tumor content and chromosome 10 status.\n\n")
 
         # Continue with normal table processing
         df_mgmt$sample_id <- sample_id
@@ -1244,63 +1245,77 @@ tryCatch({
             }
         }
 
-        # ---- 4. Create RefSeq and Nucleotide alteration columns from AAChange.refGene ----
+        # ---- 4. Load valid RefSeq IDs from protein coding bed file ----
+        valid_refseq <- character(0)
+        if (file.exists(protein_coding_bed)) {
+            # Read the BED file and extract the last column (NM_ IDs)
+            occ_bed <- fread(protein_coding_bed, header = FALSE)
+            valid_refseq <- occ_bed[[ncol(occ_bed)]]  # Last column
+            message("Loaded ", length(valid_refseq), " valid RefSeq IDs from protein coding bed file")
+        }
+
+        # ---- 4.1. Create RefSeq and Nucleotide alteration columns from AAChange.refGene ----
+        # This function intelligently selects the transcript that matches the protein coding bed file
         if ("AAChange.refGene" %in% colnames(df_snv)) {
-            # Function to extract RefSeq (NM_ID only)
-            create_refseq_column <- function(text) {
-                if (is.na(text) || text == "") return("No")
-                entries <- unlist(strsplit(text, ","))
-                # Process first entry (most common case)
-                entry <- entries[1]
-                
-                # Extract NM identifier
+            # Function to parse a single AAChange entry and extract all components
+            parse_aachange_entry <- function(entry) {
                 # Pattern: GENE:NM_XXXXX:exonX:c.CHANGE:p.CHANGE
                 parts <- unlist(strsplit(entry, ":"))
-                if (length(parts) >= 2) {
-                    nm_id <- parts[2]       # NM_XXXXX
-                    return(nm_id)
-                } else {
-                    return("No")
+                if (length(parts) < 2) return(NULL)
+
+                result <- list(
+                    nm_id = if(length(parts) >= 2) parts[2] else "No",
+                    exon = if(length(parts) >= 3 && grepl("^exon[0-9]+", parts[3])) parts[3] else "No",
+                    c_change = if(length(parts) >= 4) parts[4] else "No",
+                    p_change = if(length(parts) >= 5) {
+                        # Extract p.XXX pattern
+                        match <- regexpr("p\\.[^:]*", parts[5])
+                        if (match != -1) substr(parts[5], match, match + attr(match, "match.length") - 1) else "No"
+                    } else "No"
+                )
+                return(result)
+            }
+
+            # Main function to select the best transcript match
+            select_best_transcript <- function(text, valid_ids) {
+                if (is.na(text) || text == "") {
+                    return(list(nm_id = "No", exon = "No", c_change = "No", p_change = "No"))
                 }
-            }
-            
-            # Function to extract Nucleotide alteration (c.Change only)
-            create_nucleotide_column <- function(text) {
-                if (is.na(text) || text == "") return("No")
+
+                # Split by comma to get all transcript entries
                 entries <- unlist(strsplit(text, ","))
-                # Process first entry (most common case)
-                entry <- entries[1]
-                
-                # Extract c.DNA change
-                # Pattern: GENE:NM_XXXXX:exonX:c.CHANGE:p.CHANGE
-                parts <- unlist(strsplit(entry, ":"))
-                if (length(parts) >= 4) {
-                    c_change <- parts[4]    # c.CHANGE
-                    return(c_change)
-                } else {
-                    return("No")
+
+                # Parse all entries
+                parsed_entries <- lapply(entries, parse_aachange_entry)
+                parsed_entries <- parsed_entries[!sapply(parsed_entries, is.null)]
+
+                if (length(parsed_entries) == 0) {
+                    return(list(nm_id = "No", exon = "No", c_change = "No", p_change = "No"))
                 }
+
+                # If we have valid RefSeq IDs, try to match
+                if (length(valid_ids) > 0) {
+                    for (entry in parsed_entries) {
+                        if (entry$nm_id %in% valid_ids) {
+                            return(entry)  # Return first match
+                        }
+                    }
+                }
+
+                # If no match found or no valid IDs, return the first entry
+                return(parsed_entries[[1]])
             }
-            
-            # Create the RefSeq and Nucleotide alteration columns
-            df_snv$RefSeq <- sapply(df_snv$AAChange.refGene, create_refseq_column)
-            df_snv$`Nucleotide alteration` <- sapply(df_snv$AAChange.refGene, create_nucleotide_column)
-            
-            # Process AAChange.refGene for protein changes only (existing functionality)
-            process_aachange <- function(text) {
-                if (is.na(text) || text == "") return("No")
-                entries <- unlist(strsplit(text, ","))
-                patterns <- sapply(entries, function(x) {
-                    match <- regexpr("p\\.[^:]*", x)
-                    if (match != -1) substr(x, match, match + attr(match, "match.length") - 1) else NA
-                })
-                patterns <- patterns[!is.na(patterns)]
-                if (length(patterns) == 0) return("No")
-                if (length(patterns) == 1) return(patterns[1])
-                most_frequent <- names(which.max(table(patterns)))
-                return(most_frequent)
-            }
-            df_snv$AAChange.refGene <- sapply(df_snv$AAChange.refGene, process_aachange)
+
+            # Apply the function to all rows
+            selected_transcripts <- lapply(df_snv$AAChange.refGene, function(x) {
+                select_best_transcript(x, valid_refseq)
+            })
+
+            # Extract components into separate columns
+            df_snv$RefSeq <- sapply(selected_transcripts, function(x) x$nm_id)
+            df_snv$Exon <- sapply(selected_transcripts, function(x) x$exon)
+            df_snv$`Nucleotide alteration` <- sapply(selected_transcripts, function(x) x$c_change)
+            df_snv$AAChange.refGene <- sapply(selected_transcripts, function(x) x$p_change)
         }
 
         # ---- 4.5. Special handling for TERT promoter mutations ----
@@ -1355,42 +1370,102 @@ tryCatch({
                 select(-caller_count, -merged_callers)
         }
 
+        # ---- 4.8. Apply transformations for display ----
+
+        # Note: RefSeq selection based on protein-coding genes is now done in step 4.1 above
+
+        # 4. Create Function column using pre-extracted Exon information
+        if (all(c("Func.refGene", "Exon") %in% colnames(df_snv))) {
+            df_snv <- df_snv %>%
+                mutate(
+                    Function = case_when(
+                        Func.refGene == "exonic" & !is.na(Exon) & Exon != "No" ~ Exon,
+                        Func.refGene == "exonic" ~ "exonic",
+                        Func.refGene == "upstream" ~ "upstream",
+                        TRUE ~ as.character(Func.refGene)
+                    )
+                )
+        } else if ("Func.refGene" %in% colnames(df_snv)) {
+            # If Exon column doesn't exist, just use Func.refGene
+            df_snv$Function <- df_snv$Func.refGene
+        }
+
+        # 5. Transform Nucleotide alteration format (e.g., "c.A313G" -> "313A>G")
+        if ("Nucleotide alteration" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>%
+                mutate(`Nucleotide alteration` = case_when(
+                    is.na(`Nucleotide alteration`) | `Nucleotide alteration` == "" | `Nucleotide alteration` == "No" ~ `Nucleotide alteration`,
+                    # Match pattern like "c.A313G" and transform to "313A>G"
+                    grepl("^c\\.[A-Z]([0-9]+)[A-Z]", `Nucleotide alteration`) ~ {
+                        gsub("^c\\.([A-Z])([0-9]+)([A-Z])$", "\\2\\1>\\3", `Nucleotide alteration`)
+                    },
+                    # Match pattern like "c.313A>G" (already in desired format, just remove c.)
+                    grepl("^c\\.([0-9]+[A-Z]>[A-Z])", `Nucleotide alteration`) ~ {
+                        gsub("^c\\.", "", `Nucleotide alteration`)
+                    },
+                    # Keep as-is for other patterns
+                    TRUE ~ `Nucleotide alteration`
+                ))
+        }
+
+        # 6. Simplify CLNSIG values
+        if ("CLNSIG" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>%
+                mutate(CLNSIG = case_when(
+                    CLNSIG == "Conflicting_classifications_of_pathogenicity" ~ "conflicting",
+                    TRUE ~ CLNSIG
+                ))
+        }
+
+        # 2. Rename columns
+        df_snv <- df_snv %>%
+            rename_with(~ case_when(
+                . == "Gene.refGene" ~ "Gene name",
+                . == "Nucleotide alteration" ~ "Gene.alt",
+                . == "Func.refGene" ~ "Func.refGene_old",  # Keep old column for now
+                TRUE ~ .
+            ))
+
+        # 7. Remove GT column
+        if ("GT" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>% select(-GT)
+        }
+
+        # Remove old Func.refGene column if Function was created
+        if ("Function" %in% colnames(df_snv) && "Func.refGene_old" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>% select(-Func.refGene_old)
+        }
+
+        # Remove temporary Exon column (used only for creating Function column)
+        if ("Exon" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>% select(-Exon)
+        }
+
         # ---- 5. Reorder columns according to specified order ----
-        # Desired order: "RefSeq" "Gene.refGene" "Nucleotide alteration" "Ref" "Alt" "Func.refGene" "AAChange.refGene" "CLNSIG" "COSMIC100" "GQ" "Depth" "AD" "GT" "AF" "Chr" "Start" "End" "Variant_caller"
-        desired_order <- c("RefSeq", "Gene.refGene", "Nucleotide alteration", "Ref", "Alt", "Func.refGene", "AAChange.refGene", "CLNSIG", "COSMIC100", "GQ", "Depth", "AD", "GT", "AF", "Chr", "Start", "End", "Variant_caller")
-        
+        # Updated column names after transformations: "RefSeq" "Gene name" "Gene.alt" "Ref" "Alt" "Function" "AAChange.refGene" "CLNSIG" "COSMIC100" "GQ" "Depth" "AD" "AF" "Chr" "Start" "End" "Variant_caller"
+        desired_order <- c("RefSeq", "Gene name", "Gene.alt", "Ref", "Alt", "Function", "AAChange.refGene", "CLNSIG", "COSMIC100", "GQ", "Depth", "AD", "AF", "Chr", "Start", "End", "Variant_caller")
+
         # Get current column names
         current_cols <- names(df_snv)
-        
+
         # Select columns that exist in both desired order and current columns
         available_cols <- desired_order[desired_order %in% current_cols]
-        
+
         # Add any remaining columns that weren't specified in the desired order
         remaining_cols <- current_cols[!current_cols %in% desired_order]
-        
+
         # Combine for final order
         final_order <- c(available_cols, remaining_cols)
-        
+
         # Reorder the dataframe
         df_snv <- df_snv %>% select(all_of(final_order))
-
-        # # ---- 6. Filter out rows with "No" or empty values in RefSeq, Nucleotide alteration, or AAChange.refGene ----
-        # if (nrow(df_snv) > 0) {
-        #     # Filter out rows where RefSeq, Nucleotide alteration, or AAChange.refGene is "No" or empty
-        #     df_snv <- df_snv %>%
-        #         filter(
-        #             !is.na(RefSeq) & RefSeq != "" & RefSeq != "No",
-        #             !is.na(`Nucleotide alteration`) & `Nucleotide alteration` != "" & `Nucleotide alteration` != "No",
-        #             !is.na(AAChange.refGene) & AAChange.refGene != "" & AAChange.refGene != "No"
-        #         )
-        # }
 
         # Remove row names
         rownames(df_snv) <- NULL
 
         # ---- 7. Display the table ----
-        # Find Gene.refGene column index for italic formatting
-        gene_col_idx <- which(colnames(df_snv) == "Gene.refGene")
+        # Find Gene name column index for italic formatting
+        gene_col_idx <- which(colnames(df_snv) == "Gene name")
 
         if (knitr::is_html_output()) {
             tbl <- kable(df_snv,
@@ -1549,5 +1624,5 @@ tryCatch({
 
 This nanopore whole genome sequencing (nWGS) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
 
-#### Report generated on `r Sys.time()`
+#### Report generated on `r Sys.time()` | nWGS Pipeline version: `r pipeline_version`
 
