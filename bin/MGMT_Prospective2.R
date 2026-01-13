@@ -67,20 +67,18 @@ process_mgmt_data <- function(mgmt_bed, save_path) {
     results <- bind_cols(Pyro, FULL) %>% mutate(sample_id = basename(mgmt_bed))
     
     # Step 7: Add classification based on methylation values
-    results <- results %>%
-      mutate(Classification_by_Pyro = case_when(
-        mean_methylation_pyro < 10 ~ "Unmethylated",
-        mean_methylation_pyro > 30 ~ "Methylated",
-        mean_methylation_pyro > 10 & mean_methylation_pyro <= 22 ~ "Grey zone, Unmethylated",
-        mean_methylation_pyro > 22 & mean_methylation_pyro <= 30 ~ "Grey zone, Methylated"
-      )) %>%
-      mutate(Classification_by_Full = case_when(
-        mean_methylation_full < 25 ~ "Unmethylated",
-        mean_methylation_full > 30 ~ "Methylated",
-        mean_methylation_full > 24 & mean_methylation_full <= 28 ~ "Grey zone, Unmethylated",
-        mean_methylation_full > 28 & mean_methylation_full <= 31 ~ "Grey zone, Methylated"
-      ))
 
+    results <- results %>% 
+      mutate(Classification_by_Pyro = case_when(
+      mean_methylation_pyro < 10 ~ "Unmethylated",
+      mean_methylation_pyro > 30 ~ "Methylated",
+      mean_methylation_pyro > 10 & mean_methylation_pyro <= 30 ~ "Grey zone"
+      )) %>%
+    mutate(Classification_by_Full = case_when(
+      mean_methylation_full <= 25 ~ "Unmethylated",
+      mean_methylation_full > 30 ~ "Methylated",
+      mean_methylation_full > 25 & mean_methylation_full <= 30 ~ "Grey zone"
+    ))
     # Step 8: Write the combined results to a CSV file in the destination folder
     write_csv(results, save_path)
     

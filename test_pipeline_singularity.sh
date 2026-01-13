@@ -5,10 +5,6 @@ set -e
 
 echo " Running quick pipeline test with Singularity/Apptainer..."
 
-# Create a minimal test sample file
-mkdir -p data/testdata
-echo "test_sample" > data/testdata/sample_ids.txt
-
 # Run with test profile (if available)
 if [ -f "conf/test.config" ]; then
     ./run_pipeline_singularity.sh -profile test

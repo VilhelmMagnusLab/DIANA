@@ -319,7 +319,7 @@ process svannasv {
 
    java -jar ${params.svanna_bin_dir}/svanna-cli-1.0.4.jar prioritize  \
    -d ${params.ref_dir}/svanna-data  \
-   --vcf ${sample_id}_sniffles2_under30mb.vcf.gz\
+   --vcf  $wf_sv \
    --phenotype-term HP:0100836 \
    --output-format html,vcf \
    --prefix ${sample_id}_occ_svanna_annotation
@@ -561,7 +561,7 @@ process clair3 {
     --var_pct_phasing=1 \
     --platform="ont" \
     --no_phasing_for_fa \
-    --model_path=/data/routine_nWGS_pipeline/nWGS_pipeline/data/reference/r1041_e82_400bps_sup_v420 \
+    --model_path=/home/godzilla/nWGS_pipeline/data/reference/r1041_e82_400bps_sup_v420 \
     --output=output_clair3
  
  convert2annovar.pl output_clair3/pileup.vcf.gz \
@@ -609,7 +609,10 @@ table_annovar.pl ${sample_id}_occ_merge_snv_avinpt \
     > ${sample_id}_merge_annotateandfilter.csv
 
     cp occ_merge.hg38_multianno.txt ${sample_id}_occ_merge.hg38_multianno.txt
+    
+    # remove tmp folder
 
+    rm -rf output_clair3/tmp*
     """
    }
 
@@ -676,7 +679,10 @@ process clairs_to {
   | cut -f1-16,25,26  > ${sample_id}_annotateandfilter_clairsto.csv
 
    cp ClairS_TO_snv.hg38_multianno.txt ${sample_id}_ClairS_TO_snv.hg38_multianno.txt
+ 
+    # remove tmp folder
 
+   rm -rf clairsto_output/tmp*
     """
    }
 
@@ -841,6 +847,7 @@ process markdown_report {
           path(tsne_plot_file),
           path(nanodx_classifier),
           path(snv_target_genes),
+          path(protein_coding_bed),
           path(rmd_template)
 
     output:
@@ -927,7 +934,7 @@ process markdown_report {
     
     echo "Using Rscript at: \$RSCRIPT_PATH"
 
-    \$RSCRIPT_PATH -e "rmarkdown::render('\${PWD}/${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[23])" \
+    \$RSCRIPT_PATH -e "rmarkdown::render('\${PWD}/${rmd_template}', output_file=commandArgs(trailingOnly=TRUE)[24])" \
       "${sample_id}" \
       "\${PWD}/${craminoreport}" \
       "\${SAMPLE_FILE}" \
@@ -950,7 +957,9 @@ process markdown_report {
       "\${PWD}/${tertp_coverage}" \
       "\${PWD}/${tsne_plot_file}" \
       "\${PWD}/${snv_target_genes}" \
-      "\${PWD}/\${output_file}"
+      "\${PWD}/${protein_coding_bed}" \
+      "\${PWD}/\${output_file}" \
+      "${workflow.manifest.version}"
 
     # Clean up intermediate files and folders created by R Markdown (belt and suspenders)
     echo "Cleaning up intermediate R Markdown files..."
@@ -1898,6 +1907,11 @@ workflow analysis {
             // Create channels for downstream processes
             MGMT_output = extract_epic.out.MGMTheaderout
 
+            MGMT_sturgeon = extract_epic.out.sturgeonbedinput
+                 .combine(sturgeon_model_ch)
+                 .map { sample_id, sturgeoninput, sturgeon_model ->
+                     tuple(sample_id, sturgeoninput, sturgeon_model)
+                 }
 
             mgmt_nanodx = extract_epic.out.epicselectnanodxinput
                 .combine(hg19_450model_ch)
@@ -1906,7 +1920,7 @@ workflow analysis {
                 }
 
             // Run the processes
-            //sturgeon(MGMT_sturgeon)
+            sturgeon(MGMT_sturgeon)
             mgmt_promoter(MGMT_output)
             nanodx(mgmt_nanodx)
 
@@ -1943,8 +1957,8 @@ workflow analysis {
         rmd_svanna_html = svannasv.out.rmdsvannahtml
             svannasv_out = svannasv.out.occsvannaannotationannotationvcf
                 .combine(vcf2circos_json_ch)
-                .map { sample_id, svannavcfoutput, vcf2circos ->
-                    [sample_id, svannavcfoutput, vcf2circos]
+                .map { sample_id, occsvannaannotationannotationvcf, vcf2circos ->
+                    [sample_id, occsvannaannotationannotationvcf, vcf2circos]
                 }
         circosplot(svannasv_out)
 
@@ -2093,6 +2107,7 @@ workflow analysis {
                     tsne_plot_file,
                     nanodx_classifier,
                     file("${params.ref_dir}/snv_target_genes.txt"),
+                    file(params.occ_protein_coding_bed),
                     file("${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd")
                 ]
             }.view()

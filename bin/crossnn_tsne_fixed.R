@@ -159,7 +159,7 @@ sds <- sds[non_zero_var]
 # **KEY MEMORY OPTIMIZATION**: Reduce from 100k to 30k probes
 # This reduces memory usage during PCA by ~70% while maintaining classification quality
 # 30k highly variable probes is more than sufficient (standard classifiers use 10k-50k)
-MAX_PROBES <- 50000
+MAX_PROBES <- 10000
 maxSDs <- order(sds, decreasing = TRUE)[1:min(MAX_PROBES, length(sds))]
 message("Selected ", length(maxSDs), " most variable probes (out of ", length(sds), " with non-zero variance)")
 
