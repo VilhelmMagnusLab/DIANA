@@ -216,116 +216,101 @@ if (knitr::is_latex_output()) {
 knitr::include_graphics(copy_number_plot_file)
 ```
 
-### SNV Calling and Annotation
-
-```{r comment='', echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+```{r snv_data_processing, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# ========================================================================
+# SNV DATA PROCESSING - Process once, use in both Executive Summary and Extended Report
+# ========================================================================
 library(knitr)
 library(kableExtra)
 library(dplyr)
+library(data.table)
 
-# Read the SNV annotation results and target genes list
+# This chunk processes the SNV data once and stores it for reuse
+# The processed data will be used in both the Executive Summary and Extended Report sections
+
+df_snv_processed <- NULL  # Initialize
+
 tryCatch({
     # Read the SNV results table
-    df_snv_all <- read.csv(snv_results_file, stringsAsFactors = FALSE, sep = "\t", row.names = NULL)
-    
-    # Read the target genes list
-    target_genes <- tryCatch({
-        readLines(snv_target_genes)
-    }, error = function(e) {
-        character(0)  # Return empty if file cannot be read
-    })
-    
-    # Handle empty case
-    if (nrow(df_snv_all) == 0 || length(target_genes) == 0) {
-        cat("No SNV data available or no target genes specified.\n")
-    } else {
+    df_snv <- read.csv(snv_results_file, stringsAsFactors = FALSE, sep = "\t", row.names = NULL)
+
+    if (nrow(df_snv) > 0) {
         # ---- 1. Remove ExonicFunc.refGene ----
-        if ("ExonicFunc.refGene" %in% colnames(df_snv_all)) {
-            df_snv_all <- df_snv_all %>% select(-ExonicFunc.refGene)
+        if ("ExonicFunc.refGene" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>% select(-ExonicFunc.refGene)
         }
 
         # ---- 2. Clean COSMIC100 ----
-        if ("COSMIC100" %in% colnames(df_snv_all)) {
-            df_snv_all$COSMIC100 <- gsub("ID=", "", df_snv_all$COSMIC100)
+        if ("COSMIC100" %in% colnames(df_snv)) {
+            df_snv$COSMIC100 <- gsub("ID=", "", df_snv$COSMIC100)
         }
 
         # ---- 3. Merge Depth columns ----
-        if (all(c("Depth", "ClairS_Depth") %in% colnames(df_snv_all))) {
-            df_snv_all <- df_snv_all %>%
+        if (all(c("Depth", "ClairS_Depth") %in% colnames(df_snv))) {
+            df_snv <- df_snv %>%
                 mutate(Depth = pmax(as.numeric(Depth), as.numeric(ClairS_Depth), na.rm = TRUE)) %>%
                 select(-ClairS_Depth)
         }
 
         # ---- 3.5. Filter variants with Depth >= 10 ----
-        if ("Depth" %in% colnames(df_snv_all)) {
-            df_snv_all <- df_snv_all %>%
-                filter(as.numeric(Depth) >= 10)
+        if ("Depth" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>% filter(as.numeric(Depth) >= 10)
         }
 
-        # ---- 3.6. Filter by variant caller consensus (at least 2 callers or pathogenic or in target genes) ----
-        if ("Variant_caller" %in% colnames(df_snv_all)) {
-            df_snv_all <- df_snv_all %>%
-                rowwise() %>%
-                mutate(
-                    caller_count = sum(c(
-                        grepl("Pileup", Variant_caller, ignore.case = TRUE),
-                        grepl("Merged", Variant_caller, ignore.case = TRUE),
-                        grepl("ClairS_TO", Variant_caller, ignore.case = TRUE)
-                    )),
-                    is_pathogenic = if ("CLNSIG" %in% colnames(df_snv_all)) {
-                        CLNSIG == "Pathogenic"
-                    } else {
-                        FALSE
-                    },
-                    # Check if gene is in target list - if so, always include it
-                    in_target_genes = if ("Gene.refGene" %in% colnames(df_snv_all)) {
-                        Gene.refGene %in% target_genes
-                    } else {
-                        FALSE
-                    }
-                ) %>%
-                filter(caller_count >= 2 | is_pathogenic | in_target_genes) %>%
-                select(-caller_count, -is_pathogenic, -in_target_genes) %>%
-                ungroup()
+        # ---- 4. Load valid RefSeq IDs from protein coding bed file ----
+        valid_refseq <- character(0)
+        if (file.exists(protein_coding_bed)) {
+            occ_bed <- fread(protein_coding_bed, header = FALSE)
+            valid_refseq <- occ_bed[[ncol(occ_bed)]]
         }
 
-        # ---- 4. Create RefSeq and Nucleotide alteration columns from AAChange.refGene ----
-        if ("AAChange.refGene" %in% colnames(df_snv_all)) {
-            create_nucleotide_column <- function(text) {
-                if (is.na(text) || text == "") return("No")
-                entries <- unlist(strsplit(text, ","))
-                entry <- entries[1]
+        # ---- 4.1. Create RefSeq and Nucleotide alteration columns from AAChange.refGene ----
+        if ("AAChange.refGene" %in% colnames(df_snv)) {
+            parse_aachange_entry <- function(entry) {
                 parts <- unlist(strsplit(entry, ":"))
-                if (length(parts) >= 4) {
-                    c_change <- parts[4]
-                    return(c_change)
-                } else {
-                    return("No")
+                if (length(parts) < 2) return(NULL)
+                list(
+                    nm_id = if(length(parts) >= 2) parts[2] else "No",
+                    exon = if(length(parts) >= 3 && grepl("^exon[0-9]+", parts[3])) parts[3] else "No",
+                    c_change = if(length(parts) >= 4) parts[4] else "No",
+                    p_change = if(length(parts) >= 5) {
+                        match <- regexpr("p\\.[^:]*", parts[5])
+                        if (match != -1) substr(parts[5], match, match + attr(match, "match.length") - 1) else "No"
+                    } else "No"
+                )
+            }
+
+            select_best_transcript <- function(text, valid_ids) {
+                if (is.na(text) || text == "") {
+                    return(list(nm_id = "No", exon = "No", c_change = "No", p_change = "No"))
                 }
-            }
-
-            df_snv_all$`Nucleotide alteration` <- sapply(df_snv_all$AAChange.refGene, create_nucleotide_column)
-
-            # Process AAChange.refGene for protein changes only
-            process_aachange <- function(text) {
-                if (is.na(text) || text == "") return("No")
                 entries <- unlist(strsplit(text, ","))
-                patterns <- sapply(entries, function(x) {
-                    match <- regexpr("p\\.[^:]*", x)
-                    if (match != -1) substr(x, match, match + attr(match, "match.length") - 1) else NA
-                })
-                patterns <- patterns[!is.na(patterns)]
-                if (length(patterns) == 0) return("No")
-                if (length(patterns) == 1) return(patterns[1])
-                most_frequent <- names(which.max(table(patterns)))
-                return(most_frequent)
+                parsed_entries <- lapply(entries, parse_aachange_entry)
+                parsed_entries <- parsed_entries[!sapply(parsed_entries, is.null)]
+                if (length(parsed_entries) == 0) {
+                    return(list(nm_id = "No", exon = "No", c_change = "No", p_change = "No"))
+                }
+                if (length(valid_ids) > 0) {
+                    for (entry in parsed_entries) {
+                        if (entry$nm_id %in% valid_ids) return(entry)
+                    }
+                }
+                return(parsed_entries[[1]])
             }
-            df_snv_all$AAChange.refGene <- sapply(df_snv_all$AAChange.refGene, process_aachange)
+
+            selected_transcripts <- lapply(df_snv$AAChange.refGene, function(x) {
+                select_best_transcript(x, valid_refseq)
+            })
+
+            df_snv$RefSeq <- sapply(selected_transcripts, function(x) x$nm_id)
+            df_snv$Exon <- sapply(selected_transcripts, function(x) x$exon)
+            df_snv$`Nucleotide alteration` <- sapply(selected_transcripts, function(x) x$c_change)
+            df_snv$AAChange.refGene <- sapply(selected_transcripts, function(x) x$p_change)
         }
 
         # ---- 4.5. Special handling for TERT promoter mutations ----
-        if (all(c("Gene.refGene", "Func.refGene", "Start") %in% colnames(df_snv_all))) {
-            df_snv_all <- df_snv_all %>%
+        if (all(c("Gene.refGene", "Func.refGene", "Start") %in% colnames(df_snv))) {
+            df_snv <- df_snv %>%
                 mutate(`Nucleotide alteration` = case_when(
                     Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295113" ~ "C228T",
                     Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295135" ~ "C250T",
@@ -336,29 +321,155 @@ tryCatch({
                 ))
         }
 
-        if (all(c("Gene.refGene", "Chr", "Start", "End") %in% colnames(df_snv_all))) {
-            df_snv_all <- df_snv_all %>%
+        # Remove TERT artifact
+        if (all(c("Gene.refGene", "Chr", "Start", "End") %in% colnames(df_snv))) {
+            df_snv <- df_snv %>%
                 filter(!(Gene.refGene == "TERT" & Chr == "chr5" & Start == "1295957" & End == "1295957"))
         }
 
-        # ---- 5. Filter for target genes OR pathogenic variants ----
-        if ("Gene.refGene" %in% colnames(df_snv_all)) {
-            # Filter for variants that meet EITHER condition:
-            # 1. Gene is in the target genes list (regardless of CLNSIG status), OR
-            # 2. CLNSIG = "Pathogenic" (regardless of whether gene is in target list)
-            # Examples:
-            #   - Gene in target + Pathogenic → INCLUDED
-            #   - Gene in target + not Pathogenic → INCLUDED
-            #   - Gene NOT in target + Pathogenic → INCLUDED
-            #   - Gene NOT in target + not Pathogenic → EXCLUDED
-            
+        # ---- 4.7. Remove duplicate variants ----
+        if ("Variant_caller" %in% colnames(df_snv) && all(c("Gene.refGene", "Chr", "Start", "End", "Ref", "Alt", "Nucleotide alteration") %in% colnames(df_snv))) {
+            df_snv <- df_snv %>%
+                group_by(Gene.refGene, Chr, Start, End, Ref, Alt, `Nucleotide alteration`) %>%
+                mutate(
+                    merged_callers = {
+                        all_callers <- unlist(strsplit(Variant_caller, ",\\s*"))
+                        unique_callers <- unique(trimws(all_callers))
+                        caller_order <- c("Pileup", "Merged", "ClairS_TO")
+                        sorted_callers <- unique_callers[order(match(unique_callers, caller_order))]
+                        paste(sorted_callers, collapse = ", ")
+                    },
+                    caller_count = sum(c(
+                        grepl("Pileup", Variant_caller, ignore.case = TRUE),
+                        grepl("Merged", Variant_caller, ignore.case = TRUE),
+                        grepl("ClairS_TO", Variant_caller, ignore.case = TRUE)
+                    ))
+                ) %>%
+                slice_max(order_by = caller_count, n = 1, with_ties = FALSE) %>%
+                ungroup() %>%
+                mutate(Variant_caller = merged_callers) %>%
+                select(-caller_count, -merged_callers)
+        }
+
+        # ---- 4.8. Abbreviate variant caller names ----
+        if ("Variant_caller" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>%
+                mutate(Variant_caller = gsub("ClairS_TO", "C", Variant_caller)) %>%
+                mutate(Variant_caller = gsub("Pileup", "P", Variant_caller)) %>%
+                mutate(Variant_caller = gsub("Merged", "M", Variant_caller))
+        }
+
+        # ---- 4.9. Apply transformations for display ----
+        if (all(c("Func.refGene", "Exon") %in% colnames(df_snv))) {
+            df_snv <- df_snv %>%
+                mutate(Function = case_when(
+                    Func.refGene == "exonic" & !is.na(Exon) & Exon != "No" ~ Exon,
+                    Func.refGene == "exonic" ~ "exonic",
+                    Func.refGene == "upstream" ~ "upstream",
+                    TRUE ~ as.character(Func.refGene)
+                ))
+        } else if ("Func.refGene" %in% colnames(df_snv)) {
+            df_snv$Function <- df_snv$Func.refGene
+        }
+
+        # Transform Nucleotide alteration format
+        if ("Nucleotide alteration" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>%
+                mutate(`Nucleotide alteration` = case_when(
+                    is.na(`Nucleotide alteration`) | `Nucleotide alteration` == "" | `Nucleotide alteration` == "No" ~ `Nucleotide alteration`,
+                    grepl("dup", `Nucleotide alteration`, ignore.case = TRUE) ~ {
+                        sub("(dup).*$", "\\1", `Nucleotide alteration`, ignore.case = TRUE)
+                    },
+                    grepl("^c\\.[A-Z]([0-9]+)[A-Z]", `Nucleotide alteration`) ~ {
+                        gsub("^c\\.([A-Z])([0-9]+)([A-Z])$", "c.\\2\\1>\\3", `Nucleotide alteration`)
+                    },
+                    TRUE ~ `Nucleotide alteration`
+                ))
+        }
+
+        # Simplify CLNSIG values
+        if ("CLNSIG" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>%
+                mutate(CLNSIG = case_when(
+                    CLNSIG == "Conflicting_classifications_of_pathogenicity" ~ "conflicting",
+                    TRUE ~ CLNSIG
+                ))
+        }
+
+        # Rename columns
+        df_snv <- df_snv %>%
+            rename_with(~ case_when(
+                . == "Gene.refGene" ~ "Gene name",
+                . == "Nucleotide alteration" ~ "Seq.alt",
+                . == "AAChange.refGene" ~ "AA Change",
+                . == "Func.refGene" ~ "Func.refGene_old",
+                TRUE ~ .
+            ))
+
+        # Remove GT column
+        if ("GT" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>% select(-GT)
+        }
+
+        # Remove old Func.refGene column
+        if ("Function" %in% colnames(df_snv) && "Func.refGene_old" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>% select(-Func.refGene_old)
+        }
+
+        # Remove temporary Exon column
+        if ("Exon" %in% colnames(df_snv)) {
+            df_snv <- df_snv %>% select(-Exon)
+        }
+
+        # Reorder columns
+        desired_order <- c("RefSeq", "Gene name", "Seq.alt", "Ref", "Alt", "Function", "AA Change", "CLNSIG", "COSMIC100", "GQ", "Depth", "AD", "AF", "Chr", "Start", "End", "Variant_caller")
+        current_cols <- names(df_snv)
+        available_cols <- desired_order[desired_order %in% current_cols]
+        remaining_cols <- setdiff(current_cols, available_cols)
+        df_snv <- df_snv[, c(available_cols, remaining_cols)]
+
+        # Store the processed data for reuse
+        df_snv_processed <<- df_snv
+    }
+}, error = function(e) {
+    message("Error processing SNV data: ", e$message)
+})
+```
+
+### SNV Calling and Annotation
+
+```{r comment='', echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(knitr)
+library(kableExtra)
+library(dplyr)
+
+# Use the pre-processed SNV data from the hidden processing chunk
+tryCatch({
+    # Read the target genes list
+    target_genes <- tryCatch({
+        readLines(snv_target_genes)
+    }, error = function(e) {
+        character(0)  # Return empty if file cannot be read
+    })
+
+    # Check if processed data exists
+    if (is.null(df_snv_processed) || nrow(df_snv_processed) == 0 || length(target_genes) == 0) {
+        cat("No SNV data available or no target genes specified.\n")
+    } else {
+        # Use the already processed data (all transformations already done in the processing chunk)
+        df_snv_all <- df_snv_processed
+
+        # ---- Filter for target genes OR pathogenic variants (Executive Summary specific) ----
+        if ("Gene name" %in% colnames(df_snv_all)) {
             # Check if CLNSIG column exists and apply appropriate filter
             if ("CLNSIG" %in% colnames(df_snv_all)) {
-                # Use | (OR) to select rows where EITHER condition is TRUE
+                # Use | (OR) to select rows where EITHER condition is TRUE:
+                # 1. Gene is in target genes list, OR
+                # 2. CLNSIG = "Pathogenic"
                 df_snv_filtered <- df_snv_all %>%
                     rowwise() %>%
                     mutate(
-                        in_target = Gene.refGene %in% target_genes,
+                        in_target = `Gene name` %in% target_genes,
                         is_pathogenic_exact = CLNSIG == "Pathogenic"
                     ) %>%
                     filter(in_target | is_pathogenic_exact) %>%
@@ -367,69 +478,17 @@ tryCatch({
             } else {
                 # If no CLNSIG column, filter by target genes only
                 df_snv_filtered <- df_snv_all %>%
-                    filter(Gene.refGene %in% target_genes)
+                    filter(`Gene name` %in% target_genes)
             }
             
             # Check if any variants remain after filtering
             if (nrow(df_snv_filtered) == 0) {
                 cat("No SNV detected in target genes or pathogenic variants.\n")
             } else {
-                # ---- 5.5. Remove duplicate variants, keeping the one with most callers ----
-                if ("Variant_caller" %in% colnames(df_snv_filtered) && all(c("Gene.refGene", "Chr", "Start", "End", "Ref", "Alt", "Nucleotide alteration") %in% colnames(df_snv_filtered))) {
-                    df_snv_filtered <- df_snv_filtered %>%
-                        # Group by variant identity (same gene, position, ref, alt, and nucleotide change)
-                        group_by(Gene.refGene, Chr, Start, End, Ref, Alt, `Nucleotide alteration`) %>%
-                        mutate(
-                            # Merge all unique caller names from all duplicate entries
-                            merged_callers = {
-                                # Extract all callers from all rows in this group
-                                all_callers <- unlist(strsplit(Variant_caller, ",\\s*"))
-                                # Get unique callers and sort them
-                                unique_callers <- unique(trimws(all_callers))
-                                # Sort in standard order: Pileup, Merged, ClairS_TO
-                                caller_order <- c("Pileup", "Merged", "ClairS_TO")
-                                sorted_callers <- unique_callers[order(match(unique_callers, caller_order))]
-                                # Combine back into a single string
-                                paste(sorted_callers, collapse = ", ")
-                            },
-                            # Count how many variant callers detected this variant
-                            caller_count = sum(c(
-                                grepl("Pileup", Variant_caller, ignore.case = TRUE),
-                                grepl("Merged", Variant_caller, ignore.case = TRUE),
-                                grepl("ClairS_TO", Variant_caller, ignore.case = TRUE)
-                            ))
-                        ) %>%
-                        # Keep only the row with the maximum caller count for each variant
-                        slice_max(order_by = caller_count, n = 1, with_ties = FALSE) %>%
-                        ungroup() %>%
-                        # Replace Variant_caller with the merged callers
-                        mutate(Variant_caller = merged_callers) %>%
-                        # Remove the helper columns
-                        select(-caller_count, -merged_callers)
-                }
-
-                # ---- 5.6. Transform Nucleotide alteration format - keep "c." prefix and handle *dup ----
-                if ("Nucleotide alteration" %in% colnames(df_snv_filtered)) {
-                    df_snv_filtered <- df_snv_filtered %>%
-                        mutate(`Nucleotide alteration` = case_when(
-                            is.na(`Nucleotide alteration`) | `Nucleotide alteration` == "" | `Nucleotide alteration` == "No" ~ `Nucleotide alteration`,
-                            # If contains dup, remove everything after "dup"
-                            grepl("dup", `Nucleotide alteration`, ignore.case = TRUE) ~ {
-                                sub("(dup).*$", "\\1", `Nucleotide alteration`, ignore.case = TRUE)
-                            },
-                            # Transform "c.A313G" format to "c.313A>G" format
-                            grepl("^c\\.[A-Z]([0-9]+)[A-Z]", `Nucleotide alteration`) ~ {
-                                gsub("^c\\.([A-Z])([0-9]+)([A-Z])$", "c.\\2\\1>\\3", `Nucleotide alteration`)
-                            },
-                            # Keep as-is for all other patterns (already in correct format like "c.313A>G")
-                            TRUE ~ `Nucleotide alteration`
-                        ))
-                }
-
-                # ---- 6. Select only required columns and rename ----
-                # Rename Gene.refGene to Gene name and Nucleotide alteration to Sequence alteration
+                # Data is already fully processed, just select columns for display
+                # Note: Column names are already renamed in the processing chunk ("Seq.alt", "AA Change", "Gene name")
                 df_snv_display <- df_snv_filtered %>%
-                    select(Chr, `Gene name` = Gene.refGene, `Sequence alteration` = `Nucleotide alteration`, `AA Change` = AAChange.refGene, AF, CLNSIG)
+                    select(Chr, `Gene name`, `Sequence alteration` = `Seq.alt`, `AA Change`, AF, CLNSIG)
 
                 # Remove row names
                 rownames(df_snv_display) <- NULL
@@ -1123,7 +1182,7 @@ tryCatch({
         cat("No *MGMT* methylation results available for this sample.\n")
     } else {
         cat(" The table below summarizes methylation levels on all CpG sites in the *MGMT* promoter region (sites 1-98) and the four previously reported sites (sites 76-79) and states how the sample classifies according to both methods.\n")
-        cat("Methylation above 30% in either context is considered *MGMT* methylated with high confidence. Methylation below 10% at CpGs 76-79 or below 25% at CpGs 1-98 is considered MGMT unmethylated with high confidence.\n")
+        cat("Methylation above 30% in either context is considered *MGMT* methylated with high confidence. Methylation below 10% at CpGs 76-79 or below 25% at CpGs 1-98 is considered *MGMT* unmethylated with high confidence.\n")
         cat("*Grey-zone* indicates that *MGMT* methylation status can not be determined with high confidence.\n\n")
 
         # Continue with normal table processing
@@ -1184,305 +1243,20 @@ tryCatch({
 library(knitr)
 library(kableExtra)
 library(dplyr)
-# Read the SNV annotation results using the provided file path
-tryCatch({
-    # Read the SNV results table
-    df_snv <- read.csv(snv_results_file, stringsAsFactors = FALSE, sep = "\t", row.names = NULL)
 
-    # Handle empty case
-    if (nrow(df_snv) == 0) {
+# Use the pre-processed SNV data from the hidden processing chunk
+tryCatch({
+    # Check if processed data exists
+    if (is.null(df_snv_processed) || nrow(df_snv_processed) == 0) {
         cat("No SNV Calling and Annotation detected.\n")
     } else {
         # Display explanatory text when SNVs are present
-        cat("SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 and known pathogenic upstream variants, i.e. *TERT*p, are reported. GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency. The *GRCh38* build reference genome was used for the SNV calling and annotation.\n\n")
-        # ---- 1. Remove ExonicFunc.refGene ----
-        df_snv <- df_snv %>% select(-ExonicFunc.refGene)
+        cat("SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 and known pathogenic upstream variants, i.e. *TERT*p, are reported. GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency. The *GRCh38* build reference genome was used for the SNV calling and annotation. variant callers, P:Clair3 Pileup, M:Clair3 Merged and C:Clair Somatic tumour-only\n\n")
 
-        # ---- 2. Clean COSMIC100 ----
-        if ("COSMIC100" %in% colnames(df_snv)) {
-            df_snv$COSMIC100 <- gsub("ID=", "", df_snv$COSMIC100)
-        }
+        # Use the already processed data (all transformations already done in the processing chunk)
+        df_snv <- df_snv_processed
 
-        # ---- 3. Merge Depth columns ----
-        if (all(c("Depth", "ClairS_Depth") %in% colnames(df_snv))) {
-            df_snv <- df_snv %>%
-                mutate(Depth = pmax(as.numeric(Depth), as.numeric(ClairS_Depth), na.rm = TRUE)) %>%
-                select(-ClairS_Depth)
-        }
-
-        # ---- 3.5. Filter variants with Depth >= 10 ----
-        if ("Depth" %in% colnames(df_snv)) {
-            df_snv <- df_snv %>%
-                filter(as.numeric(Depth) >= 10)
-            
-            # Check if any variants remain after filtering
-            if (nrow(df_snv) == 0) {
-                msg <- "No SNV Calling and Annotation detected with Depth >= 10."
-                if (knitr::is_latex_output()) {
-                    cat(paste0(msg, "\n"))
-                } else {
-                    cat(paste0(msg, "\n"))
-                }
-                return()  # Exit early if no variants meet the depth criteria
-            }
-        }
-
-        # ---- 3.6. Filter by variant caller consensus (at least 2 callers or pathogenic) ----
-        if ("Variant_caller" %in% colnames(df_snv)) {
-            df_snv <- df_snv %>%
-                rowwise() %>%
-                mutate(
-                    # Count how many variant callers detected this variant
-                    caller_count = sum(c(
-                        grepl("Pileup", Variant_caller, ignore.case = TRUE),
-                        grepl("Merged", Variant_caller, ignore.case = TRUE),
-                        grepl("ClairS_TO", Variant_caller, ignore.case = TRUE)
-                    )),
-                    # Check if variant is pathogenic in CLNSIG
-                    is_pathogenic = if ("CLNSIG" %in% colnames(df_snv)) {
-                        grepl("pathogenic", CLNSIG, ignore.case = TRUE)
-                    } else {
-                        FALSE
-                    }
-                ) %>%
-                # Keep variants if: called by >=2 callers OR is pathogenic
-                filter(caller_count >= 2 | is_pathogenic) %>%
-                # Remove helper columns
-                select(-caller_count, -is_pathogenic) %>%
-                ungroup()
-            
-            # Check if any variants remain after filtering
-            if (nrow(df_snv) == 0) {
-                msg <- "No SNV Calling and Annotation detected with sufficient variant caller consensus or pathogenic significance."
-                if (knitr::is_latex_output()) {
-                    cat(paste0(msg, "\n"))
-                } else {
-                    cat(paste0(msg, "\n"))
-                }
-                return()  # Exit early if no variants meet the caller consensus criteria
-            }
-        }
-
-        # ---- 4. Load valid RefSeq IDs from protein coding bed file ----
-        valid_refseq <- character(0)
-        if (file.exists(protein_coding_bed)) {
-            # Read the BED file and extract the last column (NM_ IDs)
-            occ_bed <- fread(protein_coding_bed, header = FALSE)
-            valid_refseq <- occ_bed[[ncol(occ_bed)]]  # Last column
-            message("Loaded ", length(valid_refseq), " valid RefSeq IDs from protein coding bed file")
-        }
-
-        # ---- 4.1. Create RefSeq and Nucleotide alteration columns from AAChange.refGene ----
-        # This function intelligently selects the transcript that matches the protein coding bed file
-        if ("AAChange.refGene" %in% colnames(df_snv)) {
-            # Function to parse a single AAChange entry and extract all components
-            parse_aachange_entry <- function(entry) {
-                # Pattern: GENE:NM_XXXXX:exonX:c.CHANGE:p.CHANGE
-                parts <- unlist(strsplit(entry, ":"))
-                if (length(parts) < 2) return(NULL)
-
-                result <- list(
-                    nm_id = if(length(parts) >= 2) parts[2] else "No",
-                    exon = if(length(parts) >= 3 && grepl("^exon[0-9]+", parts[3])) parts[3] else "No",
-                    c_change = if(length(parts) >= 4) parts[4] else "No",
-                    p_change = if(length(parts) >= 5) {
-                        # Extract p.XXX pattern
-                        match <- regexpr("p\\.[^:]*", parts[5])
-                        if (match != -1) substr(parts[5], match, match + attr(match, "match.length") - 1) else "No"
-                    } else "No"
-                )
-                return(result)
-            }
-
-            # Main function to select the best transcript match
-            select_best_transcript <- function(text, valid_ids) {
-                if (is.na(text) || text == "") {
-                    return(list(nm_id = "No", exon = "No", c_change = "No", p_change = "No"))
-                }
-
-                # Split by comma to get all transcript entries
-                entries <- unlist(strsplit(text, ","))
-
-                # Parse all entries
-                parsed_entries <- lapply(entries, parse_aachange_entry)
-                parsed_entries <- parsed_entries[!sapply(parsed_entries, is.null)]
-
-                if (length(parsed_entries) == 0) {
-                    return(list(nm_id = "No", exon = "No", c_change = "No", p_change = "No"))
-                }
-
-                # If we have valid RefSeq IDs, try to match
-                if (length(valid_ids) > 0) {
-                    for (entry in parsed_entries) {
-                        if (entry$nm_id %in% valid_ids) {
-                            return(entry)  # Return first match
-                        }
-                    }
-                }
-
-                # If no match found or no valid IDs, return the first entry
-                return(parsed_entries[[1]])
-            }
-
-            # Apply the function to all rows
-            selected_transcripts <- lapply(df_snv$AAChange.refGene, function(x) {
-                select_best_transcript(x, valid_refseq)
-            })
-
-            # Extract components into separate columns
-            df_snv$RefSeq <- sapply(selected_transcripts, function(x) x$nm_id)
-            df_snv$Exon <- sapply(selected_transcripts, function(x) x$exon)
-            df_snv$`Nucleotide alteration` <- sapply(selected_transcripts, function(x) x$c_change)
-            df_snv$AAChange.refGene <- sapply(selected_transcripts, function(x) x$p_change)
-        }
-
-        # ---- 4.5. Special handling for TERT promoter mutations ----
-        if (all(c("Gene.refGene", "Func.refGene", "Start") %in% colnames(df_snv))) {
-            df_snv <- df_snv %>%
-                mutate(`Nucleotide alteration` = case_when(
-                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295113" ~ "C228T",
-                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295135" ~ "C250T",
-                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295114" ~ "C229T",
-                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295138" ~ "C253T",
-                    Gene.refGene == "TERT" & Func.refGene == "upstream" & Start == "1295127" ~ "C242T",
-                    TRUE ~ `Nucleotide alteration`
-                ))
-        }
-
-        if (all(c("Gene.refGene", "Chr", "Start", "End") %in% colnames(df_snv))) {
-            df_snv <- df_snv %>%
-                filter(!(Gene.refGene == "TERT" & Chr == "chr5" & Start == "1295957" & End == "1295957"))
-}
-
-        # ---- 4.7. Remove duplicate variants, keeping the one with most callers ----
-        if ("Variant_caller" %in% colnames(df_snv) && all(c("Gene.refGene", "Chr", "Start", "End", "Ref", "Alt", "Nucleotide alteration") %in% colnames(df_snv))) {
-            df_snv <- df_snv %>%
-                # Group by variant identity (same gene, position, ref, alt, and nucleotide change)
-                group_by(Gene.refGene, Chr, Start, End, Ref, Alt, `Nucleotide alteration`) %>%
-                mutate(
-                    # Merge all unique caller names from all duplicate entries
-                    merged_callers = {
-                        # Extract all callers from all rows in this group
-                        all_callers <- unlist(strsplit(Variant_caller, ",\\s*"))
-                        # Get unique callers and sort them
-                        unique_callers <- unique(trimws(all_callers))
-                        # Sort in standard order: Pileup, Merged, ClairS_TO
-                        caller_order <- c("Pileup", "Merged", "ClairS_TO")
-                        sorted_callers <- unique_callers[order(match(unique_callers, caller_order))]
-                        # Combine back into a single string
-                        paste(sorted_callers, collapse = ", ")
-                    },
-                    # Count how many variant callers detected this variant
-                    caller_count = sum(c(
-                        grepl("Pileup", Variant_caller, ignore.case = TRUE),
-                        grepl("Merged", Variant_caller, ignore.case = TRUE),
-                        grepl("ClairS_TO", Variant_caller, ignore.case = TRUE)
-                    ))
-                ) %>%
-                # Keep only the row with the maximum caller count for each variant
-                slice_max(order_by = caller_count, n = 1, with_ties = FALSE) %>%
-                ungroup() %>%
-                # Replace Variant_caller with the merged callers
-                mutate(Variant_caller = merged_callers) %>%
-                # Remove the helper columns
-                select(-caller_count, -merged_callers)
-        }
-
-        # ---- 4.8. Apply transformations for display ----
-
-        # Note: RefSeq selection based on protein-coding genes is now done in step 4.1 above
-
-        # 4. Create Function column using pre-extracted Exon information
-        if (all(c("Func.refGene", "Exon") %in% colnames(df_snv))) {
-            df_snv <- df_snv %>%
-                mutate(
-                    Function = case_when(
-                        Func.refGene == "exonic" & !is.na(Exon) & Exon != "No" ~ Exon,
-                        Func.refGene == "exonic" ~ "exonic",
-                        Func.refGene == "upstream" ~ "upstream",
-                        TRUE ~ as.character(Func.refGene)
-                    )
-                )
-        } else if ("Func.refGene" %in% colnames(df_snv)) {
-            # If Exon column doesn't exist, just use Func.refGene
-            df_snv$Function <- df_snv$Func.refGene
-        }
-
-        # 5. Transform Nucleotide alteration format - keep "c." prefix and handle *dup
-        if ("Nucleotide alteration" %in% colnames(df_snv)) {
-            df_snv <- df_snv %>%
-                mutate(`Nucleotide alteration` = case_when(
-                    is.na(`Nucleotide alteration`) | `Nucleotide alteration` == "" | `Nucleotide alteration` == "No" ~ `Nucleotide alteration`,
-                    # If contains dup, remove everything after "dup"
-                    grepl("dup", `Nucleotide alteration`, ignore.case = TRUE) ~ {
-                        sub("(dup).*$", "\\1", `Nucleotide alteration`, ignore.case = TRUE)
-                    },
-                    # Transform "c.A313G" format to "c.313A>G" format
-                    grepl("^c\\.[A-Z]([0-9]+)[A-Z]", `Nucleotide alteration`) ~ {
-                        gsub("^c\\.([A-Z])([0-9]+)([A-Z])$", "c.\\2\\1>\\3", `Nucleotide alteration`)
-                    },
-                    # Keep as-is for all other patterns (already in correct format like "c.313A>G")
-                    TRUE ~ `Nucleotide alteration`
-                ))
-        }
-
-        # 6. Simplify CLNSIG values
-        if ("CLNSIG" %in% colnames(df_snv)) {
-            df_snv <- df_snv %>%
-                mutate(CLNSIG = case_when(
-                    CLNSIG == "Conflicting_classifications_of_pathogenicity" ~ "conflicting",
-                    TRUE ~ CLNSIG
-                ))
-        }
-
-        # 2. Rename columns
-        df_snv <- df_snv %>%
-            rename_with(~ case_when(
-                . == "Gene.refGene" ~ "Gene name",
-                . == "Nucleotide alteration" ~ "Seq.alt",
-                . == "AAChange.refGene" ~ "AA Change",
-                . == "Func.refGene" ~ "Func.refGene_old",  # Keep old column for now
-                TRUE ~ .
-            ))
-
-        # 7. Remove GT column
-        if ("GT" %in% colnames(df_snv)) {
-            df_snv <- df_snv %>% select(-GT)
-        }
-
-        # Remove old Func.refGene column if Function was created
-        if ("Function" %in% colnames(df_snv) && "Func.refGene_old" %in% colnames(df_snv)) {
-            df_snv <- df_snv %>% select(-Func.refGene_old)
-        }
-
-        # Remove temporary Exon column (used only for creating Function column)
-        if ("Exon" %in% colnames(df_snv)) {
-            df_snv <- df_snv %>% select(-Exon)
-        }
-
-        # ---- 5. Reorder columns according to specified order ----
-        # Updated column names after transformations: "RefSeq" "Gene name" "Seq.alt" "Ref" "Alt" "Function" "AA Change" "CLNSIG" "COSMIC100" "GQ" "Depth" "AD" "AF" "Chr" "Start" "End" "Variant_caller"
-        desired_order <- c("RefSeq", "Gene name", "Seq.alt", "Ref", "Alt", "Function", "AA Change", "CLNSIG", "COSMIC100", "GQ", "Depth", "AD", "AF", "Chr", "Start", "End", "Variant_caller")
-
-        # Get current column names
-        current_cols <- names(df_snv)
-
-        # Select columns that exist in both desired order and current columns
-        available_cols <- desired_order[desired_order %in% current_cols]
-
-        # Add any remaining columns that weren't specified in the desired order
-        remaining_cols <- current_cols[!current_cols %in% desired_order]
-
-        # Combine for final order
-        final_order <- c(available_cols, remaining_cols)
-
-        # Reorder the dataframe
-        df_snv <- df_snv %>% select(all_of(final_order))
-
-        # Remove row names
-        rownames(df_snv) <- NULL
-
-        # ---- 7. Display the table ----
+        # ---- Display the table ----
         # Find Gene name column index for italic formatting
         gene_col_idx <- which(colnames(df_snv) == "Gene name")
 
