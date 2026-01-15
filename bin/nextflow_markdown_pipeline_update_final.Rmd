@@ -408,17 +408,35 @@ tryCatch({
                         select(-caller_count, -merged_callers)
                 }
 
-                # ---- 6. Select only required columns ----
-                # Rename Gene.refGene to Gene Name for display
+                # ---- 5.6. Transform Nucleotide alteration format - keep "c." prefix and handle *dup ----
+                if ("Nucleotide alteration" %in% colnames(df_snv_filtered)) {
+                    df_snv_filtered <- df_snv_filtered %>%
+                        mutate(`Nucleotide alteration` = case_when(
+                            is.na(`Nucleotide alteration`) | `Nucleotide alteration` == "" | `Nucleotide alteration` == "No" ~ `Nucleotide alteration`,
+                            # If contains dup, remove everything after "dup"
+                            grepl("dup", `Nucleotide alteration`, ignore.case = TRUE) ~ {
+                                sub("(dup).*$", "\\1", `Nucleotide alteration`, ignore.case = TRUE)
+                            },
+                            # Transform "c.A313G" format to "c.313A>G" format
+                            grepl("^c\\.[A-Z]([0-9]+)[A-Z]", `Nucleotide alteration`) ~ {
+                                gsub("^c\\.([A-Z])([0-9]+)([A-Z])$", "c.\\2\\1>\\3", `Nucleotide alteration`)
+                            },
+                            # Keep as-is for all other patterns (already in correct format like "c.313A>G")
+                            TRUE ~ `Nucleotide alteration`
+                        ))
+                }
+
+                # ---- 6. Select only required columns and rename ----
+                # Rename Gene.refGene to Gene name and Nucleotide alteration to Sequence alteration
                 df_snv_display <- df_snv_filtered %>%
-                    select(Chr, `Gene ` = Gene.refGene, `Nucleotide alteration`, `AA Change` = AAChange.refGene, AF, CLNSIG)
+                    select(Chr, `Gene name` = Gene.refGene, `Sequence alteration` = `Nucleotide alteration`, `AA Change` = AAChange.refGene, AF, CLNSIG)
 
                 # Remove row names
                 rownames(df_snv_display) <- NULL
 
                 # ---- 7. Display the table ----
                 # Find Gene column index for italic formatting
-                gene_col_idx <- which(colnames(df_snv_display) == "Gene ")
+                gene_col_idx <- which(colnames(df_snv_display) == "Gene name")
 
                 if (knitr::is_html_output()) {
                     tbl <- kable(df_snv_display,
@@ -1104,9 +1122,9 @@ tryCatch({
     if (nrow(df_mgmt) == 0) {
         cat("No *MGMT* methylation results available for this sample.\n")
     } else {
-        cat("Samples with methylation above 30% in either context are considered *MGMT* methylated with high confidence.\n")
-        cat("Samples with methylation below 10% at CpGs 76-79 or below 25% at CpGs 1-98 are considered *MGMT* unmethylated with high confidence.\n")
-        cat("*Grey-zone* indicates that MGMT methylation status can not be determined with high confidence and should be interpreted in context with tumor content and chromosome 10 status.\n\n")
+        cat(" The table below summarizes methylation levels on all CpG sites in the *MGMT* promoter region (sites 1-98) and the four previously reported sites (sites 76-79) and states how the sample classifies according to both methods.\n")
+        cat("Methylation above 30% in either context is considered *MGMT* methylated with high confidence. Methylation below 10% at CpGs 76-79 or below 25% at CpGs 1-98 is considered MGMT unmethylated with high confidence.\n")
+        cat("*Grey-zone* indicates that *MGMT* methylation status can not be determined with high confidence.\n\n")
 
         # Continue with normal table processing
         df_mgmt$sample_id <- sample_id
@@ -1390,20 +1408,20 @@ tryCatch({
             df_snv$Function <- df_snv$Func.refGene
         }
 
-        # 5. Transform Nucleotide alteration format (e.g., "c.A313G" -> "313A>G")
+        # 5. Transform Nucleotide alteration format - keep "c." prefix and handle *dup
         if ("Nucleotide alteration" %in% colnames(df_snv)) {
             df_snv <- df_snv %>%
                 mutate(`Nucleotide alteration` = case_when(
                     is.na(`Nucleotide alteration`) | `Nucleotide alteration` == "" | `Nucleotide alteration` == "No" ~ `Nucleotide alteration`,
-                    # Match pattern like "c.A313G" and transform to "313A>G"
+                    # If contains dup, remove everything after "dup"
+                    grepl("dup", `Nucleotide alteration`, ignore.case = TRUE) ~ {
+                        sub("(dup).*$", "\\1", `Nucleotide alteration`, ignore.case = TRUE)
+                    },
+                    # Transform "c.A313G" format to "c.313A>G" format
                     grepl("^c\\.[A-Z]([0-9]+)[A-Z]", `Nucleotide alteration`) ~ {
-                        gsub("^c\\.([A-Z])([0-9]+)([A-Z])$", "\\2\\1>\\3", `Nucleotide alteration`)
+                        gsub("^c\\.([A-Z])([0-9]+)([A-Z])$", "c.\\2\\1>\\3", `Nucleotide alteration`)
                     },
-                    # Match pattern like "c.313A>G" (already in desired format, just remove c.)
-                    grepl("^c\\.([0-9]+[A-Z]>[A-Z])", `Nucleotide alteration`) ~ {
-                        gsub("^c\\.", "", `Nucleotide alteration`)
-                    },
-                    # Keep as-is for other patterns
+                    # Keep as-is for all other patterns (already in correct format like "c.313A>G")
                     TRUE ~ `Nucleotide alteration`
                 ))
         }
@@ -1421,7 +1439,8 @@ tryCatch({
         df_snv <- df_snv %>%
             rename_with(~ case_when(
                 . == "Gene.refGene" ~ "Gene name",
-                . == "Nucleotide alteration" ~ "Gene.alt",
+                . == "Nucleotide alteration" ~ "Seq.alt",
+                . == "AAChange.refGene" ~ "AA Change",
                 . == "Func.refGene" ~ "Func.refGene_old",  # Keep old column for now
                 TRUE ~ .
             ))
@@ -1442,8 +1461,8 @@ tryCatch({
         }
 
         # ---- 5. Reorder columns according to specified order ----
-        # Updated column names after transformations: "RefSeq" "Gene name" "Gene.alt" "Ref" "Alt" "Function" "AAChange.refGene" "CLNSIG" "COSMIC100" "GQ" "Depth" "AD" "AF" "Chr" "Start" "End" "Variant_caller"
-        desired_order <- c("RefSeq", "Gene name", "Gene.alt", "Ref", "Alt", "Function", "AAChange.refGene", "CLNSIG", "COSMIC100", "GQ", "Depth", "AD", "AF", "Chr", "Start", "End", "Variant_caller")
+        # Updated column names after transformations: "RefSeq" "Gene name" "Seq.alt" "Ref" "Alt" "Function" "AA Change" "CLNSIG" "COSMIC100" "GQ" "Depth" "AD" "AF" "Chr" "Start" "End" "Variant_caller"
+        desired_order <- c("RefSeq", "Gene name", "Seq.alt", "Ref", "Alt", "Function", "AA Change", "CLNSIG", "COSMIC100", "GQ", "Depth", "AD", "AF", "Chr", "Start", "End", "Variant_caller")
 
         # Get current column names
         current_cols <- names(df_snv)

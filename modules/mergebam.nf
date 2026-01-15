@@ -55,7 +55,10 @@ process extract_roi {
 
     script:
     """
-    intersectBed -a ${bam} -b ${roi_bed} > ${sample_id}.roi.bam
+    set -euo pipefail
+    samtools view -@ ${params.threads} -b -L ${roi_bed} ${bam} \\
+    | samtools sort -@ ${params.threads} -o ${sample_id}.roi.bam
+    ###intersectBed -a ${bam} -b ${roi_bed} > ${sample_id}.roi.bam
     samtools index -@ ${params.threads} ${sample_id}.roi.bam
     """
 }
