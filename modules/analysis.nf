@@ -580,8 +580,8 @@ process clair3 {
          ${params.humandb_dir} \
          -otherinfo
       
-    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/' occ_pileup.hg38_multianno.txt \
-| awk '/exonic/ || /TERT/ || /Func.refGene/'  \
+    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' occ_pileup.hg38_multianno.txt \
+| awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
 | awk '!/dist=166/' \
 | cut -f1-16,26,28,29 > ${sample_id}_occ_pileup_annotateandfilter.csv
 
@@ -601,9 +601,9 @@ table_annovar.pl ${sample_id}_occ_merge_snv_avinpt \
     ${params.humandb_dir} \
     -otherinfo
 
-    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/' \
+    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' \
      occ_merge.hg38_multianno.txt \
-    | awk '/exonic/ || /TERT/ || /Func.refGene/'  \
+    | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
     | awk '!/dist=166/' \
     | cut -f1-16,26,28,29 \
     > ${sample_id}_merge_annotateandfilter.csv
@@ -672,9 +672,9 @@ process clairs_to {
     ${params.humandb_dir} \
    -otherinfo  
 
-   awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/' \
+   awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' \
    ClairS_TO_snv.hg38_multianno.txt \
-   | awk '/exonic/ || /TERT/ || /Func.refGene/'  \
+   | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
   | awk '!/dist=166/' \
   | cut -f1-16,25,26  > ${sample_id}_annotateandfilter_clairsto.csv
 
