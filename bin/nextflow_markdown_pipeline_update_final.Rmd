@@ -141,7 +141,13 @@ if (nrow(samples_df) >= 1 && ncol(samples_df) >= 2) {
   colnames(samples_df) <- c("Sample", "TumorContent")
   matched_row <- samples_df[samples_df$Sample == sample_id, ]
   if (nrow(matched_row) > 0) {
-    tumor_percent <- round(as.numeric(matched_row$TumorContent) * 100)
+    tumor_percent_value <- round(as.numeric(matched_row$TumorContent) * 100)
+    # If tumor percent is 0% or 100%, display "Undetermined"
+    if (tumor_percent_value == 0 || tumor_percent_value == 100) {
+      tumor_percent <- "Undetermined"
+    } else {
+      tumor_percent <- paste0(tumor_percent_value, "%")
+    }
   } else {
     tumor_percent <- "N/A"
   }
@@ -159,7 +165,7 @@ knitr::include_graphics(logo_file)
 
 ## Sample ID: `r args[1]`
 
-The report is based on a mean coverage of **`r mean_coverage`** and the estimated tumor content in sample is the **`r tumor_percent`%**.
+The report is based on a mean coverage of **`r mean_coverage`** and the estimated tumor content in sample is **`r tumor_percent`**.
 
 ### CrossNN Methylation-based Classification
 
@@ -734,8 +740,14 @@ if (nrow(samples_df) == 0) {
     if (nrow(matched_row) == 0) {
       cat(paste0("Sample ID '", sample_id, "' not found in tumor content file.\n"))
     } else {
-      tumor_percent <- round(as.numeric(matched_row$TumorContent) * 100)
-      cat(paste0("The estimated tumor cell content for ", sample_id, " is: ", tumor_percent, "%\n"))
+      tumor_percent_value <- round(as.numeric(matched_row$TumorContent) * 100)
+      # If tumor percent is 0% or 100%, display "Undetermined"
+      if (tumor_percent_value == 0 || tumor_percent_value == 100) {
+        tumor_percent_display <- "Undetermined"
+      } else {
+        tumor_percent_display <- paste0(tumor_percent_value, "%")
+      }
+      cat(paste0("The estimated tumor cell content for ", sample_id, " is: ", tumor_percent_display, "\n"))
     }
   } else {
     cat("Estimated tumor content file has insufficient columns. Expected at least 2 columns.\n")

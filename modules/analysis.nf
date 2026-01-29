@@ -375,7 +375,29 @@ process svannasv_fusion_events {
     #summarize exon/intron/intergenic features into compact format
 
     summarize_fusion_features.py --in ${sample_id}_filter_fusion_event_detailed.tsv \
-             --out ${sample_id}_filter_fusion_event.tsv
+             --out ${sample_id}_filter_fusion_event_temp.tsv
+
+    # Filter to keep only complete fusion pairs (IDs with both start and end breakpoints)
+    # Then keep only one representative fusion per unique gene pair
+    awk 'NR==1 {header=\$0; next}
+         {id=\$4; breaking=\$6; gene=\$7;
+          data[id,breaking]=\$0; ids[id]++;
+          genes[id,breaking]=gene;
+          if(breaking=="start") has_start[id]=1;
+          if(breaking=="end") has_end[id]=1}
+         END {print header;
+              for(id in ids) {
+                if(has_start[id] && has_end[id]) {
+                  gene_start=genes[id,"start"];
+                  gene_end=genes[id,"end"];
+                  gene_pair=(gene_start < gene_end) ? gene_start"-"gene_end : gene_end"-"gene_start;
+                  if(!seen_pair[gene_pair]++) {
+                    if((id,"start") in data) print data[id,"start"];
+                    if((id,"end") in data) print data[id,"end"]
+                  }
+                }
+              }
+         }' ${sample_id}_filter_fusion_event_temp.tsv > ${sample_id}_filter_fusion_event.tsv
 
     # Filter fusion events to keep only those with official Ensembl gene IDs (ENSG...)
     echo "Filtering for fusions with complete Ensembl gene IDs..."
@@ -399,7 +421,29 @@ process svannasv_fusion_events {
 
         # Create summarized version of Ensembl-filtered fusions
         summarize_fusion_features.py --in ${sample_id}_filter_fusion_event_detailed_ensembl_only.tsv \
-             --out ${sample_id}_filter_fusion_event_ensembl_only.tsv
+             --out ${sample_id}_filter_fusion_event_ensembl_only_temp.tsv
+
+        # Filter to keep only complete fusion pairs (IDs with both start and end breakpoints)
+        # Then keep only one representative fusion per unique gene pair
+        awk 'NR==1 {header=\$0; next}
+             {id=\$4; breaking=\$6; gene=\$7;
+              data[id,breaking]=\$0; ids[id]++;
+              genes[id,breaking]=gene;
+              if(breaking=="start") has_start[id]=1;
+              if(breaking=="end") has_end[id]=1}
+             END {print header;
+                  for(id in ids) {
+                    if(has_start[id] && has_end[id]) {
+                      gene_start=genes[id,"start"];
+                      gene_end=genes[id,"end"];
+                      gene_pair=(gene_start < gene_end) ? gene_start"-"gene_end : gene_end"-"gene_start;
+                      if(!seen_pair[gene_pair]++) {
+                        if((id,"start") in data) print data[id,"start"];
+                        if((id,"end") in data) print data[id,"end"]
+                      }
+                    }
+                  }
+             }' ${sample_id}_filter_fusion_event_ensembl_only_temp.tsv > ${sample_id}_filter_fusion_event_ensembl_only.tsv
     fi
 
     """
@@ -462,7 +506,8 @@ process annotatecnv {
           path(occ_protein_coding_bed),
           path(calls_bed),
           path(seg_bed),
-          val(threshold)  // Now explicitly receiving threshold
+          val(threshold),  // Now explicitly receiving threshold
+          path(cnv_genes_tuned)  // CNV genes annotation file
 
    output:
    tuple val(sample_id), path("${sample_id}_calls_fixed.vcf"), emit: callsfixedout
@@ -508,7 +553,7 @@ process annotatecnv {
     # Generate plots and reports
    #cnv_html.R $calls_bed ${sample_id}_annotatedcnv.csv ${sample_id}_CNV_plot.pdf ${sample_id}_CNV_plot.html $sample_id
 
-    CNV_function_new_update.R $calls_bed ${sample_id}_annotatedcnv.csv $seg_bed \
+    CNV_function_new_update29jan2026.R $calls_bed $cnv_genes_tuned $seg_bed \
         ${sample_id}_cnv_plot_full.pdf ${sample_id}_cnv_chr9.pdf ${sample_id}_cnv_chr7.pdf $sample_id
 
     # Process annotation files
@@ -1788,14 +1833,15 @@ workflow analysis {
                         def bins_bed = args[3]
                         def segs_bed = args[4]
 
-                        // Add the threshold to the tuple
+                        // Add the threshold and cnv_genes_tuned to the tuple
                         tuple(
                             sample_id,
                             segs_vcf,
                             occ_protein_coding_bed,
                             bins_bed,
                             segs_bed,
-                            final_thresholds[sample_id]
+                            final_thresholds[sample_id],
+                            file(params.cnv_genes_tuned)
                         )
                     }
 
@@ -1826,7 +1872,8 @@ workflow analysis {
                             occ_protein_coding_bed, // occ_protein_coding_bed
                             bins_bed,               // bins_bed
                             segs_bed,               // segs_bed
-                            threshold.toString()    // threshold value as string
+                            threshold.toString(),   // threshold value as string
+                            file(params.cnv_genes_tuned)  // CNV genes annotation file
                         )
                     }
 
