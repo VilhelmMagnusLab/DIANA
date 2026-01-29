@@ -553,7 +553,7 @@ process annotatecnv {
     # Generate plots and reports
    #cnv_html.R $calls_bed ${sample_id}_annotatedcnv.csv ${sample_id}_CNV_plot.pdf ${sample_id}_CNV_plot.html $sample_id
 
-    CNV_function_new_update29jan2026.R $calls_bed $cnv_genes_tuned $seg_bed \
+    CNV_function_new_update.R $calls_bed $cnv_genes_tuned $seg_bed \
         ${sample_id}_cnv_plot_full.pdf ${sample_id}_cnv_chr9.pdf ${sample_id}_cnv_chr7.pdf $sample_id
 
     # Process annotation files
