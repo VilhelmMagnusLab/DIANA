@@ -513,12 +513,13 @@ process annotatecnv {
    tuple val(sample_id), path("${sample_id}_calls_fixed.vcf"), emit: callsfixedout
    tuple val(sample_id), path("${sample_id}_annotatedcnv.csv"), emit:annotatedcnvcsvout
    tuple val(sample_id), path("${sample_id}_annotatedcnv_filter.csv"), emit:annotatedcnvfiltercsvout
-   //tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), emit:cnvpdfout
    tuple val(sample_id), path("${sample_id}_annotatedcnv_filter_header.csv"), emit:rmdannotatedcnvfilter
-   //tuple val(sample_id), path("${sample_id}_CNV_plot.html"), emit:rmdcnvhtml
    tuple val(sample_id), path("${sample_id}_tumor_copy.txt"), path("${sample_id}_bins_filter.bed"), emit:tumorcopyandbinsfilterout
-   //tuple val(sample_id), path("${sample_id}_CNV_plot.pdf"), path("${sample_id}_annotatedcnv_filter.csv"), emit:cnvpdfandcsvout
    tuple val(sample_id), path("${sample_id}_cnv_plot_full.pdf"), path("${sample_id}_tumor_copy_number.txt"), path("${sample_id}_annotatedcnv_filter_header.csv"), path("${sample_id}_cnv_chr9.pdf"), path("${sample_id}_cnv_chr7.pdf"), emit: rmdcnvtumornumber
+   // TIFF outputs from v2 script (for high-resolution images)
+   ///tuple val(sample_id), path("${sample_id}_cnv_plot_full.tiff"), emit: cnvplotfulltiff
+   ///tuple val(sample_id), path("${sample_id}_cnv_chr9.tiff"), emit: cnvchr9tiff
+   ///tuple val(sample_id), path("${sample_id}_cnv_chr7.tiff"), emit: cnvchr7tiff
 
    script:
    """
@@ -1810,7 +1811,8 @@ workflow analysis {
                         occ_protein_coding_bed,
                         bins_bed,
                         segs_bed,
-                        threshold.toString()
+                        threshold.toString(),
+                        file(params.cnv_genes_tuned)
                     )
                 } :
                 annotatecnv_input
@@ -2042,20 +2044,22 @@ workflow analysis {
                 println "Reusing OCC outputs from earlier analysis"
             }
 
-            // Other tools - reuse outputs if already run
+            // Other tools - reuse outputs if already run or run for RMD
+            // For 'all' mode, igv_tools and plot_genomic_regions were already run in tertp section
+            // For 'tertp' mode, they were also already run
+            // For other modes (rmd, cnv, stat, etc), we need to run them now
             if (!(params.run_mode in ['tertp', 'all'])) {
-                println "tertp analysis not run earlier, running now for RMD report..."
-        igv_tools(boosts_igv_channel)
-        cramino_report(boosts_cramino)
-        plot_genomic_regions(boosts_plot_genomic_regions_channel)
+                println "Running tertp/cramino analysis for RMD report..."
+                igv_tools(boosts_igv_channel)
+                cramino_report(boosts_cramino)
+                plot_genomic_regions(boosts_plot_genomic_regions_channel)
             } else {
                 println "Reusing tertp outputs from earlier analysis"
-            }
-
-            // Add a new run_mode 'stat' for the cramino_report process
-            if (params.run_mode in ['stat', 'all']) {
-                println "Running Cramino Statistics..."
-                cramino_report(boosts_cramino)
+                // For 'all' mode, cramino still needs to run (it wasn't run in tertp section)
+                if (params.run_mode in ['all']) {
+                    println "Running Cramino Statistics for 'all' mode..."
+                    cramino_report(boosts_cramino)
+                }
             }
 
             // Combine all results for markdown report

@@ -216,7 +216,7 @@ if (knitr::is_latex_output()) {
 ### Full CNV Profile
 
 
-```{r, out.height = "120px", fig.align='center', echo=FALSE, results='asis'}
+```{r, out.width = "100%", fig.align='center', echo=FALSE, results='asis'}
 #cat("`Genes annotated in the full CNV profile are amplified (Gain) or deleted (Loss) based on QDNAseq results.`")
 # Display the copy number plot using the provided file path
 knitr::include_graphics(copy_number_plot_file)
@@ -831,7 +831,7 @@ knitr::include_graphics(tsneplot)
 ### Full CNV Profile
 
 
-```{r, out.height = "150px", echo=FALSE, results='asis'}
+```{r, out.width = "100%", echo=FALSE, results='asis'}
 cat("`Genes annotated in the full CNV profile are amplified (Gain) or deleted (Loss) based on QDNAseq results.`")
 # Display the copy number plot using the provided file path
 knitr::include_graphics(copy_number_plot_file)
@@ -1077,7 +1077,7 @@ cat("\n\n### Chromosome 7: *EGFR* Profile\n\n")
 cat("Chromosome 7 CNV for visual inspection of *EGFR* annotated.\n\n")
 ```
 
-```{r egfr_cnv_plot, echo=FALSE, eval=has_egfr, out.height="150px"}
+```{r egfr_cnv_plot, echo=FALSE, eval=has_egfr, out.width="100%"}
 # Display the copy number plot using the provided file path
 knitr::include_graphics(cnv_chr7)
 ```
@@ -1114,7 +1114,7 @@ knitr::include_graphics(egfr_plot_file)
 
 Chromosome 9 CNV for visual inspection of *CDKN2A/B* annotated.
 
-```{r, out.height = "150px", echo=FALSE}
+```{r, out.width = "100%", echo=FALSE}
 # Display the copy number plot using the provided file path
 knitr::include_graphics(cnv_chr9)
 ```
