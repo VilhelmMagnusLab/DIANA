@@ -351,10 +351,9 @@ The pipeline intelligently handles tumor content:
 ### Standard Report Generation
 
 **PDF reports are automatically generated** when running the pipeline with the following modes:
-- `--run_mode_analysis rmd` - Generate reports only
-- `--run_mode_analysis all` - Run all analyses and generate reports
+- `--run_mode_annotation rmd` - Generate reports only
 - `--run_mode_order` - Run complete pipeline sequentially and generate reports
-- `--run_mode_epianalyse` - Run Epi2me and Analysis modules and generate reports
+- `--run_mode_epiannotation` - Run Epi2me and annotation modules and generate reports
 
 The reports are automatically created in the `routine_results/{sample_id}/` directory with the name `{sample_id}_markdown_pipeline_report.pdf`.
 
@@ -480,10 +479,10 @@ You can specify a custom temporary work directory using the `-w` flag. This is u
 **Example:**
 ```bash
 # Docker
-./run_pipeline_docker.sh --run_mode_analysis tertp -w /path/to/your/work/dir
+./run_pipeline_docker.sh --run_mode_annotation tertp -w /path/to/your/work/dir
 
 # Singularity/Apptainer  
-./run_pipeline_singularity.sh --run_mode_analysis tertp -w /home/chbope/extension/trash/tmp
+./run_pipeline_singularity.sh --run_mode_annotation tertp -w /home/chbope/extension/trash/tmp
 ```
 
 **Note:** The `-w` flag sets Nextflow's work directory where temporary files and intermediate results are stored during pipeline execution. By default nextflow create a folder `work` in the working directory.
@@ -494,10 +493,10 @@ You can specify a custom log directory using the `--log-dir` flag.
 **Example:**
 ```bash
 # Docker
-./run_pipeline_docker.sh --run_mode_analysis mgmt --log-dir /path/to/logs 
+./run_pipeline_docker.sh --run_mode_annotation mgmt --log-dir /path/to/logs 
 
 # Singularity/Apptainer
-./run_pipeline_singularity.sh  --run_mode_analysis mgmt --log-dir /path/to/logs
+./run_pipeline_singularity.sh  --run_mode_annotation mgmt --log-dir /path/to/logs
 ```
 
 **Note:** Logs include execution reports, timelines, traces, and Nextflow logs, automatically organized by sample ID.
