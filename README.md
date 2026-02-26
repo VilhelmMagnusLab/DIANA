@@ -54,7 +54,7 @@ The pipeline consists of three main modules that can be run independently or seq
 
 ### 1. **Mergebam Pipeline** (`--run_mode_mergebam`)
 - Merges multiple BAM files per sample
-- Extracts protein-coding regions of interest using `OCC.protein_coding.bed`
+- Extracts protein-coding regions of interest using `roi.protein_coding.bed`
 
 ### 2. **Epi2me Pipeline** (`--run_mode_epi2me`)
 Three independent analysis types:
@@ -272,12 +272,12 @@ The following reference files must be downloaded and placed in the `data/referen
 **Analysis-specific files:**
 - `EPIC_sites_NEW.bed` - Methylation sites
 - `MGMT_CpG_Island.hg38.bed` - MGMT CpG islands
-- `OCC.protein_coding.bed` - Region of interest BED file (protein-coding genes for SNV screening and BAM extraction; must be proper 10-field BED format)
+- `roi.protein_coding.bed` - Region of interest BED file (protein-coding genes for SNV screening and BAM extraction; must be proper 10-field BED format)
 - `TERTp_variants.bed` - TERT promoter variants
 - `human_GRCh38_trf.bed` - Tandem repeat regions
 - `Others` file downloaded from Zenodo should be put into `data/reference/`
 
-**Note:** The `OCC.protein_coding.bed` is a region of interest (ROI) BED file. For this pipeline, OCC (Onco-Comprehensive-Coverage) genes are used, but any custom ROI BED file can be substituted. This file is used for:
+**Note:** The `roi.protein_coding.bed` is a region of interest (ROI) BED file. For this pipeline, OCC (Onco-Comprehensive-Coverage) genes are used, but any custom ROI BED file can be substituted. This file is used for:
   - Extracting regions of interest during BAM merging (mergebam module)
   - SNV screening regions for variant calling (ClairS-TO analysis)
   - Ensure this file is properly formatted with exactly 10 tab-separated fields per line
@@ -320,9 +320,10 @@ data/
 │   ├── Assembly/                # Assembly folder for vcfcircos (from Zenodo)
 │   ├── EPIC_sites_NEW.bed
 │   ├── MGMT_CpG_Island.hg38.bed
-│   ├── OCC.protein_coding.bed
+│   ├── roi.protein_coding.bed
 │   ├── TERTp_variants.bed
 │   ├── human_GRCh38_trf.bed
+│   ├── CNV_genes_tuned.csv
 │   └── etc
 │
 └── humandb/                     # Annotation databases
