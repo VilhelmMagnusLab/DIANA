@@ -291,6 +291,12 @@ The following reference files must be downloaded and placed in the `data/referen
 **svanna databases (place in `data/reference/`):**
 - `svanna-data.zip` - svanna database need to be unzip after download and place into the reference folder or the database can be downloaded from (https://github.com/monarch-initiative/SvAnna)
 
+**Sturgeon classifier model (place in `data/reference/`):**
+- `general.zip` - Sturgeon methylation classifier model
+  - Download link: https://www.dropbox.com/s/yzca4exl40x9ukw/general.zip?dl=0
+  - Place the downloaded file directly in `data/reference/` directory
+  - Used by the Sturgeon classifier for methylation-based tumor classification
+
 **nanoDX script and files (place in `data/reference/`):**
 
 The nanoDX folder in the pipeline root should be moved into the `data/reference` folder and copy the following downloded files from https://zenodo.org/records/14006255 into `nanoDx/static/`:
@@ -324,6 +330,13 @@ data/
 │   ├── TERTp_variants.bed
 │   ├── human_GRCh38_trf.bed
 │   ├── CNV_genes_tuned.csv
+│   ├── general.zip              # Sturgeon classifier model
+│   ├── svanna-data/             # Svanna database (unzipped)
+│   ├── nanoDx/                  # NanoDx classifier
+│   │   └── static/
+│   │       ├── Capper_et_al.h5
+│   │       ├── Capper_et_al_NN.pkl
+│   │       └── ...
 │   └── etc
 │
 └── humandb/                     # Annotation databases
