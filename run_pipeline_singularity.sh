@@ -25,27 +25,39 @@ fi
 echo "Using: $SINGULARITY_CMD"
 
 # Auto-detect config file based on arguments
-CONFIG="conf/analysis.config"  # Default config
+# For epiannotation and order modes, nextflow.config handles loading multiple configs
+CONFIG=""
 
-# Check if epi2me mode is specified
-if [[ "$*" == *"--run_mode_epi2me"* ]]; then
+# Check if specific mode is specified
+if [[ "$*" == *"--run_mode_epiannotation"* ]]; then
+    echo " Using combined Epi2me + Annotation mode (configs loaded by nextflow.config)"
+    CONFIG=""  # Let nextflow.config handle it
+elif [[ "$*" == *"--run_mode_order"* ]]; then
+    echo " Using sequential order mode (configs loaded by nextflow.config)"
+    CONFIG=""  # Let nextflow.config handle it
+elif [[ "$*" == *"--run_mode_epi2me"* ]]; then
     CONFIG="conf/epi2me.config"
     echo " Using Epi2me configuration: $CONFIG"
 elif [[ "$*" == *"--run_mode_mergebam"* ]]; then
     CONFIG="conf/mergebam.config"
     echo " Using Mergebam configuration: $CONFIG"
 else
-    echo " Using default analysis configuration: $CONFIG"
+    CONFIG="conf/annotation.config"
+    echo " Using default annotation configuration: $CONFIG"
 fi
 
 echo " Starting nWGS pipeline with Singularity/Apptainer containers..."
-echo "   Configuration: $CONFIG"
+if [ -n "$CONFIG" ]; then
+    echo "   Configuration: $CONFIG"
+fi
 echo "   Arguments: $@"
 
 # Run the pipeline with Singularity/Apptainer
 # Note: Apptainer is enabled in nextflow.config, so we don't use -with-singularity flag
-nextflow run main.nf \
-    -c "$CONFIG" \
-    "$@"
+if [ -n "$CONFIG" ]; then
+    nextflow run main.nf -c "$CONFIG" "$@"
+else
+    nextflow run main.nf "$@"
+fi
 
 echo " Pipeline completed successfully!"

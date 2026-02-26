@@ -122,6 +122,125 @@ RENVEOF
     """
 }
 
+// SNV calling using Clair3 for OCC (regions of interest) regions
+process run_clair3 {
+    label 'clair3'
+    publishDir "${params.output_path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai), path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex), path(hg38_cosmic100), path(hg38_cosmic100index)
+
+    output:
+    tuple val(sample_id), path('output_clair3/'), emit: clair3_output_dir
+    tuple val(sample_id), path('output_clair3/pileup.vcf.gz'), emit: pileup_vcf
+    tuple val(sample_id), path('output_clair3/merge_output.vcf.gz'), emit: merge_vcf
+
+    script:
+    """
+    # Activate conda environment for Clair3
+    source /opt/conda/etc/profile.d/conda.sh
+    conda activate clair3
+
+    /opt/bin/run_clair3.sh \
+        --bam_fn=$occ_bam \
+        --ref_fn=$reference_genome  \
+        --threads=8 \
+        --var_pct_full=1 \
+        --ref_pct_full=1 \
+        --var_pct_phasing=1 \
+        --platform="ont" \
+        --no_phasing_for_fa \
+        --model_path=${params.clair3_model_path} \
+        --output=output_clair3
+
+    # remove tmp folder
+    rm -rf output_clair3/tmp*
+    """
+}
+
+// SNV calling using ClairS-TO for somatic variants
+process run_clairs_to {
+    label 'clairsto'
+    publishDir "${params.output_path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai), path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex), path(hg38_cosmic100), path(hg38_cosmic100index), path(roi_protein_coding_bed)
+
+    output:
+    tuple val(sample_id), path('clairsto_output/'), emit: clairsto_output_dir
+    tuple val(sample_id), path('clairsto_output/snv.vcf.gz'), emit: snv_vcf
+    tuple val(sample_id), path('clairsto_output/indel.vcf.gz'), emit: indel_vcf
+
+    script:
+    """
+    # Set micromamba environment variables
+    export MAMBA_ROOT_PREFIX=/opt/micromamba
+    export MAMBA_EXE=/opt/micromamba/bin/micromamba
+
+    # Set MKL variables before activation
+    export MKL_INTERFACE_LAYER=LP64
+    export MKL_THREADING_LAYER=SEQUENTIAL
+
+    # Activate conda environment
+    source /opt/micromamba/etc/profile.d/micromamba.sh
+    micromamba activate clairs-to
+
+    # Run ClairS-TO (may produce empty VCFs if no variants found - this is normal)
+    /opt/bin/run_clairs_to \
+        --tumor_bam_fn=${occ_bam} \
+        --ref_fn=${reference_genome} \
+        --threads=${task.cpus} \
+        --platform="ont_r10_dorado_4khz" \
+        --output_dir=clairsto_output \
+        --bed_fn=${roi_protein_coding_bed} \
+        --conda_prefix /opt/micromamba/envs/clairs-to || echo "ClairS-TO completed with warnings (possibly no variants found)"
+
+    # Ensure output files exist (create empty gzipped VCFs if missing)
+    if [ ! -f clairsto_output/snv.vcf.gz ]; then
+        echo "##fileformat=VCFv4.2" | bgzip > clairsto_output/snv.vcf.gz
+    fi
+    if [ ! -f clairsto_output/indel.vcf.gz ]; then
+        echo "##fileformat=VCFv4.2" | bgzip > clairsto_output/indel.vcf.gz
+    fi
+
+    # Create index files for the VCF files (required for downstream annotation)
+    tabix -p vcf clairsto_output/snv.vcf.gz || true
+    tabix -p vcf clairsto_output/indel.vcf.gz || true
+
+    # remove tmp folder
+    rm -rf clairsto_output/tmp*
+    """
+}
+
+// Quality assessment and statistics using Cramino
+process cramino_report {
+    label 'epic'
+    publishDir "${params.output_path}/routine_epi2me/${sample_id}/cramino", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(merge_bam), path(merge_bam_bai), path(reference_genome), path(reference_genome_bai)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_cramino_statistics.txt"), emit:craminostatout
+
+    script:
+    """
+    #!/bin/bash
+    set -e
+
+    # Check if we're in a container and use appropriate conda setup
+    if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
+        # Container environment
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate annotatecnv_env
+    else
+        # Local environment
+        source activate annotatecnv_env
+    fi
+    cramino $merge_bam --reference $reference_genome > ${sample_id}_cramino_statistics.txt
+    """
+}
+
 //---------------------------------------------------------------------
 // Workflow Definition
 //---------------------------------------------------------------------
@@ -158,13 +277,13 @@ workflow epi2me {
         }
 
         // Validate run_mode parameter
-        if (!['modkit', 'cnv', 'sv', 'all'].contains(params.run_mode)) {
-            error "ERROR: Invalid run_mode '${params.run_mode}' for epi2me. Valid modes: modkit, cnv, sv, all."
+        if (!['modkit', 'cnv', 'sv', 'snv', 'stat', 'all'].contains(params.run_mode)) {
+            error "ERROR: Invalid run_mode '${params.run_mode}' for epi2me. Valid modes: modkit, cnv, sv, snv, stat, all."
         }
 
         // Create input channel based on run mode
-        // Use merged_data input for both run_mode_order and run_mode_epianalyse
-        input_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
+        // Use merged_data input for both run_mode_order and run_mode_epiannotation
+        input_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
             merged_data.map { sid, bam, bai, ref, ref_bai ->
                 tuple(
                     sid,
@@ -197,18 +316,75 @@ workflow epi2me {
                 }
 
                 return tuple(
-                    sample_id, 
-                    bam, 
+                    sample_id,
+                    bam,
                     bai,
                     reference_genome,
                     reference_genome_bai
                 )
             }
 
+        // Create OCC/ROI BAM input channel for SNV calling
+        // This channel reads .roi.bam files from roi_bam_folder
+        occ_input_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
+            merged_data.map { sid, bam, bai, ref, ref_bai ->
+                // For run_mode_order/epiannotation, construct OCC BAM paths from sample_id
+                def occ_bam = file("${params.roi_bam_folder}/${sid}.roi.bam")
+                def occ_bai = file("${params.roi_bam_folder}/${sid}.roi.bam.bai")
+
+                // Try wildcard if exact match doesn't exist
+                if (!occ_bam.exists()) {
+                    occ_bam = file("${params.roi_bam_folder}/${sid}.*.roi.bam")
+                    occ_bam = occ_bam.find()
+                }
+                if (!occ_bai.exists()) {
+                    occ_bai = file("${params.roi_bam_folder}/${sid}.*.roi.bam.bai")
+                    occ_bai = occ_bai.find()
+                }
+
+                tuple(sid, occ_bam, occ_bai, ref, ref_bai)
+            } : Channel
+            .from(file(params.epi2me_sample_id_file).readLines())
+            .map { line ->
+                def fields = line.tokenize("\t")
+                def sample_id = fields[0].trim()
+
+                // Try exact match first for .roi.bam files
+                def occ_bam = file("${params.roi_bam_folder}/${sample_id}.roi.bam")
+                def occ_bai = file("${params.roi_bam_folder}/${sample_id}.roi.bam.bai")
+
+                // If exact match doesn't exist, try wildcard pattern
+                if (!occ_bam.exists()) {
+                    occ_bam = file("${params.roi_bam_folder}/${sample_id}.*.roi.bam")
+                    occ_bam = occ_bam.find()
+                }
+                if (!occ_bai.exists()) {
+                    occ_bai = file("${params.roi_bam_folder}/${sample_id}.*.roi.bam.bai")
+                    occ_bai = occ_bai.find()
+                }
+
+                if (!occ_bam || !occ_bai || !occ_bam.exists() || !occ_bai.exists()) {
+                    println "WARNING: OCC/ROI BAM file not found for sample ID: ${sample_id}. Tried both exact match (${sample_id}.roi.bam) and wildcard pattern (${sample_id}.*.roi.bam)"
+                    return null
+                }
+
+                return tuple(
+                    sample_id,
+                    occ_bam,
+                    occ_bai,
+                    reference_genome,
+                    reference_genome_bai
+                )
+            }
+            .filter { it != null }
+
         // Run processes based on mode
         modkit_ch = Channel.empty()
         cnv_ch = Channel.empty()
         sv_ch = Channel.empty()
+        clair3_ch = Channel.empty()
+        clairsto_ch = Channel.empty()
+        cramino_ch = Channel.empty()
 
         if (params.run_mode in ['modkit', 'all']) {
             println "Running modkit..."
@@ -224,45 +400,136 @@ workflow epi2me {
             println "Running sv..."
             sv_ch = input_channel.map { sid, bam, bai, ref, ref_bai ->
                 tuple(
-                    sid, 
-                    bam, 
+                    sid,
+                    bam,
                     bai
                 )
             } | run_epi2me_sv
         }
 
-        // Create default channels for empty processes
-        default_modkit = input_channel.map { sid, bam, bai, ref, ref_bai -> 
-            tuple(sid, file("${params.epimodkit}/${sid}.wf_mods.bedmethyl.gz")) 
+        // SNV calling with Clair3 and ClairS-TO
+        // Uses OCC/ROI BAM files and annotation databases
+        if (params.run_mode in ['snv', 'all']) {
+            println "Running SNV calling (Clair3 and ClairS-TO)..."
+
+            // Load annotation files as channels
+            def refgene_ch = Channel.value(file(params.refgene))
+            def hg38_refgenemrna_ch = Channel.value(file(params.hg38_refgenemrna))
+            def clinvar_ch = Channel.value(file(params.clinvar))
+            def clinvarindex_ch = Channel.value(file(params.clinvarindex))
+            def hg38_cosmic100_ch = Channel.value(file(params.hg38_cosmic100))
+            def hg38_cosmic100index_ch = Channel.value(file(params.hg38_cosmic100index))
+            def roi_protein_coding_bed_ch = Channel.value(file(params.roi_protein_coding_bed))
+
+            // Prepare input for Clair3 (OCC BAM + annotation files)
+            def clair3_input = occ_input_channel
+                .combine(refgene_ch)
+                .combine(hg38_refgenemrna_ch)
+                .combine(clinvar_ch)
+                .combine(clinvarindex_ch)
+                .combine(hg38_cosmic100_ch)
+                .combine(hg38_cosmic100index_ch)
+
+            // Prepare input for ClairS-TO (OCC BAM + annotation files + OCC BED)
+            def clairsto_input = occ_input_channel
+                .combine(refgene_ch)
+                .combine(hg38_refgenemrna_ch)
+                .combine(clinvar_ch)
+                .combine(clinvarindex_ch)
+                .combine(hg38_cosmic100_ch)
+                .combine(hg38_cosmic100index_ch)
+                .combine(roi_protein_coding_bed_ch)
+
+            // Run variant calling processes
+            def clair3_result = run_clair3(clair3_input)
+            clair3_ch = clair3_result.clair3_output_dir  // Use one of the outputs for dependency tracking
+
+            def clairsto_result = run_clairs_to(clairsto_input)
+            clairsto_ch = clairsto_result.clairsto_output_dir  // Use one of the outputs for dependency tracking
         }
-        
-        default_cnv = input_channel.map { sid, bam, bai, ref, ref_bai -> 
+
+        // Cramino statistics (runs for 'stat' mode or 'all' mode)
+        if (params.run_mode in ['stat', 'all']) {
+            println "Running Cramino statistics..."
+
+            // Cramino uses merged BAM files
+            def cramino_input = input_channel
+                .view { "Cramino input: $it" }
+
+            def cramino_result = cramino_report(cramino_input)
+            cramino_ch = cramino_result.craminostatout  // Use the output for dependency tracking
+        }
+
+        // Create default channels for empty processes
+        default_modkit = input_channel.map { sid, bam, bai, ref, ref_bai ->
+            tuple(sid, file("${params.epimodkit}/${sid}.wf_mods.bedmethyl.gz"))
+        }
+
+        default_cnv = input_channel.map { sid, bam, bai, ref, ref_bai ->
             tuple(
-                sid, 
+                sid,
                 file("${params.epicnv}/${sid}_segs.bed"),
                 file("${params.epicnv}/${sid}_bins.bed"),
                 file("${params.epicnv}/${sid}_segs.vcf")
             )
         }
-        
+
         default_sv = input_channel.map { sid, bam, bai, ref, ref_bai ->
             tuple(sid, file("${params.episv}/${sid}.sniffles.vcf.gz"))
         }
 
-        // Mix actual results with defaults (but only for standalone mode, not for run_mode_order/epianalyse)
-        // In run_mode_order and run_mode_epianalyse, we want to wait for actual process outputs
-        modkit_results = (params.run_mode_order || params.run_mode_epianalyse) ?
+        default_clair3 = input_channel.map { sid, bam, bai, ref, ref_bai ->
+            tuple(sid, file("${params.output_path}/routine_epi2me/${sid}/output_clair3"))
+        }
+
+        default_clairsto = input_channel.map { sid, bam, bai, ref, ref_bai ->
+            tuple(sid, file("${params.output_path}/routine_epi2me/${sid}/clairsto_output"))
+        }
+
+        default_cramino = input_channel.map { sid, bam, bai, ref, ref_bai ->
+            tuple(sid, file("${params.output_path}/routine_epi2me/${sid}/cramino/${sid}_cramino_statistics.txt"))
+        }
+
+        // Mix actual results with defaults (but only for standalone mode, not for run_mode_order/epiannotation)
+        // In run_mode_order and run_mode_epiannotation, we want to wait for actual process outputs
+        modkit_results = (params.run_mode_order || params.run_mode_epiannotation) ?
             modkit_ch : modkit_ch.mix(default_modkit)
-        cnv_results = (params.run_mode_order || params.run_mode_epianalyse) ?
+        cnv_results = (params.run_mode_order || params.run_mode_epiannotation) ?
             cnv_ch : cnv_ch.mix(default_cnv)
-        sv_results = (params.run_mode_order || params.run_mode_epianalyse) ?
+        sv_results = (params.run_mode_order || params.run_mode_epiannotation) ?
             sv_ch : sv_ch.mix(default_sv)
+        clair3_results = (params.run_mode_order || params.run_mode_epiannotation) ?
+            clair3_ch : clair3_ch.mix(default_clair3)
+        clairsto_results = (params.run_mode_order || params.run_mode_epiannotation) ?
+            clairsto_ch : clairsto_ch.mix(default_clairsto)
+        cramino_results = (params.run_mode_order || params.run_mode_epiannotation) ?
+            cramino_ch : cramino_ch.mix(default_cramino)
 
         // Combine all results
         results_ch = input_channel
             .join(modkit_results, by: 0)
             .join(cnv_results, by: 0)
             .join(sv_results, by: 0)
+
+        // In epiannotation/order mode, wait for SNV and cramino to complete
+        if (params.run_mode_epiannotation || params.run_mode_order) {
+            // Collect all SNV and cramino outputs first as a barrier
+            def snv_cramino_barrier = clair3_ch
+                .mix(clairsto_ch)
+                .mix(cramino_ch)
+                .collect()
+                .ifEmpty([])
+                .map { [1] }  // Convert to a simple marker
+
+            // Use cross to create synchronization without modifying the tuple structure
+            // cross creates pairs, then we extract just the original tuple
+            results_ch = results_ch
+                .map { tuple -> [1, tuple] }  // Add a key
+                .cross(snv_cramino_barrier)  // Wait for barrier - creates [[key, tuple], [key]]
+                .map { it[0][1] }  // Extract the original tuple
+        }
+
+        results_ch = results_ch
             .map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
@@ -271,16 +538,21 @@ workflow epi2me {
                 def ref_bai = args[4]
                 def modkit = args[5]
 
-                // CNV outputs (10 files): segs_bed, bins_bed, segs_vcf, copyNumbersCalled.rds, calls.bed, calls.vcf, raw_bins.bed, plots.pdf, isobar_plot.png, cov.png
+                // CNV outputs (6 files): segs_bed, bins_bed, segs_vcf, copyNumbersCalled.rds, calls.bed, calls.vcf
                 def segs_bed = args[6]
                 def bins_bed = args[7]
                 def segs_vcf = args[8]
                 def rds_file = args[9]  // copyNumbersCalled.rds - needed for ACE
-                // Skip the other CNV outputs (args[10] through args[15])
+                def calls_bed = args[10]
+                def calls_vcf = args[11]
 
                 // SV outputs: sv.vcf.gz and sv.vcf.gz.tbi
-                def sv = args[16]
-                def sv_index = args[17]
+                def sv = args[12]
+                def sv_index = args[13]
+
+                // SNV outputs (Clair3, ClairS-TO) - args[18], args[19]
+                // Cramino output - args[20]
+                // These are included for dependency tracking but not returned
 
                 log.info "Processing completed for sample: ${sample_id}"
                 tuple(

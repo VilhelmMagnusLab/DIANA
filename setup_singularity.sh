@@ -34,7 +34,7 @@ echo "The pipeline requires a working directory structure for processing data."
 echo "This will create the following directories:"
 echo "  - routine_bams/       (Processed BAM files)"
 echo "  - routine_epi2me/     (Epi2me module results)"
-echo "  - routine_analysis/   (Analysis module results)"
+echo "  - routine_annotation/   (Analysis module results)"
 echo "  - routine_results/    (Final results)"
 echo ""
 read -p "Enter the parent directory path [default: ~/Documents]: " WORK_DIR_PARENT
@@ -50,7 +50,7 @@ echo "Creating working directory structure at: $WORK_DIR"
 mkdir -p "$WORK_DIR/routine_bams/merge_bams"
 mkdir -p "$WORK_DIR/routine_bams/roi_bams"
 mkdir -p "$WORK_DIR/routine_epi2me"
-mkdir -p "$WORK_DIR/routine_analysis"
+mkdir -p "$WORK_DIR/routine_annotation"
 mkdir -p "$WORK_DIR/routine_results"
 
 echo "✓ Working directory structure created successfully"
@@ -151,7 +151,7 @@ fi
 echo "Using: $SINGULARITY_CMD"
 
 # Auto-detect config file based on arguments
-CONFIG="conf/analysis.config"  # Default config
+CONFIG="conf/annotation.config"  # Default config
 
 # Check if epi2me mode is specified
 if [[ "$*" == *"--run_mode_epi2me"* ]]; then
@@ -161,7 +161,7 @@ elif [[ "$*" == *"--run_mode_mergebam"* ]]; then
     CONFIG="conf/mergebam.config"
     echo " Using Mergebam configuration: $CONFIG"
 else
-    echo " Using default analysis configuration: $CONFIG"
+    echo " Using default annotation configuration: $CONFIG"
 fi
 
 echo " Starting nWGS pipeline with Singularity/Apptainer containers..."
@@ -213,25 +213,25 @@ echo "  ├── routine_bams/         # Processed BAM files"
 echo "  │   ├── merge_bams/       # Merged BAM files per sample"
 echo "  │   └── roi_bams/         # Region of interest extracted BAMs"
 echo "  ├── routine_epi2me/       # Epi2me module results"
-echo "  ├── routine_analysis/     # Analysis module results"
+echo "  ├── routine_annotation/     # Analysis module results"
 echo "  └── routine_results/      # Final results"
 echo ""
 echo "Next steps:"
 echo "1. Place your reference files in: data/reference/"
 echo "2. Update the configuration files with your working directory paths:"
-echo "   - conf/analysis.config"
+echo "   - conf/annotation.config"
 echo "   - conf/epi2me.config"
 echo "   - conf/mergebam.config"
 echo "3. Run the pipeline with: ./run_pipeline_singularity.sh"
 echo "4. Test the setup with: ./test_pipeline_singularity.sh"
 echo ""
 echo "Pipeline modes:"
-echo "  - Mergebam:  ./run_pipeline_singularity.sh --run_mode_mergebam"
-echo "  - Epi2me:    ./run_pipeline_singularity.sh --run_mode_epi2me"
-echo "  - Analysis:  ./run_pipeline_singularity.sh --run_mode_analysis"
+echo "  - Mergebam:    ./run_pipeline_singularity.sh --run_mode_mergebam"
+echo "  - Epi2me:      ./run_pipeline_singularity.sh --run_mode_epi2me"
+echo "  - Annotation:  ./run_pipeline_singularity.sh --run_mode_annotation"
 echo ""
 echo "Before starting the pipeline, make sure that all paths for each mode are correctly"
-echo "set in the appropriate config files: conf/analysis.config, conf/epi2me.config, and conf/mergebam.config"
+echo "set in the appropriate config files: conf/annotation.config, conf/epi2me.config, and conf/mergebam.config"
 echo "For more information, see the README.md file."
 echo ""
 echo "Happy analyzing! 🧬" 

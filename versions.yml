@@ -1,0 +1,261 @@
+---
+# Software Versions - nWGS Pipeline
+# Machine-readable format for automation and tracking
+
+pipeline:
+  name: nWGS_pipeline
+  version: 1.0.1
+  license: MIT
+  repository: https://github.com/VilhelmMagnusLab/nWGS_pipeline
+  authors:
+    - Christian Domilongo Bope
+    - Skarphéðinn Halldórsson
+    - Richard Nagymihaly
+
+framework:
+  nextflow: ">=23.10.1"
+  container_runtime: apptainer/singularity
+
+containers:
+  # SNV/Indel Calling
+  clair3_amd64:
+    docker_image: vilhelmmagnuslab/clair3_amd64:latest
+    singularity_image: clair3_amd64_latest.sif
+    purpose: Long-read SNV and indel variant calling
+    base_image: continuumio/miniconda3:latest
+    tools:
+      python: 3.9.0
+      samtools: 1.15.1
+      whatshap: 1.7
+      tensorflow-cpu: 2.8.0
+      pypy3.6: latest
+      parallel: "20191122"
+      pigz: latest
+      zstd: latest
+    models: http://www.bio8.cs.hku.hk/clair3/clair3_models/
+
+  clairsto_amd64:
+    docker_image: vilhelmmagnuslab/clairsto_latest:latest
+    singularity_image: clairsto_amd64_latest.sif
+    purpose: Somatic variant calling (tumor-only)
+    base_image: ubuntu:16.04
+    tools:
+      micromamba: 1.5.1-2
+      clair3: latest
+      bcftools: latest
+      pytorch: latest
+      scipy: latest
+      scikit-learn: latest
+    models: http://www.bio8.cs.hku.hk/clairs-to/models/
+    databases: http://www.bio8.cs.hku.hk/clairs-to/databases/
+
+  # Structural Variants
+  snifflesv252_update:
+    docker_image: vilhelmmagnuslab/snifflesv252_update_latest:latest
+    singularity_image: snifflesv252_update_latest.sif
+    purpose: Structural variant calling
+    base_image: ubuntu:22.04
+    tools:
+      python: "3.10"
+      sniffles: latest
+      pysam: latest
+      truvari: latest
+      edlib: 1.3.9
+      psutil: 5.9.4
+      samtools: latest
+      bcftools: latest
+
+  # Copy Number Variation
+  qdnaseq_amd64:
+    docker_image: vilhelmmagnuslab/qdnaseq_amd64_latest:latest
+    singularity_image: qdnaseq_amd64_latest.sif
+    purpose: Copy number aberration detection
+    base_image: rocker/r-ver:4.3.2
+    tools:
+      r: 4.3.2
+      bioconductor: "3.18"
+      samtools: latest
+    r_packages:
+      - QDNAseq
+      - QDNAseq.hg38
+      - QDNAseq.hg19
+      - AnnotationHub
+      - BiocManager
+
+  ace_1.24.0:
+    docker_image: vilhelmmagnuslab/ace_1.24.0:latest
+    singularity_image: ace_1.24.0_latest.sif
+    purpose: Absolute copy number estimation
+    base_image: ubuntu:20.04
+    tools:
+      r: "4.2"
+      miniconda: latest
+    r_packages:
+      - ACE
+      - QDNAseq
+      - genomicranges
+      - optparse
+      - data.table
+      - ggplot2
+
+  annotcnv_images_27feb1025:
+    docker_image: vilhelmmagnuslab/annotcnv_images_27feb1025:latest
+    singularity_image: annotcnv_images_27feb1025_latest.sif
+    purpose: CNV annotation and visualization
+    base_image: continuumio/miniconda3
+    tools:
+      r: 4.2.3
+      python: 3.13.2
+      cramino: 0.16.0
+      bedtools: 2.31.1
+      numpy: 2.2.3
+      pandas: 2.2.3
+      scipy: 1.15.2
+    r_packages:
+      - ggplot2: 3.5.1
+      - data.table: 1.15.4
+      - dplyr: 1.1.4
+      - plotly: 4.10.4
+      - rmarkdown: 2.27
+      - knitr: 1.47
+
+  # Methylation
+  modkit:
+    docker_image: vilhelmmagnuslab/modkit_latest:latest
+    singularity_image: modkit_latest.sif
+    purpose: Modified base calling and methylation
+    tools:
+      modkit: latest
+
+  sturgeon_amd64_21jan:
+    docker_image: vilhelmmagnuslab/sturgeon_amd64_21jan_latest:latest
+    singularity_image: sturgeon_amd64_21jan_latest.sif
+    purpose: DNA methylation-based tumor classification
+    base_image: python:3.9-slim
+    tools:
+      python: "3.9"
+      sturgeon: latest
+    source: https://github.com/marcpaga/sturgeon
+
+  # Quality Control
+  mgmt_nanopipe_cramino:
+    docker_image: vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni_latest:latest
+    singularity_image: mgmt_nanopipe_amd64_18feb2025_cramoni_latest.sif
+    purpose: BAM/CRAM quality statistics
+    base_image: continuumio/miniconda3
+    tools:
+      cramino: 0.16.0
+      bedtools: 2.31.1
+      r-base: 4.2.3
+      python: 3.13.2
+
+  # Classification
+  nanodx_images_3feb25:
+    docker_image: vilhelmmagnuslab/nanodx_images_3feb25:latest
+    singularity_image: nanodx_images_3feb25_latest.sif
+    purpose: Neural network tumor classification
+    base_image: continuumio/miniconda3
+    tools:
+      python: 3.10.2
+      numpy: 1.22.4
+      pandas: 1.5.1
+      scikit-learn: 1.0.2
+      pytorch: 1.12.1
+
+  crossnnumap:
+    docker_image: vilhelmmagnuslab/crossnnumap_latest:latest
+    singularity_image: crossnnumap_latest.sif
+    purpose: t-SNE dimensionality reduction
+    base_image: ubuntu:24.04
+    tools:
+      miniconda: latest
+    r_packages:
+      - rtsne
+      - uwot
+      - plotly
+      - ggplot2
+      - data.table
+
+  # Visualization
+  vcf2circos:
+    docker_image: vilhelmmagnuslab/vcf2circos:latest
+    singularity_image: vcf2circos_latest.sif
+    purpose: Circos plot generation
+    base_image: python:3.9.16
+    tools:
+      python: 3.9.16
+      vcf2circos: latest
+    source: https://github.com/JbaptisteLam/vcf2circos
+
+  igv_report_amd64:
+    docker_image: vilhelmmagnuslab/igv_report_amd64:latest
+    singularity_image: igv_report_amd64_latest.sif
+    purpose: Interactive genome viewer reports
+    tools:
+      igv.js: latest
+
+  gviz_amd64:
+    docker_image: vilhelmmagnuslab/gviz_amd64:latest
+    singularity_image: gviz_amd64ps_latest.sif
+    purpose: Gene coverage visualization
+    tools:
+      gviz: latest
+
+  markdown_images_28feb2025:
+    docker_image: vilhelmmagnuslab/markdown_images_28feb2025:latest
+    singularity_image: markdown_images_28feb2025_latest.sif
+    purpose: R Markdown report generation
+    base_image: continuumio/miniconda3
+    tools:
+      pandoc: latest
+      wkhtmltopdf: latest
+      texlive: latest
+    r_packages:
+      - rmarkdown
+      - knitr
+      - kableextra
+      - ggplot2
+      - plotly
+
+  # General utilities
+  nwgs_default_images:
+    docker_image: vilhelmmagnuslab/nwgs_default_images:latest
+    singularity_image: nwgs_default_images_latest.sif
+    purpose: Standard bioinformatics utilities
+    processes:
+      - extract_epic
+      - sturgeon
+      - svannasv
+      - nanodx
+      - merge_annotation
+      - tertp
+
+references:
+  genomes:
+    - GRCh38 (hg38)
+    - GRCh37 (hg19)
+
+  models:
+    clair3: http://www.bio8.cs.hku.hk/clair3/clair3_models/
+    clairs-to: http://www.bio8.cs.hku.hk/clairs-to/models/
+    clairs-to-db: http://www.bio8.cs.hku.hk/clairs-to/databases/
+    cna-ref: http://www.bio8.cs.hku.hk/clairs-to/cna_data/
+
+  annotations:
+    - QDNAseq reference bins (hg38, hg19)
+    - NanoDx classification models
+    - Capper et al. methylation dictionary
+    - ROI target gene lists
+
+system_requirements:
+  default_cpus: 16
+  default_memory: 2GB
+  default_time: 240h
+  container_system: apptainer
+
+profiles:
+  - docker
+  - conda
+  - apptainer
+
+last_updated: "2026-02-26"

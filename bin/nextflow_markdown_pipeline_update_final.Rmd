@@ -51,7 +51,7 @@ library(htmltools)
 
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 24) {
-  stop("Usage: Rscript report.R <sample_id> <cramino_stat> <sample_ids_file> <votes_file> <dictionary_file> <logo_file> <copy_number_plot_file> <tumor_copy_number_file> <cnv_filter_file> <cnv_chr9> <cnv_chr7> <mgmt_results_file> <snv_results_file> <structure_variant_file> <terp_html>  <svanna_html> <egfr_plot_file> <idh1_plot_file> <idh2_plot_file> <tertp_plot_file> <tsneplot> <snv_target_genes> <protein_coding_bed> <output_pdf_file> <pipeline_version>")
+  stop("Usage: Rscript report.R <sample_id> <cramino_stat> <sample_ids_file> <votes_file> <dictionary_file> <logo_file> <copy_number_plot_file> <tumor_copy_number_file> <cnv_filter_file> <cnv_chr9> <cnv_chr7> <mgmt_results_file> <snv_results_file> <structure_variant_file> <terp_html>  <svanna_html> <egfr_plot_file> <idh1_plot_file> <idh2_plot_file> <tertp_plot_file> <tsneplot> <snv_target_genes> <protein_coding_bed> <output_pdf_file> <pipeline_version> <snv_depth_threshold> <snv_gq_threshold>")
 }
 
 
@@ -81,6 +81,10 @@ snv_target_genes       <- args[22]
 protein_coding_bed     <- args[23]
 output_pdf_file        <- args[24]
 pipeline_version       <- args[25]
+
+# SNV filtering thresholds (new parameters)
+snv_depth_threshold    <- if (length(args) >= 26) as.numeric(args[26]) else 10
+snv_gq_threshold       <- if (length(args) >= 27) as.numeric(args[27]) else 10
 
 # Read in the votes and dictionary files
 if (!file.exists(votes_file)) {
@@ -258,9 +262,25 @@ tryCatch({
                 select(-ClairS_Depth)
         }
 
-        # ---- 3.5. Filter variants with Depth >= 10 ----
+        # ---- 3.5. Filter variants with Depth >= threshold ----
         if ("Depth" %in% colnames(df_snv)) {
-            df_snv <- df_snv %>% filter(as.numeric(Depth) >= 10)
+            df_snv <- df_snv %>% filter(as.numeric(Depth) >= snv_depth_threshold)
+        }
+
+        # ---- 3.6. Filter variants with GQ (Genotype Quality) >= threshold ----
+        # GQ column can contain single values (e.g., "20") or comma-separated values (e.g., "20,26,41")
+        # Keep variants where ANY of the GQ values meets or exceeds the threshold
+        if ("GQ" %in% colnames(df_snv) && !is.na(snv_gq_threshold)) {
+            df_snv <- df_snv %>%
+                filter(sapply(GQ, function(gq_str) {
+                    if (is.na(gq_str) || gq_str == "" || gq_str == ".") {
+                        return(FALSE)  # Filter out missing GQ values
+                    }
+                    # Parse comma-separated GQ values from the data
+                    gq_values <- as.numeric(unlist(strsplit(as.character(gq_str), ",")))
+                    # Keep if ANY GQ value >= threshold
+                    any(gq_values >= snv_gq_threshold, na.rm = TRUE)
+                }))
         }
 
         # ---- 4. Load valid RefSeq IDs from protein coding bed file ----
@@ -360,7 +380,7 @@ tryCatch({
         # ---- 4.8. Abbreviate variant caller names ----
         if ("Variant_caller" %in% colnames(df_snv)) {
             df_snv <- df_snv %>%
-                mutate(Variant_caller = gsub("ClairS_TO", "C", Variant_caller)) %>%
+                mutate(Variant_caller = gsub("ClairS_TO", "S_TO", Variant_caller)) %>%
                 mutate(Variant_caller = gsub("Pileup", "P", Variant_caller)) %>%
                 mutate(Variant_caller = gsub("Merged", "M", Variant_caller))
         }
@@ -1263,7 +1283,7 @@ tryCatch({
         cat("No SNV Calling and Annotation detected.\n")
     } else {
         # Display explanatory text when SNVs are present
-        cat("SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 and known pathogenic upstream variants, i.e. *TERT*p, are reported. GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency. The *GRCh38* build reference genome was used for the SNV calling and annotation. variant callers, P:Clair3 Pileup, M:Clair3 Merged and C:Clair Somatic tumour-only\n\n")
+        cat("SNVs in the select genes. Only non-synonymous exonic variants that are not known to be benign according to ClinVar_20240611 and known pathogenic upstream variants, i.e. *TERT*p, are reported. GQ: Genotype Quality, Depth: Sequenced depth, AD: Allele Depth, GT: Allele Genotype, AF: Allele Frequency. The *GRCh38* build reference genome was used for the SNV calling and annotation. variant callers, P:Clair3 Pileup, M:Clair3 Merged and S_TO:ClairS-TO Somatic tumour-only\n\n")
 
         # Use the already processed data (all transformations already done in the processing chunk)
         df_snv <- df_snv_processed

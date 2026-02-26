@@ -12,7 +12,7 @@ nWGS_pipeline is a comprehensive bioinformatics pipeline for analyzing Central N
 
 ## Pipeline Schematic
 
-The nWGS pipeline follows a modular architecture with three main Nextflow modules (run_mode_mergebam, run_mode_epi2me and run_mode_analysis) that can be run independently or sequentially:
+The nWGS pipeline follows a modular architecture with three main Nextflow modules (run_mode_mergebam, run_mode_epi2me and run_mode_annotation) that can be run independently or sequentially:
 
 <div align="center">
 
@@ -20,7 +20,7 @@ The nWGS pipeline follows a modular architecture with three main Nextflow module
 
 </div>
 
-*Pipeline workflow showing the flow from Nanopore BAM files through Mergebam, Epi2me, and Analysis modules to final PDF reports.*
+*Pipeline workflow showing the flow from Nanopore BAM files through Mergebam, Epi2me, and Annotation modules to final PDF reports.*
 
 ## Quick Start
 
@@ -65,10 +65,11 @@ Three independent analysis types:
 | **Structural Variants** | Sniffles2 | Structural variant detection | `*.sniffles.vcf.gz` |
 | **Copy Number Variation** | QDNAseq | CNV detection | `*_segs.bed`, `*_bins.bed`, `*_segs.vcf` |
 
-### 3. **Analysis Pipeline** (`--run_mode_analysis`)
+### 3. **Annotation Pipeline** (`--run_mode_annotation`)
 - **MGMT methylation analysis** using EPIC array sites
 - **NanoDx neural network classification**
 - **Structural variant annotation** with Svanna
+- **SNV annotation** with Clair3 (germline) and ClairS-TO (somatic), filtered by configurable Depth and GQ thresholds
 - **CNV analysis** with ACE tumor content determination
 - **Comprehensive reporting** (HTML, IGV snapshots, Circos plots, Markdown)
 
@@ -78,11 +79,11 @@ The pipeline can be executed in different modes:
 
 | Mode | Flag | Description | Use Case |
 |------|------|-------------|----------|
-| **Complete Pipeline** | `--run_mode_order` | Runs all three modules sequentially (Mergebam → Epi2me → Analysis) | Starting from raw BAM files |
-| **Epi2me + Analysis** | `--run_mode_epianalyse` | Runs Epi2me and Analysis sequentially (assumes merged BAM files exist) | When BAM files are already merged |
+| **Complete Pipeline** | `--run_mode_order` | Runs all three modules sequentially (Mergebam → Epi2me → Annotation) | Starting from raw BAM files |
+| **Epi2me + Annotation** | `--run_mode_epiannotation` | Runs Epi2me and Annotation sequentially (assumes merged BAM files exist) | When BAM files are already merged |
 | **Mergebam Only** | `--run_mode_mergebam` | Merges BAM files and extracts regions of interest | BAM preparation only |
-| **Epi2me Only** | `--run_mode_epi2me [all\|modkit\|cnv\|sv]` | Runs specific Epi2me analyses | Methylation, CNV, or SV calling |
-| **Analysis Only** | `--run_mode_analysis [all\|mgmt\|cnv\|svannasv\|terp\|occ\|rmd]` | Runs specific downstream analyses | Report generation or specific analyses |
+| **Epi2me Only** | `--run_mode_epi2me [all\|modkit\|cnv\|sv\|snv]` | Runs specific Epi2me analyses | Methylation, CNV, SV, or SNV calling |
+| **Annotation Only** | `--run_mode_annotation [all\|mgmt\|cnv\|svannasv\|terp\|snv\|rmd]` | Runs specific downstream analyses | Report generation or specific analyses |
 
 ## Container Systems
 
@@ -105,13 +106,13 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 ./run_pipeline_singularity.sh --run_mode_order --sample_id T001
 ```
 
-### Epi2me + Analysis (When BAM files are already merged)
+### Epi2me + Annotation (When BAM files are already merged)
 ```bash
-# Docker - Skip mergebam, run Epi2me and Analysis
-./run_pipeline_docker.sh --run_mode_epianalyse --sample_id T001
+# Docker - Skip mergebam, run Epi2me and Annotation
+./run_pipeline_docker.sh --run_mode_epiannotation --sample_id T001
 
-# Singularity/Apptainer - Skip mergebam, run Epi2me and Analysis
-./run_pipeline_singularity.sh --run_mode_epianalyse --sample_id T001
+# Singularity/Apptainer - Skip mergebam, run Epi2me and Annotation
+./run_pipeline_singularity.sh --run_mode_epiannotation --sample_id T001
 ```
 
 ### Individual Modules
@@ -126,15 +127,16 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 ./run_pipeline_docker.sh --run_mode_epi2me modkit       # Modified base calling only
 ./run_pipeline_docker.sh --run_mode_epi2me cnv          # CNV analysis only
 ./run_pipeline_docker.sh --run_mode_epi2me sv           # Structural variants only
+./run_pipeline_docker.sh --run_mode_epi2me snv          # SNV calling (Clair3 + ClairS-TO) only
 
-# Analysis modules
-./run_pipeline_docker.sh --run_mode_analysis all        # All analyses
-./run_pipeline_docker.sh --run_mode_analysis mgmt       # MGMT analysis only
-./run_pipeline_docker.sh --run_mode_analysis cnv        # CNV analysis only
-./run_pipeline_docker.sh --run_mode_analysis svannasv   # Svanna SV annotation only
-./run_pipeline_docker.sh --run_mode_analysis terp       # TERTp promoter analysis only
-./run_pipeline_docker.sh --run_mode_analysis occ        # Clair3 and ClairS-TO annotation using OCC region of interest BAM file
-./run_pipeline_docker.sh --run_mode_analysis rmd        # Markdown report only
+# Annotation modules
+./run_pipeline_docker.sh --run_mode_annotation all        # All analyses
+./run_pipeline_docker.sh --run_mode_annotation mgmt       # MGMT analysis only
+./run_pipeline_docker.sh --run_mode_annotation cnv        # CNV analysis only
+./run_pipeline_docker.sh --run_mode_annotation svannasv   # Svanna SV annotation only
+./run_pipeline_docker.sh --run_mode_annotation terp       # TERTp promoter analysis only
+./run_pipeline_docker.sh --run_mode_annotation snv        # SNV annotation (Clair3 + ClairS-TO) only
+./run_pipeline_docker.sh --run_mode_annotation rmd        # Markdown report only
 ```
 
 **Singularity/Apptainer Commands:**
@@ -147,22 +149,23 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 ./run_pipeline_singularity.sh --run_mode_epi2me modkit       # Modified base calling only
 ./run_pipeline_singularity.sh --run_mode_epi2me cnv          # CNV analysis only
 ./run_pipeline_singularity.sh --run_mode_epi2me sv           # Structural variants only
+./run_pipeline_singularity.sh --run_mode_epi2me snv          # SNV calling (Clair3 + ClairS-TO) only
 
-# Analysis modules
-./run_pipeline_singularity.sh --run_mode_analysis all        # All analyses
-./run_pipeline_singularity.sh --run_mode_analysis mgmt       # MGMT analysis only
-./run_pipeline_singularity.sh --run_mode_analysis cnv        # CNV analysis only
-./run_pipeline_singularity.sh --run_mode_analysis svannasv   # Svanna SV annotation only
-./run_pipeline_singularity.sh --run_mode_analysis terp       # TERT promoter analysis only
-./run_pipeline_singularity.sh --run_mode_analysis occ        # Clair3 and ClairS-TO annotation using OCC region of interest BAM file
-./run_pipeline_singularity.sh --run_mode_analysis rmd        # Markdown report only
+# Annotation modules
+./run_pipeline_singularity.sh --run_mode_annotation all        # All analyses
+./run_pipeline_singularity.sh --run_mode_annotation mgmt       # MGMT analysis only
+./run_pipeline_singularity.sh --run_mode_annotation cnv        # CNV analysis only
+./run_pipeline_singularity.sh --run_mode_annotation svannasv   # Svanna SV annotation only
+./run_pipeline_singularity.sh --run_mode_annotation terp       # TERT promoter analysis only
+./run_pipeline_singularity.sh --run_mode_annotation snv        # SNV annotation (Clair3 + ClairS-TO) only
+./run_pipeline_singularity.sh --run_mode_annotation rmd        # Markdown report only
 ```
 
 ## Input Requirements
 
 ### Sample ID File Format
 ```
-# For analysis pipeline (with tumor content)
+# For annotation pipeline (with tumor content)
 sample_id1   0.75    # 75% tumor content
 sample_id2          # Auto-calculate with ACE
 
@@ -181,7 +184,7 @@ Pipeline directory:
 ├── conf/                         # Configuration files
 │   ├── mergebam.config          # Mergebam module config
 │   ├── epi2me.config            # Epi2me module config
-│   └── analysis.config          # Analysis module config
+│   └── annotation.config        # Annotation module config
 ├── modules/                      # Nextflow modules
 ├── containers/                   # Singularity container images
 ├── bin/                         # Helper scripts
@@ -227,7 +230,7 @@ Output directory (configured via params.path_output):
 │       └── clairs-to/                 # Somatic SNV calling (ClairS-TO)
 │           └── *.vcf.gz
 │
-├── routine_analysis/            # Analysis module results (detailed outputs)
+├── routine_annotation/            # Analysis module results (detailed outputs)
 │   └── [sample_id]/
 │       ├── classifier/          # Tumor classification
 │       │   ├── nanodx/         # NanoDx neural network results
@@ -370,7 +373,7 @@ The pipeline uses three main path parameters that must be configured:
 
 **1. Pipeline Data Path (`params.path`)** - Reference files and databases
 ```groovy
-// conf/analysis.config, conf/epi2me.config, conf/mergebam.config
+// conf/annotation.config, conf/epi2me.config, conf/mergebam.config
 params {
     path = "/data/routine_nWGS_pipeline/nWGS_pipeline/data"
     // Contains: reference/, humandb/ directories
@@ -389,7 +392,7 @@ params {
 
 **3. Output Path (`params.path_output`)** - Pipeline results
 ```groovy
-// conf/mergebam.config, conf/epi2me.config, conf/analysis.config
+// conf/mergebam.config, conf/epi2me.config, conf/annotation.config
 params {
     path_output = "/data/routine_nWGS"
     // Contains: sample_ids_bam.txt, routine_bams/, routine_epi2me/, routine_results/
@@ -401,6 +404,36 @@ params {
 - `params.input_dir`: ONT sequencing input (changes per run)
 - `params.path_output`: Where all results are stored (consistent location)
 - The `input_dir` can be overridden using `--input_dir` flag or `smart_sample_monitor_v2.sh -d`
+
+### SNV Filtering Configuration
+
+The pipeline includes configurable quality thresholds for SNV filtering in the final reports:
+
+```groovy
+// conf/annotation.config
+params {
+    snv_depth_threshold = 10    // Minimum sequencing depth (default: 10)
+    snv_gq_threshold = 10       // Minimum Genotype Quality (default: 10)
+}
+```
+
+**How Filtering Works:**
+- **Depth threshold**: Filters out variants with sequencing depth below the threshold
+- **GQ threshold**: For variants with multiple GQ values from different callers (e.g., "20,26,41"), keeps the variant if ANY value meets the threshold
+- Both filters must pass for a variant to appear in the final report
+
+**Examples:**
+```groovy
+# Stricter filtering (higher quality variants only)
+snv_depth_threshold = 15
+snv_gq_threshold = 20
+
+# More permissive filtering (include more variants)
+snv_depth_threshold = 5
+snv_gq_threshold = 5
+```
+
+**Note:** These thresholds only affect the variants shown in the Markdown PDF reports. The raw VCF files contain all called variants regardless of these filters.
 
 ### Container Configuration
 Choose your preferred container engine:

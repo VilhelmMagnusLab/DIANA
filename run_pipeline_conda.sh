@@ -8,7 +8,7 @@ LOG_BASE_DIR="${LOG_BASE_DIR:-$PWD}"  # Default to current directory/logs
 
 # Parse command line arguments for paths
 NEXTFLOW_ARGS=()
-ANALYSIS_MODE="all"  # Default analysis mode
+ANNOTATION_MODE="all"  # Default annotation mode
 CUSTOM_RUN_NAME=""   # Custom run name if specified
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -16,8 +16,8 @@ while [[ $# -gt 0 ]]; do
             LOG_BASE_DIR="$2"
             shift 2
             ;;
-        --run_mode_analysis)
-            ANALYSIS_MODE="$2"
+        --run_mode_annotation)
+            ANNOTATION_MODE="$2"
             # Still pass this argument to Nextflow
             NEXTFLOW_ARGS+=("$1" "$2")
             shift 2
@@ -49,14 +49,14 @@ fi
 echo "Using: conda environment (nwgs_env) - no containers"
 
 # Auto-detect config file based on arguments
-CONFIG="conf/analysis.config"  # Default config
+CONFIG="conf/annotation.config"  # Default config
 USE_CONFIG_FILE=false
 
 # Check if run_mode_order is specified (highest priority)
 if [[ " ${NEXTFLOW_ARGS[*]} " =~ " --run_mode_order " ]]; then
-    CONFIG="conf/analysis.config"
+    CONFIG="conf/annotation.config"
     USE_CONFIG_FILE=true
-    echo " Using Analysis configuration for run_mode_order: $CONFIG"
+    echo " Using Annotation configuration for run_mode_order: $CONFIG"
 # Check if epi2me mode is specified
 elif [[ " ${NEXTFLOW_ARGS[*]} " =~ " --run_mode_epi2me " ]]; then
     CONFIG="conf/epi2me.config"
@@ -67,7 +67,7 @@ elif [[ " ${NEXTFLOW_ARGS[*]} " =~ " --run_mode_mergebam " ]]; then
     USE_CONFIG_FILE=false
     echo " Using Mergebam configuration (via nextflow.config): $CONFIG"
 else
-    echo " Using default analysis configuration: $CONFIG"
+    echo " Using default annotation configuration: $CONFIG"
 fi
 
 echo " Starting nWGS pipeline with conda environment (no containers)..."

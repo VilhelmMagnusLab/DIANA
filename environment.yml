@@ -3,10 +3,56 @@ channels:
   - conda-forge
   - bioconda
   - defaults
+
 dependencies:
+  # Base environment
   - conda-forge::python=3.9.5
   - conda-forge::markdown=3.3.4
   - conda-forge::pymdown-extensions=8.2
   - conda-forge::pygments=2.9.0
+
+  # Quality Control
   - bioconda::fastqc=0.11.9
-  - bioconda::multiqc=1.11 
+  - bioconda::multiqc=1.11
+
+  # Container Management
+  # Note: Primary analysis runs in Singularity/Apptainer containers
+  # See SOFTWARE_VERSIONS.md for detailed container specifications
+
+# Container-based Tools (via Singularity/Docker)
+# ================================================
+# The following tools run in containers and are NOT installed via conda:
+#
+# SNV/Indel Calling:
+#   - Clair3 (v1.0+, in clair3_amd64 container)
+#   - ClairS-TO (in clairsto_amd64 container)
+#
+# Structural Variants:
+#   - Sniffles v2.5.2+ (in snifflesv252_update container)
+#
+# Copy Number Variation:
+#   - QDNAseq (in qdnaseq_amd64 container)
+#   - ACE 1.24.0 (in ace_1.24.0 container)
+#   - CNV Annotation tools (in annotcnv_images container)
+#
+# Methylation:
+#   - Modkit (in modkit container)
+#   - Sturgeon (in sturgeon_amd64 container)
+#
+# Quality Control:
+#   - Cramino 0.16.0 (in mgmt_nanopipe container)
+#
+# Classification:
+#   - NanoDx (in nanodx_images container)
+#   - t-SNE/UMAP (in crossnnumap container)
+#
+# Visualization:
+#   - VCF2Circos (in vcf2circos container)
+#   - IGV Reports (in igv_report_amd64 container)
+#   - Gviz plots (in gviz_amd64 container)
+#   - R Markdown reports (in markdown_images container)
+#
+# For complete version information, see:
+#   - SOFTWARE_VERSIONS.md (human-readable documentation)
+#   - versions.yml (machine-readable format)
+#   - dockerfiles/ directory (container definitions)

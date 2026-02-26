@@ -16,7 +16,7 @@ while [[ $# -gt 0 ]]; do
             LOG_BASE_DIR="$2"
             shift 2
             ;;
-        --run_mode_analysis)
+        --run_mode_annotation)
             ANALYSIS_MODE="$2"
             NEXTFLOW_ARGS+=("$1" "$2")
             shift 2
@@ -49,12 +49,12 @@ fi
 echo "Using: docker"
 
 # Auto-detect config file based on arguments
-CONFIG="conf/analysis.config"  # Default config
+CONFIG="conf/annotation.config"  # Default config
 USE_CONFIG_FILE=false
 
 # Check if run_mode_order is specified (highest priority)
 if printf '%s\n' "${NEXTFLOW_ARGS[@]}" | grep -q "--run_mode_order"; then
-    CONFIG="conf/analysis.config"
+    CONFIG="conf/annotation.config"
     USE_CONFIG_FILE=true
     echo " Using Analysis configuration for run_mode_order: $CONFIG"
 # Check if epi2me mode is specified
@@ -167,7 +167,7 @@ if [ $? -eq 0 ]; then
             | grep -E '^[A-Za-z0-9._-]+' \
             | sort -u | tr '\n' ' ')
 
-        # Pattern 2: "Sample thresholds: [T25-256:null]" (for run_mode_analysis)
+        # Pattern 2: "Sample thresholds: [T25-256:null]" (for run_mode_annotation)
         if [ -z "$SAMPLE_IDS" ]; then
             SAMPLE_IDS=$(grep -E "Sample thresholds:" "$NEXTFLOW_LOG" \
                 | sed -E 's/.*\[([A-Za-z0-9._-]+):.*/\1/' \

@@ -6,23 +6,23 @@ nextflow.enable.dsl=2
 if (params.run_mode_mergebam || params.run_mode_order) {
     include { mergebam } from './modules/mergebam.nf'
 }
-if (params.run_mode_epi2me || params.run_mode_order || params.run_mode_epianalyse) {
+if (params.run_mode_epi2me || params.run_mode_order || params.run_mode_epiannotation) {
     include { epi2me }   from './modules/epi2me.nf'
 }
-if (params.run_mode_analysis || params.run_mode_order || params.run_mode_epianalyse) {
-    include { analysis } from './modules/analysis.nf'
+if (params.run_mode_annotation || params.run_mode_order || params.run_mode_epiannotation) {
+    include { annotation } from './modules/annotation.nf'
 }
 
 workflow {
     if (params.run_mode_order) {
-        // Set run_mode_analysis to 'all' when using run_mode_order to ensure all analyses run
-        params.run_mode_analysis = 'all'
+        // Set run_mode_annotation to 'all' when using run_mode_order to ensure all analyses run
+        params.run_mode_annotation = 'all'
         
         log.info """
         Running pipelines sequentially in strict order:
         1. Mergebam Pipeline
         2. Epi2me Pipeline
-        3. Analysis Pipeline
+        3. Annotation Pipeline
         """
 
         // Step 1: Run mergebam
@@ -44,7 +44,7 @@ workflow {
         def epi2me_results = epi2me(epi2me_input)
 
         // Step 3: Prepare analysis input using epi2me outputs and mergebam outputs
-        def analysis_input = epi2me_results.results
+        def annotation_input = epi2me_results.results
             .join(mergebam_results.occ_bams, by: 0)
             .map { joined ->
                 println "DEBUG: joined: ${joined}"
@@ -79,18 +79,18 @@ workflow {
             }
 
         // Step 4: Run analysis
-        log.info "=== Starting Analysis Pipeline ==="
-        def analysis_results = analysis(analysis_input)
+        log.info "=== Starting Annotation Pipeline ==="
+        def annotation_results = annotation(annotation_input)
 
-    } else if (params.run_mode_epianalyse) {
+    } else if (params.run_mode_epiannotation) {
         // Combined mode: run epi2me then analysis (assumes merged BAM files already exist)
-        // Set run_mode_analysis to 'all' to ensure all analyses run
-        params.run_mode_analysis = 'all'
+        // Set run_mode_annotation to 'all' to ensure all analyses run
+        params.run_mode_annotation = 'all'
 
         log.info """
-        Running combined Epi2me + Analysis Pipeline sequentially:
+        Running combined Epi2me + Annotation Pipeline sequentially:
         1. Epi2me Pipeline (using existing merged BAM files)
-        2. Analysis Pipeline (using epi2me outputs)
+        2. Annotation Pipeline (using epi2me outputs)
         """
 
         // Step 1: Create input channel for epi2me from existing merged BAM files
@@ -139,8 +139,8 @@ workflow {
                 def fields = line.tokenize("\t")
                 def sample_id = fields[0].trim()
 
-                def bam = file("${params.occ_bam_folder}/${sample_id}.roi.bam")
-                def bai = file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai")
+                def bam = file("${params.roi_bam_folder}/${sample_id}.roi.bam")
+                def bai = file("${params.roi_bam_folder}/${sample_id}.roi.bam.bai")
 
                 if (!bam.exists() || !bai.exists()) {
                     error "ROI BAM file or index not found for sample ID: ${sample_id}"
@@ -150,7 +150,7 @@ workflow {
             }
 
         // Step 4: Combine epi2me results with OCC BAM files (wait for epi2me to complete)
-        def analysis_input = epi2me_results.results
+        def annotation_input = epi2me_results.results
             .join(occ_bam_channel, by: 0)
             .map { joined ->
                 def sample_id = joined[0]
@@ -184,13 +184,13 @@ workflow {
             }
 
         // Step 3: Run analysis
-        log.info "=== Starting Analysis Pipeline ==="
-        def analysis_results = analysis(analysis_input)
+        log.info "=== Starting Annotation Pipeline ==="
+        def annotation_results = annotation(annotation_input)
 
     } else {
         if (params.run_mode_mergebam) mergebam()
         if (params.run_mode_epi2me) epi2me(Channel.empty())
-        if (params.run_mode_analysis) analysis(Channel.empty())
+        if (params.run_mode_annotation) annotation(Channel.empty())
     }
 }
 

@@ -114,7 +114,7 @@ ${YELLOW}EXAMPLES:${NC}
     $0 -d /path/to/data -s /path/to/samples.txt -w /tmp/work
 
     # Different config file
-    $0 -c conf/analysis.config -v
+    $0 -c conf/annotation.config -v
 
 ${YELLOW}DIRECTORY STRUCTURE:${NC}
     The script expects sample directories with final_summary files:
@@ -192,16 +192,22 @@ resolve_variables() {
     # Extract base variables
     local base_path=$(extract_config_value "$config_file" "path")
     local nwgs_dir=$(extract_config_value "$config_file" "nWGS_dir")
-    
+    local path_output=$(extract_config_value "$config_file" "path_output")
+
     # Replace variable patterns
     if [[ -n "$base_path" ]]; then
         resolved_path="${resolved_path//\$\{params.path\}/$base_path}"
         resolved_path="${resolved_path//\$\{path\}/$base_path}"
     fi
-    
+
     if [[ -n "$nwgs_dir" ]]; then
         resolved_path="${resolved_path//\$\{params.nWGS_dir\}/$nwgs_dir}"
         resolved_path="${resolved_path//\$\{nWGS_dir\}/$nwgs_dir}"
+    fi
+
+    if [[ -n "$path_output" ]]; then
+        resolved_path="${resolved_path//\$\{params.path_output\}/$path_output}"
+        resolved_path="${resolved_path//\$\{path_output\}/$path_output}"
     fi
     
     echo "$resolved_path"
@@ -473,16 +479,16 @@ run_sample_pipeline() {
     if bash run_pipeline_singularity.sh --run_mode_order -w "$work_dir" -resume ; then
 
         # Check if markdown report was generated successfully
-        # The markdown report is published using result_path from analysis.config
-        # Try to get result_path from analysis.config, or construct it
-        local analysis_config="${PIPELINE_DIR}/conf/analysis.config"
-        local result_path=$(extract_config_value "$analysis_config" "result_path")
+        # The markdown report is published using result_path from annotation.config
+        # Try to get result_path from annotation.config, or construct it
+        local annotation_config="${PIPELINE_DIR}/conf/annotation.config"
+        local result_path=$(extract_config_value "$annotation_config" "result_path")
 
         # If result_path has variables, resolve them
         if [[ "$result_path" =~ \$\{ ]]; then
-            local analysis_base_path=$(extract_config_value "$analysis_config" "path")
-            result_path="${result_path//\$\{params.path\}/$analysis_base_path}"
-            result_path="${result_path//\$\{path\}/$analysis_base_path}"
+            local annotation_base_path=$(extract_config_value "$annotation_config" "path")
+            result_path="${result_path//\$\{params.path\}/$annotation_base_path}"
+            result_path="${result_path//\$\{path\}/$annotation_base_path}"
         fi
 
         local report_pattern="${result_path}/${sample_id}_markdown_pipeline_report.pdf"

@@ -6,10 +6,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### `Added`
+- Added configurable SNV filtering thresholds in annotation configuration
+  - `snv_depth_threshold` parameter (default: 10) for minimum sequencing depth filtering
+  - `snv_gq_threshold` parameter (default: 10) for minimum Genotype Quality filtering
+  - Filters variants in Markdown PDF reports while preserving all variants in raw VCF files
+  - GQ filtering supports multiple values from different callers (keeps variant if ANY value meets threshold)
+- Added comprehensive software version documentation
+  - `SOFTWARE_VERSIONS.md` - Human-readable documentation of all tools and versions
+  - `versions.yml` - Machine-readable YAML format for automation
+  - `CONTAINERS.md` - Quick reference guide for container usage and troubleshooting
+- Added VCF indexing (.tbi files) to epi2me:run_clairs_to process
+  - Automatically creates tabix index files for ClairS-TO VCF outputs
+  - Ensures downstream annotation processes can access indexed VCF files
+  - Handles empty VCF files gracefully when no variants are found
+- Added automatic log file organization
+  - All Nextflow logs now written to `logs/` directory
+  - Log filenames include run mode and sample ID for easy identification
+  - Format: `trace-{mode}_{sample_id}_{timestamp}.txt`
+  - HTML reports: `execution_report-{mode}_{sample_id}_{timestamp}.html`
 
 ### `Changed`
+- **BREAKING**: Renamed "analysis" to "annotation" throughout the entire pipeline
+  - Module renamed: `modules/analysis.nf` → `modules/annotation.nf`
+  - Config renamed: `conf/analysis.config` → `conf/annotation.config`
+  - Run mode renamed: `--run_mode_analysis` → `--run_mode_annotation`
+  - Run mode renamed: `--run_mode_epianalyse` → `--run_mode_epiannotation`
+  - Directory renamed: `routine_analysis/` → `routine_annotation/`
+  - Updated all documentation, scripts, and configuration files
+- Updated SNV variant caller abbreviations in reports
+  - Changed ClairS-TO abbreviation from "C" to "S_TO" for clarity
+  - Updated legend: "P:Clair3 Pileup, M:Clair3 Merged and S_TO:ClairS-TO Somatic tumour-only"
+- Renamed process `run_nn_classifier` to `crossNN` for clarity
+  - Updated in `modules/annotation.nf` (7 occurrences)
+  - Updated in `conf/annotation.config`
+  - Updated in `conf/example.config`
+- Updated smart_sample_monitor scripts for consistency
+  - `smart_sample_monitor_v2.sh`: Changed variable names from `analysis_config` → `annotation_config`
+  - `smart_sample_monitor.sh`: Changed variable names from `analysis_config` → `annotation_config`
+- Updated setup scripts
+  - `setup_docker.sh`: Updated pipeline mode examples and config file references
+  - `setup_singularity.sh`: Updated default config, directory structure, and mode examples
+  - `run_pipeline_conda.sh`: Updated variable names and config file references
+- Enhanced README.md documentation
+  - Added SNV Filtering Configuration section with examples
+  - Updated all pipeline mode references to use "annotation" terminology
+  - Added SNV mode to epi2me and annotation module options
+  - Updated container and configuration file references
+- Modified ClairS-TO VCF file access in annotation workflow
+  - Changed from passing individual VCF files to using clairsto_output_dir
+  - Ensures .tbi index files are accessible alongside VCF files
+  - Fixes "could not retrieve index file" errors in run_mode_order
 
 ### `Fixed`
+- Fixed "tabix: command not found" error in run_mode_order
+  - Root cause: VCF files from epi2me lacked .tbi index files in run_mode_order
+  - Solution: Added tabix indexing to epi2me:run_clairs_to process
+  - Removed redundant tabix calls from annotation:clairs_to_annotate process
+- Fixed bcftools concat index file access issues
+  - Updated annotation:clairs_to_annotate to reference VCF files via clairsto_output_dir
+  - Ensures both .vcf.gz and .vcf.gz.tbi files are accessible in same directory
+- Fixed trace-*.txt files cluttering pipeline root directory
+  - Implemented automatic log organization to `logs/` directory
+  - Moved 197+ existing trace files to organized location
 
 ## [1.0.1] - 2024-11-14
 

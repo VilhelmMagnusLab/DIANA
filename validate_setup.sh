@@ -36,7 +36,7 @@ fi
 # Check configuration files
 echo ""
 echo "Configuration Files:"
-for config in conf/analysis.config conf/epi2me.config conf/mergebam.config; do
+for config in conf/annotation.config conf/epi2me.config conf/mergebam.config; do
     if [ -f "$config" ]; then
         echo "  ✓ $(basename $config)"
     else

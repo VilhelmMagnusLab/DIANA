@@ -57,7 +57,7 @@ readonly SCRIPT_VERSION="2.1"
 readonly SCRIPT_DATE="2025-11-17"
 
 # HARDCODED CONFIGURATION
-readonly HARDCODED_SAMPLE_IDS_FILE="/data/routine_nWGS/sample_ids_bam.txt"
+readonly HARDCODED_SAMPLE_IDS_FILE="/home/godzilla/routine_nWGS/sample_ids_bam.txt"
 
 # Detect script location for finding pipeline directory
 # Resolve symlinks to find the actual script location
@@ -72,9 +72,9 @@ SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 # Default configuration
 readonly DEFAULT_CONFIG_FILE="conf/mergebam.config"
 readonly DEFAULT_PIPELINE_DIR="$SCRIPT_DIR"
-readonly DEFAULT_NEXTFLOW_WORK_DIR="/data/trash"
+readonly DEFAULT_NEXTFLOW_WORK_DIR="/home/godzilla/trash"
 readonly DEFAULT_CHECK_INTERVAL=300
-readonly DEFAULT_TIMEOUT=432000
+readonly DEFAULT_TIMEOUT=259200
 
 # Global variables
 CONFIG_FILE="$DEFAULT_CONFIG_FILE"
@@ -158,7 +158,7 @@ ${YELLOW}EXAMPLES:${NC}
     $0 -r
 
     # Different config file with resume
-    $0 -c conf/analysis.config -r -v
+    $0 -c conf/annotation.config -r -v
 
 ${YELLOW}DIRECTORY STRUCTURE:${NC}
     The script expects sample directories with final_summary files:
@@ -507,15 +507,15 @@ run_sample_pipeline() {
         # not just the single sample we think we're running. We need to check ALL samples
         # and mark them as completed if they have markdown reports.
 
-        # Get result_path from analysis.config
-        local analysis_config="${PIPELINE_DIR}/conf/analysis.config"
-        local result_path=$(extract_config_value "$analysis_config" "result_path")
+        # Get result_path from annotation.config
+        local annotation_config="${PIPELINE_DIR}/conf/annotation.config"
+        local result_path=$(extract_config_value "$annotation_config" "result_path")
 
         # If result_path has variables, resolve them
         if [[ "$result_path" =~ \$\{ ]]; then
-            local analysis_base_path=$(extract_config_value "$analysis_config" "path")
-            result_path="${result_path//\$\{params.path\}/$analysis_base_path}"
-            result_path="${result_path//\$\{path\}/$analysis_base_path}"
+            local annotation_base_path=$(extract_config_value "$annotation_config" "path")
+            result_path="${result_path//\$\{params.path\}/$annotation_base_path}"
+            result_path="${result_path//\$\{path\}/$annotation_base_path}"
         fi
 
         # Check ALL samples (not just the one we think we're running)

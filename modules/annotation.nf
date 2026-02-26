@@ -2,9 +2,9 @@
 nextflow.enable.dsl=2
 
 //---------------------------------------------------------------------
-// Analysis Pipeline: Comprehensive analysis of glioblastoma samples
-// Includes MGMT methylation, structural variant annotation, CNV analysis, 
-// SNV calling, and report generation
+// Annotation Pipeline: Comprehensive annotation of glioblastoma samples
+// Includes MGMT methylation, structural variant annotation, CNV analysis,
+// SNV annotation, and report generation
 //---------------------------------------------------------------------
 
 def start_time = new Date()
@@ -14,10 +14,10 @@ def start_time = new Date()
 //---------------------------------------------------------------------
 
 def validateParameters() {
-    params.run_mode = params.run_mode_analysis ?: 'all'
-    println "Analysis run mode: ${params.run_mode}"
-    if (!['mgmt', 'svannasv', 'cnv', 'occ', 'tertp', 'mgmt', 'rmd', 'stat', 'all'].contains(params.run_mode)) {
-        error "ERROR: Invalid run_mode '${params.run_mode}' for analysis. Valid modes: svannasv, cnv, occ, tertp, mgmt, rmd, stat, all"
+    params.run_mode = params.run_mode_annotation ?: 'rmd'
+    println "Annotation run mode: ${params.run_mode}"
+    if (!['mgmt', 'svannasv', 'cnv', 'roi', 'tertp', 'rmd'].contains(params.run_mode)) {
+        error "ERROR: Invalid run_mode '${params.run_mode}' for annotation. Valid modes: mgmt, svannasv, cnv, roi, tertp, rmd"
     }
 }
 
@@ -51,7 +51,7 @@ process extract_epic {
     memory '2 GB'
     label 'epic'
     tag "${sample_id}"
-    publishDir "${params.output_path}/${sample_id}/methylation/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/methylation/", mode: "copy", overwrite: true
     publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_mnpflex_input.bed"
 
     input:
@@ -99,7 +99,7 @@ process extract_epic {
 // Prepare nanoDX input for methylation data processing and CpG site intersection
 process nanodx {
     label 'epic'
-    publishDir "${params.output_path}/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(nanodx_bed), path(hg19_450model)
@@ -118,7 +118,7 @@ process sturgeon {
     cpus 4
     memory '2 GB'
     label 'epic'
-    publishDir "${params.output_path}/${sample_id}/classifier/sturgeon", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/sturgeon", mode: "copy", overwrite: true
     publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_bedmethyl_sturgeon_general.pdf"
 
     input:
@@ -150,9 +150,9 @@ process sturgeon {
 
 
 // Neural network classification for tumor type prediction using NanoDx CrossNN classifier
-process run_nn_classifier {
+process crossNN {
     label 'nanodx'
-    publishDir "${params.output_path}/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
     
     input:
     tuple val(sample_id), path(bed_file), path(model_file), path(snakefile), path(nn_model)
@@ -210,7 +210,7 @@ EOF
 process tsne_plot {
     label 'tsne'
     stageInMode 'copy'
-    publishDir "${params.output_path}/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
     publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_tsne_plot.html"
 
     input:
@@ -261,7 +261,7 @@ process tsne_plot {
 // MGMT promoter methylation analysis and quantification
 process mgmt_promoter {
     label 'epic'
-    publishDir "${params.output_path}/${sample_id}/methylation/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/methylation/", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(mgmt_bed)
@@ -292,11 +292,11 @@ process mgmt_promoter {
 process svannasv {
 
   label 'svannasv'
-   publishDir "${params.output_path}/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
+   publishDir "${params.output_path}/routine_annotation/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_occ_svanna_annotation.html"
 
    input:
-   tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(occ_protein_coding_bed)
+   tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(roi_protein_coding_bed)
 
    output:
    
@@ -310,7 +310,7 @@ process svannasv {
    echo "Input files:"
    echo "SV file: $wf_sv"
    echo "SV index: $wf_sv_tbi"
-   echo "OCC protein coding bed: $occ_protein_coding_bed"
+   echo "OCC protein coding bed: $roi_protein_coding_bed"
    ls -la
 
    bcftools view -O z -o ${sample_id}_sniffles2_under30mb.vcf.gz   -i '(INFO/SVTYPE="DUP" || INFO/SVTYPE="INV" || INFO/SVTYPE="INS") && INFO/SVLEN < 30000000 || (INFO/SVTYPE="DEL" && INFO/SVLEN > -30000000)'   $wf_sv
@@ -332,7 +332,7 @@ process svannasv {
 // Fusion event analysis and filtering from structural variants
 process svannasv_fusion_events {
     label 'svannasv'
-    publishDir "${params.output_path}/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(occ_svannavcf), path(genecode_bed), path(occ_fusions_genes)
@@ -453,7 +453,7 @@ process svannasv_fusion_events {
 // Circos plot generation for structural variant visualization
 process circosplot {
    label 'circos'
-   publishDir "${params.output_path}/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
+   publishDir "${params.output_path}/routine_annotation/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
    
    input:
    tuple val(sample_id), path(svanna_output), path(vcf2circos_json)
@@ -498,12 +498,12 @@ process circosplot {
 // Copy number variant annotation and analysis with ACE
 process annotatecnv {
    label 'annotatecnv'
-    publishDir "${params.output_path}/${sample_id}/cnv/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/cnv/", mode: "copy", overwrite: true
 
    input:
     tuple val(sample_id),
           path(vcf_file),
-          path(occ_protein_coding_bed),
+          path(roi_protein_coding_bed),
           path(calls_bed),
           path(seg_bed),
           val(threshold),  // Now explicitly receiving threshold
@@ -545,7 +545,7 @@ process annotatecnv {
     awk 'OFS="\\t" {if (NR > 13) \$1="chr"\$1; print}' $vcf_file > ${sample_id}_calls_fixed.vcf
     
     # Intersect and process
-    intersectBed -a ${sample_id}_calls_fixed.vcf -b $occ_protein_coding_bed -wa -wb | \
+    intersectBed -a ${sample_id}_calls_fixed.vcf -b $roi_protein_coding_bed -wa -wb | \
         cut -f1,2,5,8,20 | awk '/protein_coding/' | \
         awk -v OFS=";" '\$1=\$1' | \
         awk 'BEGIN { FS=";"; OFS="\\t"} {\$1=\$1; print}' | \
@@ -565,7 +565,7 @@ process annotatecnv {
         ${sample_id}_annotatedcnv_filter.csv > ${sample_id}_annotatedcnv_filter_header.csv
 
     # Run CNV mapping with threshold
-    cnv_mapping_occfusion_update.py $seg_bed $occ_protein_coding_bed \
+    cnv_mapping_occfusion_update.py $seg_bed $roi_protein_coding_bed \
         ${sample_id}_tumor_copy.txt ${sample_id}_bins_filter.bed ${threshold}
     
     cnv_mapping_occfusion_update_nofilter.py $seg_bed \
@@ -573,107 +573,83 @@ process annotatecnv {
     """
 }
 
-// SNV calling and annotation using Clair3 for OCC (regions of interest) regions
-process clair3 {
+// Annotation of Clair3 variant calling results
+process clair3_annotate {
     label 'clair3'
-    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
-   
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/snv_annotation", mode: "copy", overwrite: true
+
     input:
-    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai),  path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex),path(hg38_cosmic100),path(hg38_cosmic100index)
+    tuple val(sample_id), path(clair3_output_dir), path(pileup_vcf), path(merge_vcf)
 
     output:
-    tuple val(sample_id), path('output_clair3/')
     tuple val(sample_id), path("${sample_id}_occ_pileup_snvs_avinput")
     tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), emit:occpileupannotateandfilterout
     tuple val(sample_id), path("${sample_id}_occ_merge_snv_avinpt")
     tuple val(sample_id), path("${sample_id}_occ_merge.hg38_multianno.txt")
     tuple val(sample_id), path("${sample_id}_merge_annotateandfilter.csv"), emit:mergeannotateandfilterout
-    tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), path("${sample_id}_merge_annotateandfilter.csv"), emit:clair3output 
-
+    tuple val(sample_id), path("${sample_id}_occ_pileup_annotateandfilter.csv"), path("${sample_id}_merge_annotateandfilter.csv"), emit:clair3output
 
     script:
-   
-   """ 
-   # Activate conda environment for Clair3
-   source /opt/conda/etc/profile.d/conda.sh
-   conda activate clair3
+    """
+    convert2annovar.pl ${pileup_vcf} \
+        --format vcf4 \
+        --withfreq \
+        --filter pass \
+        --fraction 0.1 \
+        --includeinfo \
+        --outfile ${sample_id}_occ_pileup_snvs_avinput
 
-   /opt/bin/run_clair3.sh \
-    --bam_fn=$occ_bam \
-    --ref_fn=$reference_genome  \
-    --threads=8 \
-    --var_pct_full=1 \
-    --ref_pct_full=1 \
-    --var_pct_phasing=1 \
-    --platform="ont" \
-    --no_phasing_for_fa \
-    --model_path=/home/godzilla/nWGS_pipeline/data/reference/r1041_e82_400bps_sup_v420 \
-    --output=output_clair3
- 
- convert2annovar.pl output_clair3/pileup.vcf.gz \
-    --format vcf4 \
-	--withfreq \
-	--filter pass \
-	--fraction 0.1 \
-	--includeinfo \
-	--outfile ${sample_id}_occ_pileup_snvs_avinput
+    table_annovar.pl  ${sample_id}_occ_pileup_snvs_avinput \
+        -outfile occ_pileup \
+        -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
+        -operation g,f,f \
+        ${params.humandb_dir} \
+        -otherinfo
 
-   
-   table_annovar.pl  ${sample_id}_occ_pileup_snvs_avinput \
-         -outfile occ_pileup \
-         -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
-         -operation g,f,f \
-         ${params.humandb_dir} \
-         -otherinfo
-      
     awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' occ_pileup.hg38_multianno.txt \
-| awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
-| awk '!/dist=166/' \
-| cut -f1-16,26,28,29 > ${sample_id}_occ_pileup_annotateandfilter.csv
+        | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
+        | awk '!/dist=166/' \
+        | cut -f1-16,26,28,29 > ${sample_id}_occ_pileup_annotateandfilter.csv
 
-convert2annovar.pl \
-    output_clair3/merge_output.vcf.gz \
-    --format vcf4 \
-    --withfreq \
-    --filter pass \
-    --fraction 0.1 \
-    --includeinfo \
-    --outfile ${sample_id}_occ_merge_snv_avinpt
+    convert2annovar.pl ${merge_vcf} \
+        --format vcf4 \
+        --withfreq \
+        --filter pass \
+        --fraction 0.1 \
+        --includeinfo \
+        --outfile ${sample_id}_occ_merge_snv_avinpt
 
-table_annovar.pl ${sample_id}_occ_merge_snv_avinpt \
-    -outfile occ_merge \
-    -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
-    -operation g,f,f \
-    ${params.humandb_dir} \
-    -otherinfo
+    table_annovar.pl ${sample_id}_occ_merge_snv_avinpt \
+        -outfile occ_merge \
+        -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
+        -operation g,f,f \
+        ${params.humandb_dir} \
+        -otherinfo
 
     awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' \
-     occ_merge.hg38_multianno.txt \
-    | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
-    | awk '!/dist=166/' \
-    | cut -f1-16,26,28,29 \
-    > ${sample_id}_merge_annotateandfilter.csv
+        occ_merge.hg38_multianno.txt \
+        | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
+        | awk '!/dist=166/' \
+        | cut -f1-16,26,28,29 \
+        > ${sample_id}_merge_annotateandfilter.csv
 
     cp occ_merge.hg38_multianno.txt ${sample_id}_occ_merge.hg38_multianno.txt
-    
-    # remove tmp folder
-
-    rm -rf output_clair3/tmp*
     """
-   }
+}
 
 
 
 // Somatic variant calling using ClairS-TO for tumor-only samples
-process clairs_to {
+// Annotation of ClairS-TO variant calling results
+process clairs_to_annotate {
     label 'clairsto'
-    publishDir "${params.path}/routine_epi2me/${sample_id}", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/snv_annotation", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(reference_genome), path(reference_genome_bai),  path(refGene), path(hg38_refGeneMrna), path(clinvar), path(clinvarindex),path(hg38_cosmic100),path(hg38_cosmic100index), path(occ_protein_coding_bed)
-    
+    tuple val(sample_id), path(clairsto_output_dir), path(snv_vcf), path(indel_vcf)
+
     output:
-    tuple val(sample_id), path('clairsto_output/')
+    //tuple val(sample_id), path('clairsto_output/')
     tuple val(sample_id), path("${sample_id}_clairS_To_snv_avinput")
     tuple val(sample_id), path("${sample_id}_ClairS_TO_snv.hg38_multianno.txt")
     tuple val(sample_id), path("${sample_id}_annotateandfilter_clairsto.csv"), emit:annotateandfilter_clairstoout
@@ -681,62 +657,39 @@ process clairs_to {
 
     script:
     """
-    # Set micromamba environment variables
-    export MAMBA_ROOT_PREFIX=/opt/micromamba
-    export MAMBA_EXE=/opt/micromamba/bin/micromamba
-
-    # Set MKL variables before activation
-    export MKL_INTERFACE_LAYER=LP64
-    export MKL_THREADING_LAYER=SEQUENTIAL
-    
-    # Activate conda environment
-    source /opt/micromamba/etc/profile.d/micromamba.sh
-    micromamba activate clairs-to
-
-    /opt/bin/run_clairs_to \
-        --tumor_bam_fn=${occ_bam} \
-        --ref_fn=${reference_genome} \
-        --threads=${task.cpus} \
-        --platform="ont_r10_dorado_4khz" \
-        --output_dir=clairsto_output \
-        --bed_fn=${occ_protein_coding_bed} \
-        --conda_prefix /opt/micromamba/envs/clairs-to
-
-    bcftools concat -a -d all clairsto_output/snv.vcf.gz clairsto_output/indel.vcf.gz -Oz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
+    # VCF index files (.tbi) should already exist from the epi2me:run_clairs_to process
+    # bcftools concat requires these index files to be present
+    # Use the clairsto_output_dir to access both VCF files and their .tbi index files
+    bcftools concat -a -d all ${clairsto_output_dir}/snv.vcf.gz ${clairsto_output_dir}/indel.vcf.gz -Oz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
 
     convert2annovar.pl ${sample_id}_merge_snv_indel_claisto.vcf.gz \
-   --format vcf4 \
-   --filter pass \
-   --includeinfo \
-   --outfile  ${sample_id}_clairS_To_snv_avinput
+        --format vcf4 \
+        --filter pass \
+        --includeinfo \
+        --outfile  ${sample_id}_clairS_To_snv_avinput
 
+    table_annovar.pl ${sample_id}_clairS_To_snv_avinput \
+        -outfile ClairS_TO_snv \
+        -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
+        -operation g,f,f \
+        ${params.humandb_dir} \
+        -otherinfo
 
-  table_annovar.pl ${sample_id}_clairS_To_snv_avinput \
-   -outfile ClairS_TO_snv \
-   -buildver hg38 -protocol refGene,clinvar_20240611,cosmic100coding2024\
-   -operation g,f,f \
-    ${params.humandb_dir} \
-   -otherinfo  
+    awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' \
+        ClairS_TO_snv.hg38_multianno.txt \
+        | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
+        | awk '!/dist=166/' \
+        | cut -f1-16,25,26  > ${sample_id}_annotateandfilter_clairsto.csv
 
-   awk '/exonic/ && /nonsynonymous/ && !/Benign/ && !/Likely_benign/|| /upstream/ || /Func.refGene/ || /splicing/ && !/Benign/ && !/Likely_benign/ || /frameshift/ && !/Benign/ && !/Likely_benign/ || /stopgain/ && !/Benign/ && !/Likely_benign/ || /Pathogenic/' \
-   ClairS_TO_snv.hg38_multianno.txt \
-   | awk '/exonic/ || /TERT/ || /Func.refGene/ || /Pathogenic/'  \
-  | awk '!/dist=166/' \
-  | cut -f1-16,25,26  > ${sample_id}_annotateandfilter_clairsto.csv
-
-   cp ClairS_TO_snv.hg38_multianno.txt ${sample_id}_ClairS_TO_snv.hg38_multianno.txt
- 
-    # remove tmp folder
-
-   rm -rf clairsto_output/tmp*
+    cp ClairS_TO_snv.hg38_multianno.txt ${sample_id}_ClairS_TO_snv.hg38_multianno.txt
     """
-   }
+}
 
 // Merge and filter annotations from Clair3 and ClairS-TO results
 process merge_annotation {
     debug true
     label 'merge_annotation'
-    publishDir "${params.output_path}/${sample_id}/merge_annot_clair3andclairsto/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/merge_annot_clair3andclairsto/", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(merge_file), path(pileup_file), path(clairsto_file), path(occ_genes)
@@ -773,7 +726,7 @@ process merge_annotation {
 // TERT promoter variant visualization using IGV tools
 process igv_tools {
     label 'epic'
-    publishDir "${params.output_path}/${sample_id}/coverage", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/coverage", mode: "copy", overwrite: true
 
     input:
     tuple val(sample_id), path(occ_bam), path(occ_bam_bai), path(tertp_variants), path(ncbirefseq), path(reference_genome), path(reference_genome_bai)
@@ -794,41 +747,9 @@ process igv_tools {
 }
 
 // Quality assessment and statistics using Cramino
-process cramino_report {
-        label 'epic'
-        publishDir "${params.output_path}/${sample_id}/cramino", mode: "copy", overwrite: true
-
-    input:
-    tuple val(sample_id), path(merge_bam), path(merge_bam_bai), path(reference_genome), path(reference_genome_bai)
-
-    output:
-    tuple val(sample_id), file("${sample_id}_cramino_statistics.txt"), emit:craminostatout
-    
-    script:
-    """
-   ### source /opt/conda/etc/profile.d/conda.sh
-    ### conda init
-    ### conda activate annotatecnv_env
-
-      #!/bin/bash
-    set -e
-    
-    # Check if we're in a container and use appropriate conda setup
-    if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
-        # Container environment
-    source /opt/conda/etc/profile.d/conda.sh
-    conda activate annotatecnv_env
-    else
-        # Local environment
-        source activate annotatecnv_env
-    fi
-    cramino $merge_bam --reference $reference_genome > ${sample_id}_cramino_statistics.txt
-   """
-    }
-
 // Genomic region coverage plotting for EGFR, IDH1, and TERTp
 process plot_genomic_regions {
-    publishDir "${params.output_path}/${sample_id}/coverage", mode: 'copy'
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/coverage", mode: 'copy'
     label 'gviz'
     
     input:
@@ -908,18 +829,18 @@ process markdown_report {
     if [ "${params.run_mode_order}" = "true" ]; then
         # For run_mode_order: Create sample_file.txt with sample_id and threshold_value
         THRESHOLD_VALUE=""
-        if [ -f "${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
-            THRESHOLD_VALUE=\$(cat "${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
+        if [ -f "${params.output_path}/routine_annotation/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
+            THRESHOLD_VALUE=\$(cat "${params.output_path}/routine_annotation/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
             # Create sample_file.txt
             echo -e "${sample_id}\\t\${THRESHOLD_VALUE}" > sample_file.txt
             echo "Created sample_file.txt for run_mode_order with: ${sample_id} \${THRESHOLD_VALUE}"
             SAMPLE_FILE="\${PWD}/sample_file.txt"
         else
-            echo "ERROR: ACE threshold file not found for ${sample_id} at ${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt"
+            echo "ERROR: ACE threshold file not found for ${sample_id} at ${params.output_path}/routine_annotation/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt"
             exit 1
         fi
     else
-        # For run_mode_analysis: Check if user provided tumor content first (takes priority)
+        # For run_mode_annotation: Check if user provided tumor content first (takes priority)
         if [ ! -f "${sample_id_file}" ]; then
             echo "ERROR: Sample ID file not found: ${sample_id_file}"
             exit 1
@@ -939,9 +860,9 @@ process markdown_report {
             SAMPLE_FILE="\${PWD}/sample_file.txt"
             echo "Created local sample_file.txt with user-provided tumor content:"
             cat "\${SAMPLE_FILE}"
-        elif [ -f "${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
+        elif [ -f "${params.output_path}/routine_annotation/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt" ]; then
             # User provided only 1 column, but ACE results available - use ACE-calculated value
-            THRESHOLD_VALUE=\$(cat "${params.output_path}/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
+            THRESHOLD_VALUE=\$(cat "${params.output_path}/routine_annotation/${sample_id}/cnv/ace/${sample_id}_ace_results/threshold_value.txt")
             echo -e "${sample_id}\\t\${THRESHOLD_VALUE}" > sample_file.txt
             echo "Created sample_file.txt with ACE-calculated tumor content: ${sample_id} \${THRESHOLD_VALUE}"
             SAMPLE_FILE="\${PWD}/sample_file.txt"
@@ -1005,7 +926,9 @@ process markdown_report {
       "\${PWD}/${snv_target_genes}" \
       "\${PWD}/${protein_coding_bed}" \
       "\${PWD}/\${output_file}" \
-      "${workflow.manifest.version}"
+      "${workflow.manifest.version}" \
+      "${params.snv_depth_threshold}" \
+      "${params.snv_gq_threshold}"
 
     # Clean up intermediate files and folders created by R Markdown (belt and suspenders)
     echo "Cleaning up intermediate R Markdown files..."
@@ -1028,7 +951,7 @@ process markdown_report {
 // ACE tumor content calculation and copy number analysis
 process ace_tmc {
     label 'ace_tmc'
-    publishDir "${params.output_path}/${sample_id}/cnv/ace/", mode: "copy", overwrite: true
+    publishDir "${params.output_path}/routine_annotation/${sample_id}/cnv/ace/", mode: "copy", overwrite: true
     
     input:
     tuple val(sample_id), path(rds_file)
@@ -1074,7 +997,7 @@ process ace_tmc {
 // to prevent cache invalidation. These are created ONCE when the module
 // is loaded, not every time the workflow runs for a new sample.
 
-def occ_protein_coding_bed_ch = Channel.value(file(params.occ_protein_coding_bed))
+def roi_protein_coding_bed_ch = Channel.value(file(params.roi_protein_coding_bed))
 def nanodx_450model_ch = Channel.value(file(params.nanodx_450model))
 def snakefile_nanodx_ch = Channel.value(file(params.snakefile_nanodx))
 def nn_model_ch = Channel.value(file(params.nn_model))
@@ -1103,7 +1026,7 @@ def sturgeon_model_ch = Channel.value(file(params.sturgeon_model))
 // Workflow definition
 //---------------------------------------------------------------------
 
-workflow analysis {
+workflow annotation {
     take:
         input_data
 
@@ -1117,7 +1040,7 @@ workflow analysis {
         // Initialize channels as empty by default
         def annotatecnv_out = Channel.empty()
         def merge_annotation_out = Channel.empty()
-        def run_nn_classifier_out = Channel.empty()
+        def crossNN_out = Channel.empty()
         def mgmt_promoter_out = Channel.empty()
         def svannasv_out = Channel.empty()
         def igv_tools_out = Channel.empty()
@@ -1127,12 +1050,26 @@ workflow analysis {
         // to ensure they're created once and reused across all samples for optimal caching
 
         // Initialize sample_thresholds based on run mode
-        def sample_thresholds = (params.run_mode_order || params.run_mode_epianalyse) ? [:] : loadSampleThresholds()
-        println "Sample thresholds: ${sample_thresholds}"
+        def sample_thresholds
+        if (params.run_mode_epiannotation) {
+            // For epiannotation mode, load samples from epi2me_sample_id_file
+            sample_thresholds = file(params.epi2me_sample_id_file).readLines()
+                .collectEntries { line ->
+                    def sample_id = line.trim()
+                    [(sample_id): null]  // null indicates ACE calculation needed
+                }
+            println "Sample thresholds (from epi2me_sample_id_file): ${sample_thresholds}"
+        } else if (params.run_mode_order) {
+            sample_thresholds = [:]
+            println "Sample thresholds (run_mode_order): ${sample_thresholds}"
+        } else {
+            sample_thresholds = loadSampleThresholds()
+            println "Sample thresholds: ${sample_thresholds}"
+        }
 
         // Create segsfromepi2me channel based on mode
-        boosts_segsfromepi2me_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.combine(occ_protein_coding_bed_ch).map { args ->
+        boosts_segsfromepi2me_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
+            input_data.combine(roi_protein_coding_bed_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -1157,7 +1094,7 @@ workflow analysis {
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .combine(occ_protein_coding_bed_ch)
+                .combine(roi_protein_coding_bed_ch)
                 .map { sample_id, occ_bed ->
                     tuple(
                         sample_id,
@@ -1169,8 +1106,8 @@ workflow analysis {
                     )
                 }
 
-        boosts_svanna_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
-            input_data.combine(occ_protein_coding_bed_ch).map { args ->
+        boosts_svanna_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
+            input_data.combine(roi_protein_coding_bed_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -1200,7 +1137,7 @@ workflow analysis {
                 )
             } :
             Channel.fromList(sample_thresholds.keySet().collect())
-                .combine(occ_protein_coding_bed_ch)
+                .combine(roi_protein_coding_bed_ch)
                 .map { sample_id, occ_bed ->
                     //log.info "Creating Svanna input for sample: ${sample_id} (standalone mode)"
                     def sv_file = file("${params.sv_folder}/${sample_id}/${sample_id}.sniffles.vcf.gz")
@@ -1217,7 +1154,7 @@ workflow analysis {
                     )
                 }
 
-        boosts_clair3_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
+        boosts_clair3_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
             input_data.combine(refgene_ch).combine(hg38_refgenemrna_ch).combine(clinvar_ch)
                 .combine(clinvarindex_ch).combine(hg38_cosmic100_ch).combine(hg38_cosmic100index_ch)
                 .map { args ->
@@ -1260,8 +1197,8 @@ workflow analysis {
                 .map { sample_id, refgene, refgenemrna, clinvar, clinvarindex, cosmic100, cosmic100index ->
                     tuple(
                         sample_id,
-                        file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
-                        file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
+                        file("${params.roi_bam_folder}/${sample_id}.roi.bam"),
+                        file("${params.roi_bam_folder}/${sample_id}.roi.bam.bai"),
                         file(params.reference_genome),
                         file(params.reference_genome_bai),
                         refgene,
@@ -1273,10 +1210,10 @@ workflow analysis {
                     )
                 }
 
-        boosts_clairSTo_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
+        boosts_clairSTo_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
             input_data.combine(refgene_ch).combine(hg38_refgenemrna_ch).combine(clinvar_ch)
                 .combine(clinvarindex_ch).combine(hg38_cosmic100_ch).combine(hg38_cosmic100index_ch)
-                .combine(occ_protein_coding_bed_ch).map { args ->
+                .combine(roi_protein_coding_bed_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
                 def bai = args[2]
@@ -1315,12 +1252,12 @@ workflow analysis {
             Channel.fromList(sample_thresholds.keySet().collect())
                 .combine(refgene_ch).combine(hg38_refgenemrna_ch).combine(clinvar_ch)
                 .combine(clinvarindex_ch).combine(hg38_cosmic100_ch).combine(hg38_cosmic100index_ch)
-                .combine(occ_protein_coding_bed_ch)
+                .combine(roi_protein_coding_bed_ch)
                 .map { sample_id, refgene, refgenemrna, clinvar, clinvarindex, cosmic100, cosmic100index, occ_bed ->
                     tuple(
                         sample_id,
-                        file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
-                        file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
+                        file("${params.roi_bam_folder}/${sample_id}.roi.bam"),
+                        file("${params.roi_bam_folder}/${sample_id}.roi.bam.bai"),
                         file(params.reference_genome),
                         file(params.reference_genome_bai),
                         refgene,
@@ -1334,7 +1271,7 @@ workflow analysis {
                     )
                 }
 
-        boosts_igv_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
+        boosts_igv_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
             input_data.combine(tertp_variants_ch).combine(ncbirefseq_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
@@ -1356,15 +1293,15 @@ workflow analysis {
             Channel.fromList(sample_thresholds.keySet().collect())
                 .combine(tertp_variants_ch).combine(ncbirefseq_ch)
                 .map { sample_id, tertp_var, ncbi ->
-                    tuple(sample_id, file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
-                          file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
+                    tuple(sample_id, file("${params.roi_bam_folder}/${sample_id}.roi.bam"),
+                          file("${params.roi_bam_folder}/${sample_id}.roi.bam.bai"),
                           tertp_var,
                           ncbi,
                           file(params.reference_genome),
                           file("${params.reference_genome}.fai"))
                 }
 
-        boosts_plot_genomic_regions_channel = (params.run_mode_order || params.run_mode_epianalyse) ?
+        boosts_plot_genomic_regions_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
             input_data.combine(gviz_data_ch).combine(cytoband_file_ch).map { args ->
                 def sample_id = args[0]
                 def bam = args[1]
@@ -1395,13 +1332,13 @@ workflow analysis {
                     tuple(
                         sample_id,
                         gviz,
-                        file("${params.occ_bam_folder}/${sample_id}.roi.bam"),
-                        file("${params.occ_bam_folder}/${sample_id}.roi.bam.bai"),
+                        file("${params.roi_bam_folder}/${sample_id}.roi.bam"),
+                        file("${params.roi_bam_folder}/${sample_id}.roi.bam.bai"),
                         cytoband
                     )
                 }
 
-        boosts_cramino = (params.run_mode_order || params.run_mode_epianalyse) ?
+        boosts_cramino = (params.run_mode_order || params.run_mode_epiannotation) ?
             input_data.map { args ->
                 def sample_id = args[0]
                 def occ_bam = args[1]    
@@ -1488,11 +1425,11 @@ workflow analysis {
                 .filter { it != null }
 
         // MGMT analysis
-        if (params.run_mode in ['mgmt', 'all']) {
+        if (params.run_mode in ['mgmt', 'rmd']) {
             println "Running MGMT Analysis..."
             
-            // Create MGMT channel that works for combined modes (order and epianalyse)
-            mgmt_ch = (params.run_mode_order || params.run_mode_epianalyse) ?
+            // Create MGMT channel that works for combined modes (order and epiannotation)
+            mgmt_ch = (params.run_mode_order || params.run_mode_epiannotation) ?
                 input_data.combine(epicsites_ch).combine(mgmt_cpg_island_hg38_ch).map { args ->
                     def sample_id = args[0]
                     def bam = args[1]
@@ -1562,7 +1499,7 @@ workflow analysis {
                     )
                 }
 
-            run_nn_classifier(nanodx_out)
+            crossNN(nanodx_out)
 
             // Generate t-SNE plot using EPIC bed files
             tsne_plot(
@@ -1573,7 +1510,7 @@ workflow analysis {
         }
 
         // Svanna analysis
-        if (params.run_mode in ['svannasv', 'all']) {
+        if (params.run_mode in ['svannasv', 'rmd']) {
             println "Running Svanna Analysis..."
             
             svannasv(boosts_svanna_channel)
@@ -1596,28 +1533,76 @@ workflow analysis {
         }
 
         // OCC analysis
-        if (params.run_mode in ['occ', 'all']) {
-            println "Running OCC Analysis..."
-            
-            // Run variant callers and get outputs
-            clair3(boosts_clair3_channel)
-            
-            
-            // Create properly structured channels for combination
-            def clair3_results = clair3.out.clair3output
-                .map { args -> 
+        // NOTE: Variant calling (Clair3/ClairS-TO) is now handled by epi2me workflow
+        // This section reads pre-existing VCF files from epi2me output and runs annotation
+        if (params.run_mode in ['roi', 'rmd']) {
+            println "Running ROI Analysis (annotation of pre-existing VCFs from epi2me)..."
+
+            // Step 1: Create channels for VCF files
+            // In epiannotation/order mode, derive from input_data to ensure dependency on epi2me completion
+            // In standalone mode, create from sample list
+            def clair3_annot_input = (params.run_mode_epiannotation || params.run_mode_order) ?
+                input_data.map { args ->
+                    def sample_id = args[0]
+                    def clair3_output_dir = file("${params.path}/routine_epi2me/${sample_id}/output_clair3")
+                    def pileup_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
+                    def merge_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
+                    tuple(sample_id, clair3_output_dir, pileup_vcf, merge_vcf)
+                }.view { "Clair3 annotation input: $it" } :
+                Channel.fromList(sample_thresholds.keySet().collect())
+                    .map { sample_id ->
+                        def clair3_output_dir = file("${params.path}/routine_epi2me/${sample_id}/output_clair3")
+                        def pileup_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
+                        def merge_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
+
+                        if (!clair3_output_dir.exists() || !pileup_vcf.exists() || !merge_vcf.exists()) {
+                            error "ERROR: Clair3 VCF files not found for ${sample_id}. Please run epi2me workflow with SNV mode first."
+                        }
+
+                        tuple(sample_id, clair3_output_dir, pileup_vcf, merge_vcf)
+                    }
+                    .view { "Clair3 annotation input: $it" }
+
+            def clairsto_annot_input = (params.run_mode_epiannotation || params.run_mode_order) ?
+                input_data.map { args ->
+                    def sample_id = args[0]
+                    def clairsto_output_dir = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output")
+                    def snv_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
+                    def indel_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
+                    tuple(sample_id, clairsto_output_dir, snv_vcf, indel_vcf)
+                } :
+                Channel.fromList(sample_thresholds.keySet().collect())
+                    .map { sample_id ->
+                        def clairsto_output_dir = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output")
+                        def snv_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
+                        def indel_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
+
+                        if (!clairsto_output_dir.exists() || !snv_vcf.exists() || !indel_vcf.exists()) {
+                            error "ERROR: ClairS-TO VCF files not found for ${sample_id}. Please run epi2me workflow with SNV mode first."
+                        }
+
+                        tuple(sample_id, clairsto_output_dir, snv_vcf, indel_vcf)
+                    }
+                .view { "ClairSTo annotation input: $it" }
+
+            // Step 2: Run annotation processes
+            clair3_annotate(clair3_annot_input)
+            clairs_to_annotate(clairsto_annot_input)
+
+            // Step 3: Create properly structured channels for combination
+            def clair3_results = clair3_annotate.out.clair3output
+                .map { args ->
                     def sample_id = args[0]
                     def pileup_file = args[1]
                     def merge_file = args[2]
                     tuple(sample_id, pileup_file, merge_file)
                 }
-                .view { "Clair3 mapped: $it" }
+                .view { "Clair3 annotated mapped: $it" }
 
-            clairs_to(boosts_clairSTo_channel)
-            def clairsto_results = clairs_to.out.annotateandfilter_clairstoout
-                .view { "ClairSTo output: $it" }
+            def clairsto_results = clairs_to_annotate.out.annotateandfilter_clairstoout
+                .view { "ClairSTo annotated output: $it" }
 
-            // Combine results and create input for merge_annotation
+            // Step 4: Combine results and create input for merge_annotation
             combine_file = clair3_results
                 .combine(clairsto_results, by: 0)
                 .combine(occ_genes_ch)
@@ -1638,7 +1623,7 @@ workflow analysis {
          }
 
         // tertp analysis
-        if (params.run_mode in ['tertp', 'all']) {
+        if (params.run_mode in ['tertp', 'rmd']) {
             println "Running tertp Analysis..."
             igv_tools(boosts_igv_channel)
         //    igv_tools.out.tertp_out_igv.view { "tertp output: $it" }
@@ -1646,19 +1631,19 @@ workflow analysis {
         }
 
         // CNV analysis (now handles both CNV and RMD modes)
-        if (params.run_mode in ['cnv', 'all', 'rmd'] || params.run_mode_order) {
+        if (params.run_mode in ['cnv', 'rmd'] || params.run_mode_order) {
             println "Running CNV Analysis..."
             
             // Handle sample_thresholds for different run modes
             def samples_needing_ace = []
             def samples_with_provided_threshold = [:]
 
-            if (params.run_mode_order || params.run_mode_epianalyse) {
-                // In run_mode_order or run_mode_epianalyse, we always compute ACE to get thresholds
-                println "Using ${params.run_mode_order ? 'run_mode_order' : 'run_mode_epianalyse'} - computing ACE for all samples to get thresholds"
+            if (params.run_mode_order || params.run_mode_epiannotation) {
+                // In run_mode_order or run_mode_epiannotation, we always compute ACE to get thresholds
+                println "Using ${params.run_mode_order ? 'run_mode_order' : 'run_mode_epiannotation'} - computing ACE for all samples to get thresholds"
 
                 // For run_mode_order, load from bam_sample_id_file
-                // For run_mode_epianalyse, load from epi2me_sample_id_file
+                // For run_mode_epiannotation, load from epi2me_sample_id_file
                 if (params.run_mode_order) {
                     def sample_ids = file(params.bam_sample_id_file).readLines().collect { line ->
                         // Extract only the sample ID part (first column), removing flow cell ID
@@ -1666,7 +1651,7 @@ workflow analysis {
                     }
                     samples_needing_ace = sample_ids.toSet()
                 } else {
-                    // For run_mode_epianalyse, load from epi2me_sample_id_file
+                    // For run_mode_epiannotation, load from epi2me_sample_id_file
                     def sample_ids = file(params.epi2me_sample_id_file).readLines().collect { line ->
                         // Extract only the sample ID part (first column)
                         line.trim().split(/\t/)[0]
@@ -1685,9 +1670,9 @@ workflow analysis {
 
             // Run ACE only for samples that need calculation (have null threshold)
             if (samples_needing_ace.size() > 0) {
-        // For run_mode_epianalyse or run_mode_order, use RDS from input_data channel
+        // For run_mode_epiannotation or run_mode_order, use RDS from input_data channel
         // For standalone mode, scan filesystem
-        if (params.run_mode_order || params.run_mode_epianalyse) {
+        if (params.run_mode_order || params.run_mode_epiannotation) {
             ace_input = input_data
                 .map { args ->
                     def sample_id = args[0]
@@ -1742,8 +1727,8 @@ workflow analysis {
             println "Final threshold mapping: ${final_thresholds}"
 
             // Create channel for annotatecnv based on run mode
-            if (params.run_mode_order || params.run_mode_epianalyse) {
-                // Use epi2me output paths when in run_mode_order or run_mode_epianalyse
+            if (params.run_mode_order || params.run_mode_epiannotation) {
+                // Use epi2me output paths when in run_mode_order or run_mode_epiannotation
                 annotatecnv_input = input_data
                     .map { args -> 
                         def sample_id = args[0]
@@ -1773,7 +1758,7 @@ workflow analysis {
                         tuple(
                             sample_id,
                             file(segs_vcf_path),
-                            file(params.occ_protein_coding_bed),
+                            file(params.roi_protein_coding_bed),
                             file(bins_bed_path),
                             file(segs_bed_path)
                         )
@@ -1786,7 +1771,7 @@ workflow analysis {
                         tuple(
                             sample_id,
                             file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.vcf"),
-                            file(params.occ_protein_coding_bed),
+                            file(params.roi_protein_coding_bed),
                             file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_bins.bed"),
                             file("${params.segsfromepi2me_folder}/${sample_id}/${sample_id}_segs.bed")
                         )
@@ -1794,12 +1779,12 @@ workflow analysis {
             }
 
             // Combine with thresholds and prepare final input
-            // For run_mode_order and run_mode_epianalyse, we use calculated thresholds from ACE
-            def annotatecnv_with_provided = (params.run_mode_order || params.run_mode_epianalyse) ?
+            // For run_mode_order and run_mode_epiannotation, we use calculated thresholds from ACE
+            def annotatecnv_with_provided = (params.run_mode_order || params.run_mode_epiannotation) ?
                 annotatecnv_input.combine(ace_thresholds, by: 0).map { args ->
                     def sample_id = args[0]
                     def segs_vcf = args[1]
-                    def occ_protein_coding_bed = args[2]
+                    def roi_protein_coding_bed = args[2]
                     def bins_bed = args[3]
                     def segs_bed = args[4]
                     def threshold = args[5]
@@ -1808,7 +1793,7 @@ workflow analysis {
                     tuple(
                         sample_id,
                         segs_vcf,
-                        occ_protein_coding_bed,
+                        roi_protein_coding_bed,
                         bins_bed,
                         segs_bed,
                         threshold.toString(),
@@ -1819,7 +1804,7 @@ workflow analysis {
                     .filter { args ->
                         def sample_id = args[0]
                         def segs_vcf = args[1]
-                        def occ_protein_coding_bed = args[2]
+                        def roi_protein_coding_bed = args[2]
                         def bins_bed = args[3]
                         def segs_bed = args[4]
 
@@ -1831,7 +1816,7 @@ workflow analysis {
                     .map { args ->
                         def sample_id = args[0]
                         def segs_vcf = args[1]
-                        def occ_protein_coding_bed = args[2]
+                        def roi_protein_coding_bed = args[2]
                         def bins_bed = args[3]
                         def segs_bed = args[4]
 
@@ -1839,7 +1824,7 @@ workflow analysis {
                         tuple(
                             sample_id,
                             segs_vcf,
-                            occ_protein_coding_bed,
+                            roi_protein_coding_bed,
                             bins_bed,
                             segs_bed,
                             final_thresholds[sample_id],
@@ -1848,13 +1833,13 @@ workflow analysis {
                     }
 
             // For samples with calculated thresholds, combine with ace_thresholds
-            def annotatecnv_with_calculated = (params.run_mode_order || params.run_mode_epianalyse) ?
-                Channel.empty() :  // Skip this in run_mode_order/run_mode_epianalyse since we handle it above
+            def annotatecnv_with_calculated = (params.run_mode_order || params.run_mode_epiannotation) ?
+                Channel.empty() :  // Skip this in run_mode_order/run_mode_epiannotation since we handle it above
                 annotatecnv_input
                     .filter { args ->
                         def sample_id = args[0]
                         def segs_vcf = args[1]
-                        def occ_protein_coding_bed = args[2]
+                        def roi_protein_coding_bed = args[2]
                         def bins_bed = args[3]
                         def segs_bed = args[4]
                         !final_thresholds.containsKey(sample_id)
@@ -1863,7 +1848,7 @@ workflow analysis {
                     .map { args ->
                         def sample_id = args[0]
                         def segs_vcf = args[1]
-                        def occ_protein_coding_bed = args[2]
+                        def roi_protein_coding_bed = args[2]
                         def bins_bed = args[3]
                         def segs_bed = args[4]
                         def threshold = args[5]
@@ -1871,7 +1856,7 @@ workflow analysis {
                         tuple(
                             sample_id,              // sample_id
                             segs_vcf,               // segs_vcf
-                            occ_protein_coding_bed, // occ_protein_coding_bed
+                            roi_protein_coding_bed, // roi_protein_coding_bed
                             bins_bed,               // bins_bed
                             segs_bed,               // segs_bed
                             threshold.toString(),   // threshold value as string
@@ -1892,14 +1877,10 @@ workflow analysis {
             //plot_genomic_regions(boosts_plot_genomic_regions_channel)
         }
 
-        // Statistics mode - run cramino for quality assessment
-        if (params.run_mode in ['stat']) {
-            println "Running Cramino Statistics..."
-            cramino_report(boosts_cramino)
-        }
-
+        // Statistics mode - cramino is now run by epi2me workflow
+        // Analysis workflow reads the pre-generated cramino outputs
         // RMD report generation
-        if (params.run_mode in ['rmd', 'all'] || params.run_mode_order) {
+        if (params.run_mode in ['rmd'] || params.run_mode_order || params.run_mode_epiannotation) {
             println "Running RMD Report Generation..."
             
             // Ensure annotatecnv_results is defined for run_mode_order
@@ -1913,11 +1894,11 @@ workflow analysis {
             
             // Reuse MGMT outputs from earlier analysis if available
             // If MGMT analysis was not run, we need to run it here
-            if (!(params.run_mode in ['mgmt', 'all'])) {
+            if (!(params.run_mode in ['mgmt', 'rmd'])) {
                 println "MGMT analysis not run earlier, running now for RMD report..."
                 
                 // Create channel for MGMT analysis
-        mgmt_ch = (params.run_mode_order || params.run_mode_epianalyse) ? 
+        mgmt_ch = (params.run_mode_order || params.run_mode_epiannotation) ? 
                 input_data.map { args -> 
                     def sample_id = args[0]
                     def bam = args[1]
@@ -1985,8 +1966,8 @@ workflow analysis {
                     )
                 }
 
-            run_nn_classifier(nanodx_out)
-            rmd_nanodx_out = run_nn_classifier.out.rmdnanodx
+            crossNN(nanodx_out)
+            rmd_nanodx_out = crossNN.out.rmdnanodx
 
             // Generate t-SNE plot using EPIC bed files
             tsne_plot(
@@ -2000,7 +1981,7 @@ workflow analysis {
             }
 
             // Svanna analysis - reuse outputs if already run
-            if (!(params.run_mode in ['svannasv', 'all'])) {
+            if (!(params.run_mode in ['svannasv', 'rmd'])) {
                 println "Svanna analysis not run earlier, running now for RMD report..."
         svannasv(boosts_svanna_channel)
         rmd_svanna_html = svannasv.out.rmdsvannahtml
@@ -2027,13 +2008,47 @@ workflow analysis {
                 fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
             }
 
-            // OCC analysis - reuse outputs if already run
-            if (!(params.run_mode in ['occ', 'all'])) {
-                println "OCC analysis not run earlier, running now for RMD report..."
-        clair3(boosts_clair3_channel)
-        clair3_out = clair3.out.clair3output
-        clairs_to(boosts_clairSTo_channel)
-        clairs_to_out = clairs_to.out.annotateandfilter_clairstoout
+            // ROI analysis - reuse outputs if already run
+            if (!(params.run_mode in ['roi', 'rmd'])) {
+                println "ROI analysis not run earlier, running annotation for RMD report..."
+                // NOTE: Variant calling should have been done by epi2me workflow
+                // Read pre-existing VCF files from epi2me output directory
+
+                // Step 1: Read pre-existing VCF files
+                def clair3_annot_input = Channel.fromList(sample_thresholds.keySet().collect())
+                    .map { sample_id ->
+                        def clair3_output_dir = file("${params.path}/routine_epi2me/${sample_id}/output_clair3")
+                        def pileup_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
+                        def merge_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
+
+                        // Skip existence check in epiannotation mode (files created by epi2me workflow)
+                        if (!params.run_mode_epiannotation && (!clair3_output_dir.exists() || !pileup_vcf.exists() || !merge_vcf.exists())) {
+                            error "ERROR: Clair3 VCF files not found for ${sample_id}. Please run epi2me workflow with SNV mode first."
+                        }
+
+                        tuple(sample_id, clair3_output_dir, pileup_vcf, merge_vcf)
+                    }
+
+                def clairsto_annot_input = Channel.fromList(sample_thresholds.keySet().collect())
+                    .map { sample_id ->
+                        def clairsto_output_dir = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output")
+                        def snv_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
+                        def indel_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
+
+                        // Skip existence check in epiannotation mode (files created by epi2me workflow)
+                        if (!params.run_mode_epiannotation && (!clairsto_output_dir.exists() || !snv_vcf.exists() || !indel_vcf.exists())) {
+                            error "ERROR: ClairS-TO VCF files not found for ${sample_id}. Please run epi2me workflow with SNV mode first."
+                        }
+
+                        tuple(sample_id, clairsto_output_dir, snv_vcf, indel_vcf)
+                    }
+
+                // Step 2: Run annotation
+                clair3_annotate(clair3_annot_input)
+                clairs_to_annotate(clairsto_annot_input)
+
+                clair3_out = clair3_annotate.out.clair3output
+                clairs_to_out = clairs_to_annotate.out.annotateandfilter_clairstoout
             combine_file = clair3_out.combine(clairs_to_out, by: 0)
                 .combine(occ_genes_ch)
                 .map { sample_id, pileup_file, merge_file, clairsto_file, occ_genes ->
@@ -2041,26 +2056,32 @@ workflow analysis {
     }
         merge_annotation(combine_file)
             } else {
-                println "Reusing OCC outputs from earlier analysis"
+                println "Reusing ROI outputs from earlier analysis"
             }
 
             // Other tools - reuse outputs if already run or run for RMD
-            // For 'all' mode, igv_tools and plot_genomic_regions were already run in tertp section
+            // For 'rmd' mode, igv_tools and plot_genomic_regions were already run in tertp section
             // For 'tertp' mode, they were also already run
             // For other modes (rmd, cnv, stat, etc), we need to run them now
-            if (!(params.run_mode in ['tertp', 'all'])) {
-                println "Running tertp/cramino analysis for RMD report..."
+            if (!(params.run_mode in ['tertp', 'rmd'])) {
+                println "Running tertp analysis for RMD report..."
                 igv_tools(boosts_igv_channel)
-                cramino_report(boosts_cramino)
                 plot_genomic_regions(boosts_plot_genomic_regions_channel)
             } else {
                 println "Reusing tertp outputs from earlier analysis"
-                // For 'all' mode, cramino still needs to run (it wasn't run in tertp section)
-                if (params.run_mode in ['all']) {
-                    println "Running Cramino Statistics for 'all' mode..."
-                    cramino_report(boosts_cramino)
-                }
             }
+
+            // Read cramino outputs from epi2me workflow
+            println "Reading Cramino statistics from epi2me output..."
+            def cramino_output_ch = Channel.fromList(sample_thresholds.keySet().collect())
+                .map { sample_id ->
+                    def cramino_file = file("${params.path}/routine_epi2me/${sample_id}/cramino/${sample_id}_cramino_statistics.txt")
+                    // Skip existence check in epiannotation mode (files created by epi2me workflow)
+                    if (!params.run_mode_epiannotation && !cramino_file.exists()) {
+                        error "ERROR: Cramino statistics file not found for ${sample_id}. Please run epi2me workflow with 'stat' or 'rmd' mode first."
+                    }
+                    tuple(sample_id, cramino_file)
+                }
 
             // Combine all results for markdown report
             // Use the stored annotatecnv results from earlier CNV analysis
@@ -2073,7 +2094,7 @@ workflow analysis {
                 error "Merge annotation results not found. Make sure OCC analysis runs before RMD generation."
             }
             
-            if (!run_nn_classifier.out.rmdnanodx) {
+            if (!crossNN.out.rmdnanodx) {
                 error "NN classifier results not found. Make sure MGMT analysis runs before RMD generation."
             }
             
@@ -2092,8 +2113,8 @@ workflow analysis {
             if (!igv_tools.out.tertp_out_igv) {
                 error "tertp HTML results not found. Make sure tertp analysis runs before RMD generation."
             }
-            
-            if (!cramino_report.out.craminostatout) {
+
+            if (!cramino_output_ch) {
                 error "Cramino statistics not found. Make sure Cramino analysis runs before RMD generation."
             }
             
@@ -2103,12 +2124,12 @@ workflow analysis {
             
             mergecnv_out = annotatecnv_results.rmdcnvtumornumber
             .combine(merge_annotation.out.occmergeout, by:0)
-            .combine(run_nn_classifier.out.rmdnanodx, by: 0)
+            .combine(crossNN.out.rmdnanodx, by: 0)
             .combine(mgmt_promoter.out.mgmtresultsout, by:0)
             .combine(svannasv.out.rmdsvannahtml, by:0)
             .combine(fusion_events_channel, by:0)
             .combine(igv_tools.out.tertp_out_igv, by:0)
-            .combine(cramino_report.out.craminostatout, by:0)
+            .combine(cramino_output_ch, by:0)
             .combine(plot_genomic_regions.out.plot_genomic_regions_out, by:0)
             .combine(tsne_plot.out.tsne_out, by:0)
             // Create final map for markdown report
@@ -2158,7 +2179,7 @@ workflow analysis {
                     tsne_plot_file,
                     nanodx_classifier,
                     file("${params.ref_dir}/snv_target_genes.txt"),
-                    file(params.occ_protein_coding_bed),
+                    file(params.roi_protein_coding_bed),
                     file("${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd")
                 ]
             }.view()
@@ -2168,7 +2189,7 @@ workflow analysis {
         }
 
     emit:
-        markdown_out = (params.run_mode_analysis == 'rmd' || params.run_mode_order) ? 
+        markdown_out = (params.run_mode_annotation == 'rmd' || params.run_mode_order) ? 
             markdown_report.out : 
             Channel.empty()
 }
