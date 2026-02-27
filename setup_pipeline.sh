@@ -1,0 +1,1068 @@
+#!/bin/bash
+################################################################################
+# nWGS Pipeline - Automated Setup Script
+################################################################################
+# This script automatically downloads all reference files from Zenodo and
+# sets up the pipeline for immediate use.
+#
+# Zenodo Record: https://doi.org/10.5281/zenodo.15916972
+#
+# Usage:
+#   ./setup_pipeline.sh docker|singularity [OPTIONS]
+#
+# Arguments:
+#   docker          Use Docker containers
+#   singularity     Use Singularity/Apptainer containers
+#
+# Options:
+#   --skip-optional          Skip downloading optional large files (~20 GB)
+#   --skip-containers        Skip container setup (only download reference files)
+#   --skip-reference         Skip reference file download (only setup containers)
+#   --help                   Show this help message
+#
+# Examples:
+#   ./setup_pipeline.sh docker
+#   ./setup_pipeline.sh singularity --skip-optional
+#   ./setup_pipeline.sh docker --skip-containers
+################################################################################
+
+set -e  # Exit on error
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Configuration
+ZENODO_RECORD="15916972"
+BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
+PIPELINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DATA_DIR="${PIPELINE_DIR}/data"
+REFERENCE_DIR="${DATA_DIR}/reference"
+HUMANDB_DIR="${DATA_DIR}/humandb"
+
+# Options
+CONTAINER_SYSTEM=""
+SKIP_OPTIONAL=false
+SKIP_CONTAINERS=false
+SKIP_REFERENCE=false
+
+################################################################################
+# Helper Functions
+################################################################################
+
+print_header() {
+    echo -e "${BLUE}==========================================${NC}"
+    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}==========================================${NC}"
+}
+
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+print_info() {
+    echo -e "${CYAN}ℹ️  $1${NC}"
+}
+
+check_command() {
+    if command -v "$1" &> /dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+download_file() {
+    local filename="$1"
+    local destination="$2"
+    local url="${BASE_URL}/${filename}"
+
+    echo -e "${CYAN}📥 Downloading ${filename}...${NC}"
+
+    if check_command wget; then
+        wget -q --show-progress "${url}" -O "${destination}" 2>&1 | \
+            grep --line-buffered "%" | \
+            sed -u -e "s,\.,,g" | \
+            awk '{printf("\r  Progress: %s", $2+0); fflush()}'
+        echo ""
+    elif check_command curl; then
+        curl -L "${url}" -o "${destination}" --progress-bar
+    else
+        print_error "Neither wget nor curl found. Please install one of them."
+        exit 1
+    fi
+
+    if [ $? -eq 0 ]; then
+        print_success "Downloaded ${filename}"
+    else
+        print_error "Failed to download ${filename}"
+        print_info "URL: ${url}"
+        exit 1
+    fi
+}
+
+extract_archive() {
+    local archive="$1"
+    local destination="$2"
+
+    echo -e "${CYAN}📦 Extracting $(basename ${archive})...${NC}"
+
+    if [[ $archive == *.tar.gz ]] || [[ $archive == *.tgz ]]; then
+        tar -xzf "${archive}" -C "${destination}"
+    elif [[ $archive == *.tar ]]; then
+        tar -xf "${archive}" -C "${destination}"
+    elif [[ $archive == *.zip ]]; then
+        if check_command unzip; then
+            unzip -q "${archive}" -d "${destination}"
+        else
+            print_error "unzip command not found. Please install unzip."
+            exit 1
+        fi
+    elif [[ $archive == *.gz ]] && [[ $archive != *.tar.gz ]]; then
+        gunzip -k "${archive}"
+    else
+        print_error "Unknown archive format: ${archive}"
+        return 1
+    fi
+
+    print_success "Extracted $(basename ${archive})"
+}
+
+show_usage() {
+    grep "^#" "$0" | grep -v "^#!/bin/bash" | sed 's/^# //' | sed 's/^#//'
+}
+
+################################################################################
+# Parse Command Line Arguments
+################################################################################
+
+parse_args() {
+    # First argument must be container system
+    if [ $# -eq 0 ]; then
+        print_error "Missing required argument: container system"
+        echo ""
+        show_usage
+        exit 1
+    fi
+
+    case "$1" in
+        docker|singularity)
+            CONTAINER_SYSTEM="$1"
+            shift
+            ;;
+        --help|-h)
+            show_usage
+            exit 0
+            ;;
+        *)
+            print_error "Invalid container system: $1"
+            echo ""
+            print_info "First argument must be either 'docker' or 'singularity'"
+            echo ""
+            show_usage
+            exit 1
+            ;;
+    esac
+
+    # Parse remaining options
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --skip-optional)
+                SKIP_OPTIONAL=true
+                shift
+                ;;
+            --skip-containers)
+                SKIP_CONTAINERS=true
+                shift
+                ;;
+            --skip-reference)
+                SKIP_REFERENCE=true
+                shift
+                ;;
+            --help|-h)
+                show_usage
+                exit 0
+                ;;
+            *)
+                print_error "Unknown option: $1"
+                echo "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+}
+
+################################################################################
+# Main Setup Functions
+################################################################################
+
+check_prerequisites() {
+    print_header "Checking Prerequisites"
+
+    local missing_deps=()
+
+    # Check for wget or curl
+    if ! check_command wget && ! check_command curl; then
+        missing_deps+=("wget or curl")
+    fi
+
+    # Check for tar
+    if ! check_command tar; then
+        missing_deps+=("tar")
+    fi
+
+    # Check for unzip (needed for Assembly.zip, svanna-data.zip, and model files)
+    if ! check_command unzip; then
+        print_warning "unzip not found - will be needed for extracting .zip files"
+        missing_deps+=("unzip")
+    fi
+
+    # Validate container system
+    if [ "$SKIP_CONTAINERS" = false ]; then
+        if [ "$CONTAINER_SYSTEM" = "docker" ]; then
+            if ! check_command docker; then
+                print_error "Docker not found but docker mode was specified"
+                print_info "Install Docker: https://docs.docker.com/get-docker/"
+                exit 1
+            fi
+            if ! docker info &> /dev/null; then
+                print_error "Docker daemon is not running"
+                print_info "Please start Docker and try again"
+                exit 1
+            fi
+            print_success "Docker is available and running"
+        elif [ "$CONTAINER_SYSTEM" = "singularity" ]; then
+            if ! check_command singularity && ! check_command apptainer; then
+                print_error "Neither Singularity nor Apptainer found but singularity mode was specified"
+                print_info "Install Apptainer: https://apptainer.org/docs/admin/main/installation.html"
+                print_info "Install Singularity: https://sylabs.io/guides/latest/admin-guide/installation.html"
+                exit 1
+            fi
+            if check_command apptainer; then
+                print_success "Apptainer is available"
+            else
+                print_success "Singularity is available"
+            fi
+        fi
+    fi
+
+    # Check for nextflow
+    if ! check_command nextflow; then
+        print_warning "Nextflow not found - will be installed automatically"
+    else
+        print_success "Nextflow is available"
+    fi
+
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        print_error "Missing required dependencies:"
+        for dep in "${missing_deps[@]}"; do
+            echo "  - $dep"
+        done
+        echo ""
+        exit 1
+    fi
+
+    print_success "All prerequisites met!"
+    echo ""
+}
+
+create_directories() {
+    print_header "Creating Directory Structure"
+
+    mkdir -p "${REFERENCE_DIR}"
+    mkdir -p "${HUMANDB_DIR}"
+    mkdir -p "${PIPELINE_DIR}/logs"
+    mkdir -p "${PIPELINE_DIR}/containers"
+    mkdir -p "${REFERENCE_DIR}/nanoDx/static"
+
+    print_success "Created directory structure"
+    echo ""
+}
+
+verify_md5() {
+    local file="$1"
+    local md5_file="$2"
+
+    if [ ! -f "$md5_file" ]; then
+        print_warning "MD5 checksum file not found: $md5_file"
+        return 1
+    fi
+
+    print_info "Verifying MD5 checksum for $(basename $file)..."
+
+    if check_command md5sum; then
+        local expected_md5=$(cat "$md5_file" | awk '{print $1}')
+        local actual_md5=$(md5sum "$file" | awk '{print $1}')
+
+        if [ "$expected_md5" = "$actual_md5" ]; then
+            print_success "MD5 checksum verified"
+            return 0
+        else
+            print_error "MD5 checksum mismatch!"
+            print_error "Expected: $expected_md5"
+            print_error "Got: $actual_md5"
+            return 1
+        fi
+    else
+        print_warning "md5sum not found - skipping checksum verification"
+        return 0
+    fi
+}
+
+setup_nanodx_classifier() {
+    print_info "Setting up nanoDx classifier..."
+
+    # Define paths
+    local NANODX_DIR="${REFERENCE_DIR}/nanoDx"
+    local NANODX_STATIC="${NANODX_DIR}/static"
+    local ZENODO_NANODX="14006255"  # Specific Zenodo record for nanoDx files
+    local NANODX_URL="https://zenodo.org/record/${ZENODO_NANODX}/files"
+
+    # Create directory structure
+    mkdir -p "${NANODX_STATIC}"
+
+    # Check if nanoDx folder exists in pipeline root (old location)
+    if [ -d "${PIPELINE_DIR}/nanoDx" ] && [ ! -d "${NANODX_DIR}" ]; then
+        print_info "Moving nanoDx folder from pipeline root to data/reference/..."
+        mv "${PIPELINE_DIR}/nanoDx" "${REFERENCE_DIR}/"
+        print_success "Moved nanoDx to data/reference/"
+    fi
+
+    # Download nanoDx model files from Zenodo if not present
+    local files_to_download=(
+        "Capper_et_al.h5"
+        "Capper_et_al.h5.md5"
+        "Capper_et_al_NN.pkl"
+    )
+
+    local all_files_present=true
+    for file in "${files_to_download[@]}"; do
+        if [ ! -f "${NANODX_STATIC}/${file}" ]; then
+            all_files_present=false
+            break
+        fi
+    done
+
+    if [ "$all_files_present" = true ]; then
+        print_success "nanoDx model files already present"
+        echo ""
+        return
+    fi
+
+    print_info "Downloading nanoDx model files from Zenodo..."
+
+    for file in "${files_to_download[@]}"; do
+        if [ ! -f "${NANODX_STATIC}/${file}" ]; then
+            echo -e "${CYAN}  Downloading ${file}...${NC}"
+
+            if check_command wget; then
+                wget -q --show-progress "${NANODX_URL}/${file}" -O "${NANODX_STATIC}/${file}"
+            elif check_command curl; then
+                curl -L "${NANODX_URL}/${file}" -o "${NANODX_STATIC}/${file}" --progress-bar
+            fi
+
+            if [ $? -eq 0 ]; then
+                echo -e "  ${GREEN}✓${NC} Downloaded ${file}"
+            else
+                print_error "Failed to download ${file}"
+                exit 1
+            fi
+        else
+            echo -e "  ${GREEN}✓${NC} ${file} already exists"
+        fi
+    done
+
+    # Verify MD5 checksum for the model file
+    if [ -f "${NANODX_STATIC}/Capper_et_al.h5" ] && [ -f "${NANODX_STATIC}/Capper_et_al.h5.md5" ]; then
+        verify_md5 "${NANODX_STATIC}/Capper_et_al.h5" "${NANODX_STATIC}/Capper_et_al.h5.md5"
+    fi
+
+    print_success "nanoDx classifier setup complete!"
+    echo ""
+}
+
+setup_svanna_database() {
+    print_info "Setting up Svanna database..."
+
+    # Check if svanna-data already exists (either as directory or zip)
+    if [ -d "${REFERENCE_DIR}/svanna-data" ]; then
+        print_success "Svanna database already present"
+        echo ""
+        return
+    fi
+
+    # Download svanna-data.zip if not present
+    if [ ! -f "${REFERENCE_DIR}/svanna-data.zip" ]; then
+        print_info "Downloading svanna-data.zip from Zenodo..."
+        download_file "svanna-data.zip" "${REFERENCE_DIR}/svanna-data.zip"
+    else
+        print_success "svanna-data.zip already downloaded"
+    fi
+
+    # Extract the zip file
+    if [ -f "${REFERENCE_DIR}/svanna-data.zip" ]; then
+        print_info "Extracting Svanna database..."
+        extract_archive "${REFERENCE_DIR}/svanna-data.zip" "${REFERENCE_DIR}"
+
+        # Optionally remove zip after extraction to save space
+        # Uncomment the next line if you want to delete the zip after extraction
+        # rm "${REFERENCE_DIR}/svanna-data.zip"
+
+        print_success "Svanna database setup complete!"
+    else
+        print_error "Failed to download svanna-data.zip"
+        exit 1
+    fi
+
+    echo ""
+}
+
+download_reference_files() {
+    if [ "$SKIP_REFERENCE" = true ]; then
+        print_info "Skipping reference file download (--skip-reference specified)"
+        echo ""
+        return
+    fi
+
+    print_header "Downloading Reference Files from Zenodo"
+    print_info "Zenodo Record: https://doi.org/10.5281/zenodo.${ZENODO_RECORD}"
+    print_info "This may take 20-40 minutes depending on your internet speed"
+    echo ""
+    print_warning "Total download size: ~30-35 GB (core) + ~20 GB (optional)"
+    echo ""
+
+    # Download core reference bundle
+    if [ ! -f "${DATA_DIR}/.reference_core_downloaded" ]; then
+        print_info "Downloading core reference files..."
+        download_file "reference_core.tar.gz" "${PIPELINE_DIR}/reference_core.tar.gz"
+        extract_archive "${PIPELINE_DIR}/reference_core.tar.gz" "${PIPELINE_DIR}"
+        rm "${PIPELINE_DIR}/reference_core.tar.gz"
+        touch "${DATA_DIR}/.reference_core_downloaded"
+        echo ""
+    else
+        print_success "Core reference files already downloaded"
+        print_info "(Remove data/.reference_core_downloaded to re-download)"
+        echo ""
+    fi
+
+    # Download ANNOVAR humandb
+    if [ ! -f "${DATA_DIR}/.humandb_downloaded" ]; then
+        print_info "Downloading ANNOVAR databases..."
+        download_file "humandb.tar.gz" "${PIPELINE_DIR}/humandb.tar.gz"
+        extract_archive "${PIPELINE_DIR}/humandb.tar.gz" "${PIPELINE_DIR}"
+        rm "${PIPELINE_DIR}/humandb.tar.gz"
+        touch "${DATA_DIR}/.humandb_downloaded"
+        echo ""
+    else
+        print_success "ANNOVAR databases already downloaded"
+        print_info "(Remove data/.humandb_downloaded to re-download)"
+        echo ""
+    fi
+
+    # Download general.zip (Sturgeon classifier) - keep as zip, DO NOT extract
+    if [ ! -f "${REFERENCE_DIR}/general.zip" ]; then
+        print_info "Downloading Sturgeon classifier (general.zip)..."
+        download_file "general.zip" "${REFERENCE_DIR}/general.zip"
+        print_success "Sturgeon classifier downloaded (kept as .zip)"
+        echo ""
+    else
+        print_success "Sturgeon classifier (general.zip) already present"
+        echo ""
+    fi
+
+    # Download and extract Assembly.zip (vcfcircos assembly data)
+    if [ ! -f "${REFERENCE_DIR}/Assembly.zip" ] && [ ! -d "${REFERENCE_DIR}/Assembly" ]; then
+        print_info "Downloading Assembly data (Assembly.zip)..."
+        download_file "Assembly.zip" "${REFERENCE_DIR}/Assembly.zip"
+        print_info "Extracting Assembly data..."
+        extract_archive "${REFERENCE_DIR}/Assembly.zip" "${REFERENCE_DIR}"
+        print_success "Assembly data extracted"
+        echo ""
+    else
+        if [ -d "${REFERENCE_DIR}/Assembly" ]; then
+            print_success "Assembly data already present"
+        else
+            print_success "Assembly.zip already downloaded"
+        fi
+        echo ""
+    fi
+
+    # Download and extract Dorado model
+    if [ ! -f "${REFERENCE_DIR}/r1041_e82_400bps_sup_v420.zip" ] && [ ! -d "${REFERENCE_DIR}/r1041_e82_400bps_sup_v420" ]; then
+        print_info "Downloading Dorado model (r1041_e82_400bps_sup_v420.zip)..."
+        download_file "r1041_e82_400bps_sup_v420.zip" "${REFERENCE_DIR}/r1041_e82_400bps_sup_v420.zip"
+        print_info "Extracting Dorado model..."
+        extract_archive "${REFERENCE_DIR}/r1041_e82_400bps_sup_v420.zip" "${REFERENCE_DIR}"
+        print_success "Dorado model extracted"
+        echo ""
+    else
+        print_success "Dorado model already present"
+        echo ""
+    fi
+
+    # Setup nanoDx classifier (from Zenodo record 14006255)
+    setup_nanodx_classifier
+
+    # Download optional large files (Svanna database, etc.)
+    if [ "$SKIP_OPTIONAL" = false ]; then
+        echo ""
+        print_warning "Optional files include Svanna database (~15-20 GB)"
+        print_info "Downloading in 5 seconds... Press Ctrl+C to skip"
+        sleep 5
+
+        # Setup Svanna database (large structural variant annotation database)
+        setup_svanna_database
+
+        # Download any other optional files if they exist in a bundle
+        if [ ! -f "${DATA_DIR}/.optional_downloaded" ]; then
+            # Check if reference_optional.tar.gz exists on Zenodo
+            # This is for any additional optional files beyond Svanna
+            print_info "Checking for additional optional files..."
+            # Uncomment below if you have a reference_optional.tar.gz on Zenodo
+            # download_file "reference_optional.tar.gz" "${PIPELINE_DIR}/reference_optional.tar.gz"
+            # extract_archive "${PIPELINE_DIR}/reference_optional.tar.gz" "${PIPELINE_DIR}"
+            # rm "${PIPELINE_DIR}/reference_optional.tar.gz"
+            touch "${DATA_DIR}/.optional_downloaded"
+            echo ""
+        fi
+    else
+        print_info "Skipping optional files (use without --skip-optional to download)"
+        echo ""
+    fi
+
+    print_success "All reference files downloaded and extracted!"
+    echo ""
+}
+
+setup_containers() {
+    if [ "$SKIP_CONTAINERS" = true ]; then
+        print_info "Skipping container setup (--skip-containers specified)"
+        echo ""
+        return
+    fi
+
+    print_header "Setting Up ${CONTAINER_SYSTEM^} Containers"
+    print_info "Pulling/building container images..."
+    print_info "This may take 10-30 minutes on first run..."
+    echo ""
+
+    if [ "$CONTAINER_SYSTEM" = "docker" ]; then
+        setup_docker_containers
+    elif [ "$CONTAINER_SYSTEM" = "singularity" ]; then
+        setup_singularity_containers
+    fi
+
+    print_success "All container images are ready!"
+    echo ""
+}
+
+# Docker container setup (based on setup_docker.sh)
+setup_docker_containers() {
+    print_info "Pulling Docker images from vilhelmmagnuslab repository..."
+
+    # Function to pull Docker image if it doesn't exist
+    pull_docker_if_not_exists() {
+        local image_name=$1
+        local image_with_tag="${image_name}:latest"
+
+        if docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "^${image_with_tag}$"; then
+            echo -e "  ${GREEN}✓${NC} $image_with_tag already exists, skipping..."
+        else
+            echo -e "  ${CYAN}Pulling${NC} $image_with_tag..."
+            docker pull "$image_with_tag" 2>&1 | grep -v "Pulling from"
+            echo -e "  ${GREEN}✓${NC} Pulled $image_with_tag"
+        fi
+    }
+
+    # Core analysis images
+    echo "Core analysis images:"
+    pull_docker_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
+    pull_docker_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
+    pull_docker_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
+    pull_docker_if_not_exists "vilhelmmagnuslab/clair3_amd64"
+    pull_docker_if_not_exists "vilhelmmagnuslab/clairsto_amd64"
+    pull_docker_if_not_exists "vilhelmmagnuslab/igv_report_amd64"
+    pull_docker_if_not_exists "vilhelmmagnuslab/vcf2circos"
+    pull_docker_if_not_exists "vilhelmmagnuslab/nanodx_env"
+    pull_docker_if_not_exists "vilhelmmagnuslab/crossnnumap"
+    pull_docker_if_not_exists "vilhelmmagnuslab/markdown_images_28feb2025"
+    pull_docker_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
+    pull_docker_if_not_exists "vilhelmmagnuslab/gviz_amd64"
+    pull_docker_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
+    echo ""
+
+    # Epi2me images
+    echo "Epi2me analysis images:"
+    pull_docker_if_not_exists "vilhelmmagnuslab/snifflesv252_update_latest"
+    pull_docker_if_not_exists "vilhelmmagnuslab/qdnaseq_amd64_latest"
+    pull_docker_if_not_exists "vilhelmmagnuslab/modkit_latest"
+    echo ""
+}
+
+# Singularity container setup (based on setup_singularity.sh)
+setup_singularity_containers() {
+    # Detect Singularity or Apptainer
+    SINGULARITY_CMD=""
+    if command -v apptainer &> /dev/null; then
+        SINGULARITY_CMD="apptainer"
+        print_info "Using Apptainer"
+    elif command -v singularity &> /dev/null; then
+        SINGULARITY_CMD="singularity"
+        print_info "Using Singularity"
+    fi
+
+    mkdir -p "${PIPELINE_DIR}/containers"
+
+    print_info "Pulling Singularity/Apptainer images from vilhelmmagnuslab repository..."
+    echo ""
+
+    # Function to pull image if it doesn't exist
+    pull_singularity_if_not_exists() {
+        local image_name=$1
+        local image_basename=$(basename "$image_name")
+        local image_file="${PIPELINE_DIR}/containers/${image_basename}_latest.sif"
+
+        if [ -f "$image_file" ]; then
+            echo -e "  ${GREEN}✓${NC} $image_name already exists, skipping..."
+        else
+            echo -e "  ${CYAN}Pulling${NC} $image_name..."
+
+            # Pull the image without authentication
+            SINGULARITY_DOCKER_USERNAME="" SINGULARITY_DOCKER_PASSWORD="" \
+            APPTAINER_DOCKER_USERNAME="" APPTAINER_DOCKER_PASSWORD="" \
+            $SINGULARITY_CMD pull --dir "${PIPELINE_DIR}/containers/" "docker://$image_name:latest" 2>&1 | \
+                grep -v "INFO:" || true
+
+            echo -e "  ${GREEN}✓${NC} Pulled $image_name"
+        fi
+    }
+
+    # Core analysis images
+    echo "Core analysis images:"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/clair3_amd64"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/clairsto_amd64"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/igv_report_amd64"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/vcf2circos"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/nanodx_images_3feb25"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/crossnnumap"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/markdown_images_28feb2025"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/mgmt_nanopipe_amd64_18feb2025_cramoni"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/gviz_amd64ps"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
+    echo ""
+
+    # Epi2me images
+    echo "Epi2me analysis images:"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/snifflesv252_update"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/qdnaseq_amd64"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/modkit"
+    echo ""
+}
+
+install_nextflow() {
+    if ! check_command nextflow; then
+        print_header "Installing Nextflow"
+
+        cd "${PIPELINE_DIR}"
+        curl -s https://get.nextflow.io | bash
+        chmod +x nextflow
+
+        print_success "Nextflow installed to ${PIPELINE_DIR}/nextflow"
+        print_info "You can run it with: ./nextflow or add it to your PATH"
+        echo ""
+    fi
+}
+
+validate_setup() {
+    print_header "Validating Setup"
+
+    if [ -f "${PIPELINE_DIR}/validate_setup.sh" ]; then
+        bash "${PIPELINE_DIR}/validate_setup.sh"
+    else
+        print_warning "validate_setup.sh not found, skipping validation"
+
+        # Basic validation
+        print_info "Performing basic validation..."
+
+        local missing_files=()
+
+        # Check key reference files
+        [ ! -f "${REFERENCE_DIR}/GRCh38.fa" ] && missing_files+=("GRCh38.fa")
+        [ ! -f "${REFERENCE_DIR}/roi.protein_coding.bed" ] && missing_files+=("roi.protein_coding.bed")
+        [ ! -f "${REFERENCE_DIR}/CNV_genes_tuned.csv" ] && missing_files+=("CNV_genes_tuned.csv")
+
+        # Check humandb
+        [ ! -f "${HUMANDB_DIR}/hg38_refGene.txt" ] && missing_files+=("hg38_refGene.txt")
+
+        if [ ${#missing_files[@]} -gt 0 ]; then
+            print_warning "Some files appear to be missing:"
+            for file in "${missing_files[@]}"; do
+                echo "  - $file"
+            done
+            echo ""
+            print_info "This might be normal if files are named differently or optional"
+        else
+            print_success "Key reference files found!"
+        fi
+    fi
+
+    echo ""
+}
+
+create_quick_start_guide() {
+    print_header "Creating Quick Start Guide"
+
+    cat > "${PIPELINE_DIR}/QUICKSTART.md" << 'EOF'
+# nWGS Pipeline - Quick Start Guide
+
+## 🎉 Setup Complete!
+
+Your nWGS pipeline is ready to use. All reference files have been downloaded from Zenodo and containers are configured.
+
+---
+
+## Running the Pipeline
+
+### 1. Prepare Your Sample Files
+
+Create a `sample_ids.txt` file with your sample IDs:
+
+```bash
+echo "your_sample_id" > data/sample_ids.txt
+```
+
+### 2. Choose a Pipeline Mode
+
+#### Option A: Full Pipeline (Order Mode - Recommended)
+
+Runs the complete pipeline sequentially:
+
+```bash
+# Docker
+./run_pipeline_docker.sh --run_mode_order
+
+# Singularity
+./run_pipeline_singularity.sh --run_mode_order
+```
+
+#### Option B: Specific Modules
+
+**Epi2me module only** (methylation, CNV, SV calling):
+```bash
+./run_pipeline_docker.sh --run_mode_epi2me
+```
+
+**Annotation module only** (SNV, MGMT, TERTp, etc.):
+```bash
+./run_pipeline_docker.sh --run_mode_annotation tertp
+```
+
+**Combined Epi2me + Annotation** (epiannotation mode):
+```bash
+./run_pipeline_docker.sh --run_mode_epiannotation
+```
+
+**Merge BAM files**:
+```bash
+./run_pipeline_docker.sh --run_mode_mergebam
+```
+
+### 3. Monitor Progress
+
+Logs are automatically saved to `logs/` directory with sample IDs and timestamps:
+
+- `logs/trace-{mode}_{sample_id}_{timestamp}.txt` - Execution trace
+- `logs/execution_report-{mode}_{sample_id}_{timestamp}.html` - Interactive report
+- `logs/execution_timeline-{mode}_{sample_id}_{timestamp}.html` - Timeline visualization
+
+**View reports:**
+```bash
+# Open the latest execution report
+firefox logs/execution_report-*.html
+
+# Or use your preferred browser
+google-chrome logs/execution_report-*.html
+```
+
+### 4. View Results
+
+Results are organized in:
+
+```
+routine_results/{sample_id}/
+├── {sample_id}_markdown_pipeline_report.pdf    # Main PDF report
+├── CNV/                                         # Copy number variations
+├── SNV/                                         # Single nucleotide variants
+├── SV/                                          # Structural variants
+├── methylation/                                 # Methylation analysis
+└── ...
+```
+
+---
+
+## Configuration
+
+Edit configuration files in `conf/` to customize pipeline behavior:
+
+- **`conf/epi2me.config`** - Epi2me module (methylation, CNV, SV)
+- **`conf/annotation.config`** - Annotation module (SNV filtering, reports)
+- **`conf/mergebam.config`** - BAM merging settings
+
+### Key Parameters
+
+**SNV Filtering** (in `conf/annotation.config`):
+```groovy
+params {
+    snv_depth_threshold = 10    // Minimum sequencing depth
+    snv_gq_threshold = 10       // Minimum genotype quality
+}
+```
+
+**Working Directories** (configure paths for your system):
+```groovy
+params {
+    path = "/path/to/nWGS_pipeline"
+    path_output = "/path/to/routine_nWGS"
+}
+```
+
+---
+
+## Example: Complete Workflow
+
+```bash
+# 1. Setup (already done!)
+# ./setup_pipeline.sh docker
+
+# 2. Prepare sample
+echo "T25-000" > data/sample_ids.txt
+
+# 3. Run full pipeline
+./run_pipeline_docker.sh --run_mode_order
+
+# 4. Wait for completion (monitor logs in real-time)
+tail -f logs/trace-order_T25-000_*.txt
+
+# 5. Check results
+ls -lh routine_results/T25-000/
+
+# 6. View PDF report
+evince routine_results/T25-000/T25-000_markdown_pipeline_report.pdf
+```
+
+---
+
+## Advanced Options
+
+### Custom Work Directory
+
+Specify a custom temporary work directory (useful for large datasets):
+
+```bash
+./run_pipeline_docker.sh --run_mode_order -w /path/to/work/dir
+```
+
+### Custom Log Directory
+
+```bash
+./run_pipeline_docker.sh --run_mode_order --log-dir /path/to/logs
+```
+
+### Resume Failed Runs
+
+Nextflow automatically caches completed processes. Resume from where it stopped:
+
+```bash
+./run_pipeline_docker.sh --run_mode_order -resume
+```
+
+---
+
+## Troubleshooting
+
+### Pipeline Fails?
+
+1. **Check logs** in `logs/` directory
+2. **Run validation**: `./validate_setup.sh`
+3. **Check configuration** files in `conf/`
+4. **Review error** in trace file: `logs/trace-*.txt`
+
+### Common Issues
+
+**"Container not found"**
+- Re-run setup: `./setup_pipeline.sh docker` (or singularity)
+
+**"Reference file not found"**
+- Verify files in `data/reference/`
+- Re-download if needed: `rm data/.reference_core_downloaded && ./setup_pipeline.sh docker --skip-containers`
+
+**"Out of disk space"**
+- Clear work directory: `rm -rf work/`
+- Use custom work directory: `-w /path/to/large/disk`
+
+**"Permission denied"**
+- Ensure scripts are executable: `chmod +x run_pipeline_*.sh`
+
+---
+
+## Automated Monitoring
+
+For production environments, use the automated monitoring script:
+
+```bash
+# Monitor ONT sequencing runs automatically
+./smart_sample_monitor_v2.sh
+```
+
+This script automatically:
+- Detects new samples
+- Runs the pipeline
+- Monitors progress
+- Handles timeouts
+- Cleans up on completion
+
+---
+
+## Getting Help
+
+- **Full documentation**: `README.md`
+- **Software versions**: `SOFTWARE_VERSIONS.md`
+- **Container information**: `CONTAINERS.md`
+- **Changelog**: `CHANGELOG.md`
+- **GitHub issues**: https://github.com/VilhelmMagnusLab/nWGS_pipeline/issues
+
+---
+
+## Next Steps
+
+1. ✅ Read the full `README.md` for advanced features
+2. ✅ Customize configuration files for your needs
+3. ✅ Run a test sample to verify everything works
+4. ✅ Set up automated monitoring if needed
+
+**Happy analyzing! 🧬**
+EOF
+
+    print_success "Created QUICKSTART.md"
+    echo ""
+}
+
+print_completion_message() {
+    echo ""
+    echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║                                                          ║${NC}"
+    echo -e "${GREEN}║      🎉  Setup Complete! Pipeline Ready to Use  🎉       ║${NC}"
+    echo -e "${GREEN}║                                                          ║${NC}"
+    echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+
+    if [ "$SKIP_REFERENCE" = false ]; then
+        echo -e "${BLUE}📂 Reference files installed in:${NC}"
+        echo "   └─ ${DATA_DIR}"
+        echo ""
+    fi
+
+    if [ "$SKIP_CONTAINERS" = false ]; then
+        echo -e "${BLUE}🐳 Container system configured:${NC}"
+        echo "   └─ ${CONTAINER_SYSTEM^}"
+        echo ""
+    fi
+
+    echo -e "${BLUE}🚀 Quick Start:${NC}"
+    echo ""
+    echo "   1. Read the quick start guide:"
+    echo -e "      ${GREEN}cat QUICKSTART.md${NC}"
+    echo ""
+    echo "   2. Prepare your sample:"
+    echo -e "      ${GREEN}echo 'your_sample_id' > data/sample_ids.txt${NC}"
+    echo ""
+    echo "   3. Run the pipeline:"
+    if [ "$CONTAINER_SYSTEM" = "docker" ]; then
+        echo -e "      ${GREEN}./run_pipeline_docker.sh --run_mode_order${NC}"
+    else
+        echo -e "      ${GREEN}./run_pipeline_singularity.sh --run_mode_order${NC}"
+    fi
+    echo ""
+    echo -e "${BLUE}📖 Documentation:${NC}"
+    echo -e "   ├─ Quick start: ${GREEN}QUICKSTART.md${NC}"
+    echo -e "   ├─ Full guide: ${GREEN}README.md${NC}"
+    echo -e "   ├─ Software versions: ${GREEN}SOFTWARE_VERSIONS.md${NC}"
+    echo -e "   └─ Containers: ${GREEN}CONTAINERS.md${NC}"
+    echo ""
+    echo -e "${BLUE}🔍 Validation:${NC}"
+    echo -e "   └─ Run: ${GREEN}./validate_setup.sh${NC}"
+    echo ""
+    print_success "You're all set! Happy analyzing! 🧬"
+    echo ""
+}
+
+################################################################################
+# Main Execution
+################################################################################
+
+main() {
+    clear
+
+    echo -e "${BLUE}"
+    cat << "EOF"
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║           nWGS Pipeline - Automated Setup                     ║
+║        Nanopore Whole Genome Sequencing Analysis              ║
+║                                                               ║
+║           Zenodo: 10.5281/zenodo.15916972                     ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+EOF
+    echo -e "${NC}"
+
+    print_info "Container system: ${CONTAINER_SYSTEM^}"
+    echo ""
+    print_info "This script will automatically:"
+    echo "  1. Download all reference files from Zenodo (~30-50 GB)"
+    echo "  2. Extract and organize files in correct directories"
+    echo "  3. Set up ${CONTAINER_SYSTEM^} containers"
+    echo "  4. Validate the installation"
+    echo "  5. Create quick start guide"
+    echo ""
+    print_warning "Estimated time: 30-60 minutes (depends on internet speed)"
+    echo ""
+
+    read -p "Continue with setup? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        print_info "Setup cancelled by user"
+        exit 0
+    fi
+
+    echo ""
+
+    # Run setup steps
+    check_prerequisites
+    create_directories
+    install_nextflow
+    download_reference_files
+    setup_containers
+    validate_setup
+    create_quick_start_guide
+    print_completion_message
+}
+
+# Parse arguments and run
+parse_args "$@"
+main
