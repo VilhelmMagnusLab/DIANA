@@ -248,7 +248,8 @@ process cramino_report {
 workflow epi2me {
     take:
         merged_data
-        
+        occ_bams_channel  // Optional: ROI BAMs from mergebam (for run_mode_order)
+
     main:
         params.run_mode = params.run_mode_epi2me ?: 'all'
         println "epi2me run mode: ${params.run_mode}"
@@ -325,10 +326,15 @@ workflow epi2me {
             }
 
         // Create OCC/ROI BAM input channel for SNV calling
-        // This channel reads .roi.bam files from roi_bam_folder
-        occ_input_channel = (params.run_mode_order || params.run_mode_epiannotation) ?
+        // For run_mode_order: use the occ_bams_channel passed from mergebam (waits for ROI extraction)
+        // For run_mode_epiannotation: read .roi.bam files from roi_bam_folder (already exist)
+        occ_input_channel = params.run_mode_order ?
+            occ_bams_channel.map { sid, occ_bam, occ_bai ->
+                tuple(sid, occ_bam, occ_bai, file(params.reference_genome), file(params.reference_genome_bai))
+            } :
+            params.run_mode_epiannotation ?
             merged_data.map { sid, bam, bai, ref, ref_bai ->
-                // For run_mode_order/epiannotation, construct OCC BAM paths from sample_id
+                // For run_mode_epiannotation, construct OCC BAM paths from sample_id
                 def occ_bam = file("${params.roi_bam_folder}/${sid}.roi.bam")
                 def occ_bai = file("${params.roi_bam_folder}/${sid}.roi.bam.bai")
 
