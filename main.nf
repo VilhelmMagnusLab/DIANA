@@ -41,7 +41,8 @@ workflow {
                     file(params.reference_genome_bai)
                 )
             }
-        def epi2me_results = epi2me(epi2me_input)
+        // Pass occ_bams channel to epi2me so SNV calling waits for ROI extraction
+        def epi2me_results = epi2me(epi2me_input, mergebam_results.occ_bams)
 
         // Step 3: Prepare analysis input using epi2me outputs and mergebam outputs
         def annotation_input = epi2me_results.results
@@ -130,7 +131,8 @@ workflow {
 
         // Step 2: Run epi2me with merged BAM files
         log.info "=== Starting Epi2me Pipeline ==="
-        def epi2me_results = epi2me(merged_bam_channel)
+        // Pass empty channel for occ_bams since they're read from disk in epiannotation mode
+        def epi2me_results = epi2me(merged_bam_channel, Channel.empty())
 
         // Step 3: Create OCC BAM channel (filtered by sample IDs)
         def occ_bam_channel = Channel
@@ -189,7 +191,7 @@ workflow {
 
     } else {
         if (params.run_mode_mergebam) mergebam()
-        if (params.run_mode_epi2me) epi2me(Channel.empty())
+        if (params.run_mode_epi2me) epi2me(Channel.empty(), Channel.empty())
         if (params.run_mode_annotation) annotation(Channel.empty())
     }
 }
