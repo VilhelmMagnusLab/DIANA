@@ -41,40 +41,77 @@ NC='\033[0m'
 
 # Configuration
 ZENODO_TOKEN=""
-ZENODO_RECORD="15916972"  # Default to nWGS pipeline Zenodo record
+ZENODO_RECORD=""
+ZENODO_DEPOSIT=""  # Optional: existing draft deposit ID to upload to
+RECORD_EXPLICITLY_SET=false  # Track if --record flag was used
 USE_SANDBOX=false
 FILES_DIR=""
 ZENODO_API="https://zenodo.org/api"
 SANDBOX_API="https://sandbox.zenodo.org/api"
+BUCKET_URL=""  # Will be set after creating new version or getting deposit
 
 ################################################################################
 # Helper Functions
 ################################################################################
 
 print_header() {
-    echo -e "${BLUE}==========================================${NC}"
-    echo -e "${BLUE}$1${NC}"
-    echo -e "${BLUE}==========================================${NC}"
+    echo -e "${BLUE}==========================================${NC}" >&2
+    echo -e "${BLUE}$1${NC}" >&2
+    echo -e "${BLUE}==========================================${NC}" >&2
 }
 
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}✅ $1${NC}" >&2
 }
 
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}❌ $1${NC}" >&2
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+    echo -e "${YELLOW}⚠️  $1${NC}" >&2
 }
 
 print_info() {
-    echo -e "${CYAN}ℹ️  $1${NC}"
+    echo -e "${CYAN}ℹ️  $1${NC}" >&2
 }
 
 show_usage() {
-    grep "^#" "$0" | grep -v "^#!/bin/bash" | sed 's/^# //' | sed 's/^#//'
+    cat << 'USAGE'
+Zenodo Upload Script for nWGS Pipeline Reference Files
+
+This script automates uploading reference files to Zenodo using the API.
+
+Usage:
+  ./upload_to_zenodo.sh [OPTIONS]
+
+Options:
+  --token TOKEN              Zenodo API access token (required)
+  --record RECORD_ID         Existing Zenodo record ID to create new version
+  --deposit DEPOSIT_ID       Existing draft deposit ID to upload to (skips version creation)
+  --sandbox                  Use Zenodo sandbox (for testing)
+  --files-dir PATH           Directory containing files to upload (required)
+  --help                     Show this help message
+
+Examples:
+
+  # Option 1: Create new version automatically (requires empty published record)
+  ./upload_to_zenodo.sh --token YOUR_TOKEN --record 17589248 --files-dir ./zenodo_upload
+
+  # Option 2: Upload to existing draft (recommended)
+  # First: Create new version on Zenodo web interface and delete old files
+  # Then: Run this with the draft deposit ID from the URL
+  ./upload_to_zenodo.sh --token YOUR_TOKEN --deposit 12345678 --files-dir ./zenodo_upload
+
+  # Test on sandbox first
+  ./upload_to_zenodo.sh --token SANDBOX_TOKEN --deposit DRAFT_ID --sandbox --files-dir ./zenodo_upload
+
+Notes:
+  - Get your Zenodo API token from:
+    https://zenodo.org/account/settings/applications/tokens/new/
+  - Required scopes: deposit:write and deposit:actions
+  - For large files, Option 2 (--deposit) is more reliable
+USAGE
 }
 
 check_dependencies() {
@@ -117,6 +154,11 @@ parse_args() {
                 ;;
             --record)
                 ZENODO_RECORD="$2"
+                RECORD_EXPLICITLY_SET=true
+                shift 2
+                ;;
+            --deposit)
+                ZENODO_DEPOSIT="$2"
                 shift 2
                 ;;
             --sandbox)
@@ -191,6 +233,102 @@ human_readable_size() {
     fi
 }
 
+get_existing_deposit() {
+    print_header "Getting Existing Draft Deposit"
+
+    if [ -z "$ZENODO_DEPOSIT" ]; then
+        print_error "Deposit ID required (--deposit)"
+        exit 1
+    fi
+
+    print_info "Fetching deposit: $ZENODO_DEPOSIT"
+
+    # Get deposit details
+    local deposit_response=$(curl -s \
+        "${API_BASE}/deposit/depositions/${ZENODO_DEPOSIT}" \
+        -H "Authorization: Bearer ${ZENODO_TOKEN}")
+
+    # Check for errors
+    if echo "$deposit_response" | jq -e '.status' &> /dev/null; then
+        local status=$(echo "$deposit_response" | jq -r '.status')
+        local message=$(echo "$deposit_response" | jq -r '.message')
+        print_error "Failed to get deposit: $message (status: $status)"
+        exit 1
+    fi
+
+    # Check if it's a draft
+    local state=$(echo "$deposit_response" | jq -r '.state')
+    if [ "$state" != "unsubmitted" ]; then
+        print_error "Deposit $ZENODO_DEPOSIT is not a draft (state: $state)"
+        print_info "You can only upload to draft deposits"
+        exit 1
+    fi
+
+    # Get bucket URL
+    local bucket_url=$(echo "$deposit_response" | jq -r '.links.bucket')
+
+    if [ "$bucket_url" = "null" ] || [ -z "$bucket_url" ]; then
+        print_error "Failed to get bucket URL from deposit"
+        echo "$deposit_response" | jq '.' >&2
+        exit 1
+    fi
+
+    print_success "Draft deposit found: $ZENODO_DEPOSIT"
+    print_info "Bucket URL: $bucket_url"
+    echo "" >&2
+
+    # Output: deposit_id|bucket_url
+    echo "$ZENODO_DEPOSIT|$bucket_url"
+}
+
+create_new_deposit() {
+    print_header "Creating New Zenodo Deposit"
+
+    print_info "Creating a brand new Zenodo record for nWGS Pipeline v5.0"
+    echo "" >&2
+
+    # Create new empty deposit
+    local response=$(curl -s -X POST \
+        "${API_BASE}/deposit/depositions" \
+        -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d '{
+            "metadata": {
+                "title": "nWGS Pipeline Reference Files - v5.0",
+                "upload_type": "dataset",
+                "description": "Reference files for the nWGS (Nanopore Whole Genome Sequencing) pipeline for brain tumor analysis.",
+                "creators": [{"name": "VilhelmMagnusLab"}],
+                "access_right": "open",
+                "license": "cc-by-4.0"
+            }
+        }')
+
+    # Check for errors
+    if echo "$response" | jq -e '.status' &> /dev/null; then
+        local status=$(echo "$response" | jq -r '.status')
+        local message=$(echo "$response" | jq -r '.message')
+        print_error "Failed to create deposit: $message (status: $status)"
+        exit 1
+    fi
+
+    # Get deposit ID and bucket URL
+    local deposit_id=$(echo "$response" | jq -r '.id')
+    local bucket_url=$(echo "$response" | jq -r '.links.bucket')
+
+    if [ "$bucket_url" = "null" ] || [ -z "$bucket_url" ]; then
+        print_error "Failed to get bucket URL from new deposit"
+        echo "$response" | jq '.' >&2
+        exit 1
+    fi
+
+    print_success "New deposit created with ID: $deposit_id"
+    print_info "Bucket URL: $bucket_url"
+    echo "" >&2
+
+    # Output: deposit_id|bucket_url
+    echo "$deposit_id|$bucket_url"
+}
+
 create_new_version() {
     print_header "Creating New Version"
 
@@ -200,6 +338,8 @@ create_new_version() {
     fi
 
     print_info "Creating new version of record: $ZENODO_RECORD"
+    print_warning "Note: This requires the published record to have no files"
+    echo "" >&2
 
     # Create new version
     local response=$(curl -s -X POST \
@@ -211,6 +351,16 @@ create_new_version() {
         local status=$(echo "$response" | jq -r '.status')
         local message=$(echo "$response" | jq -r '.message')
         print_error "Failed to create new version: $message (status: $status)"
+        echo "" >&2
+        print_info "Zenodo now requires all files to be removed before creating a new version via API"
+        print_info "Please use Option 2 instead:"
+        echo "" >&2
+        echo "  1. Go to: https://zenodo.org/records/$ZENODO_RECORD" >&2
+        echo "  2. Click 'New version'" >&2
+        echo "  3. Delete all old files from the draft" >&2
+        echo "  4. Note the draft deposit ID from the URL" >&2
+        echo "  5. Run: ./upload_to_zenodo.sh --token \"\$ZENODO_TOKEN\" --deposit DEPOSIT_ID --files-dir $FILES_DIR" >&2
+        echo "" >&2
         exit 1
     fi
 
@@ -219,18 +369,27 @@ create_new_version() {
 
     if [ "$draft_url" = "null" ] || [ -z "$draft_url" ]; then
         print_error "Failed to get draft URL from response"
-        echo "$response" | jq '.'
+        echo "$response" | jq '.' >&2
         exit 1
     fi
 
-    # Get the new deposit ID
+    # Get the new deposit ID and bucket URL
     local deposit_response=$(curl -s -H "Authorization: Bearer ${ZENODO_TOKEN}" "$draft_url")
-    NEW_DEPOSIT_ID=$(echo "$deposit_response" | jq -r '.id')
+    local deposit_id=$(echo "$deposit_response" | jq -r '.id')
+    local bucket_url=$(echo "$deposit_response" | jq -r '.links.bucket')
 
-    print_success "New version created with deposit ID: $NEW_DEPOSIT_ID"
-    echo ""
+    if [ "$bucket_url" = "null" ] || [ -z "$bucket_url" ]; then
+        print_error "Failed to get bucket URL from deposit"
+        echo "$deposit_response" | jq '.' >&2
+        exit 1
+    fi
 
-    echo "$NEW_DEPOSIT_ID"
+    print_success "New version created with deposit ID: $deposit_id"
+    print_info "Bucket URL: $bucket_url"
+    echo "" >&2
+
+    # Output: deposit_id|bucket_url
+    echo "$deposit_id|$bucket_url"
 }
 
 delete_old_files() {
@@ -270,36 +429,46 @@ delete_old_files() {
 }
 
 upload_file() {
-    local deposit_id=$1
-    local filepath=$2
+    local filepath=$1
     local filename=$(basename "$filepath")
     local filesize=$(stat -f%z "$filepath" 2>/dev/null || stat -c%s "$filepath")
     local filesize_human=$(human_readable_size $filesize)
 
     echo -e "${CYAN}📤 Uploading: $filename ($filesize_human)${NC}"
 
-    # Upload file with progress
-    local upload_response=$(curl -X PUT \
-        "${API_BASE}/deposit/depositions/${deposit_id}/files" \
+    # Upload file to bucket with progress
+    # Use bucket URL directly with filename appended
+    local upload_url="${BUCKET_URL}/${filename}"
+
+    # Upload and write HTTP status to file (avoid command substitution issues)
+    curl -X PUT \
+        "$upload_url" \
         -H "Authorization: Bearer ${ZENODO_TOKEN}" \
         -H "Content-Type: application/octet-stream" \
         --data-binary "@${filepath}" \
-        --progress-bar \
-        -o /dev/null \
-        -w "%{http_code}")
+        -# \
+        -w "%{http_code}\n" \
+        -o /tmp/zenodo_upload_response_$$.json \
+        > /tmp/zenodo_upload_status_$$.txt 2>&1
+
+    local upload_response=$(tail -n 1 /tmp/zenodo_upload_status_$$.txt 2>/dev/null | tr -d -c '0-9')
 
     if [ "$upload_response" -eq 201 ] || [ "$upload_response" -eq 200 ]; then
         echo -e "${GREEN}✓ Successfully uploaded: $filename${NC}"
+        rm -f /tmp/zenodo_upload_response_$$.json /tmp/zenodo_upload_status_$$.txt
         return 0
     else
         echo -e "${RED}✗ Failed to upload: $filename (HTTP $upload_response)${NC}"
+        if [ -f /tmp/zenodo_upload_response_$$.json ]; then
+            echo "Response:"
+            cat /tmp/zenodo_upload_response_$$.json | jq '.' 2>/dev/null || cat /tmp/zenodo_upload_response_$$.json
+        fi
+        rm -f /tmp/zenodo_upload_response_$$.json /tmp/zenodo_upload_status_$$.txt
         return 1
     fi
 }
 
 upload_files() {
-    local deposit_id=$1
-
     print_header "Uploading Files"
 
     # Define files to upload (in order of size - smallest first for faster initial upload)
@@ -327,7 +496,7 @@ upload_files() {
             continue
         fi
 
-        if upload_file "$deposit_id" "$filepath"; then
+        if upload_file "$filepath"; then
             ((uploaded++))
         else
             ((failed++))
@@ -466,8 +635,10 @@ EOF
 
     print_info "Configuration:"
     echo "  Files directory: $FILES_DIR"
-    if [ -n "$ZENODO_RECORD" ]; then
-        echo "  Base record: $ZENODO_RECORD (creating new version)"
+    if [ -n "$ZENODO_DEPOSIT" ]; then
+        echo "  Mode: Upload to existing draft deposit $ZENODO_DEPOSIT"
+    elif [ "$RECORD_EXPLICITLY_SET" = true ]; then
+        echo "  Mode: Create new version of record $ZENODO_RECORD"
     else
         echo "  Mode: Creating new deposit"
     fi
@@ -488,18 +659,28 @@ EOF
 
     echo ""
 
-    # Create new version or new deposit
-    if [ -n "$ZENODO_RECORD" ]; then
-        NEW_DEPOSIT_ID=$(create_new_version)
+    # Get or create deposit
+    local result
+    if [ -n "$ZENODO_DEPOSIT" ]; then
+        # Option 2: Upload to existing draft
+        result=$(get_existing_deposit)
+    elif [ "$RECORD_EXPLICITLY_SET" = true ]; then
+        # Option 1: Create new version automatically
+        result=$(create_new_version)
+        # Parse deposit_id from result (before deleting files)
+        NEW_DEPOSIT_ID="${result%%|*}"
         delete_old_files "$NEW_DEPOSIT_ID"
     else
-        print_error "Creating new deposits not yet implemented"
-        print_info "Please use --record to create a new version of existing record"
-        exit 1
+        # Option 3: Create brand new deposit
+        result=$(create_new_deposit)
     fi
 
+    # Parse result: deposit_id|bucket_url
+    NEW_DEPOSIT_ID="${result%%|*}"
+    BUCKET_URL="${result##*|}"
+
     # Upload files
-    upload_files "$NEW_DEPOSIT_ID"
+    upload_files
 
     # Update metadata
     update_metadata "$NEW_DEPOSIT_ID"
