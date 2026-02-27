@@ -322,25 +322,28 @@ verify_md5() {
 }
 
 setup_nanodx_classifier() {
-    print_info "Setting up nanoDx classifier..."
+    print_info "Verifying nanoDx classifier setup..."
 
     # Define paths
     local NANODX_DIR="${REFERENCE_DIR}/nanoDx"
     local NANODX_STATIC="${NANODX_DIR}/static"
-    local ZENODO_NANODX="14006255"  # Specific Zenodo record for nanoDx files
+    local ZENODO_NANODX="14006255"  # Specific Zenodo record for nanoDx files (fallback only)
     local NANODX_URL="https://zenodo.org/record/${ZENODO_NANODX}/files"
 
-    # Create directory structure
+    # Note: nanoDx is included in reference_core.tar.gz, so this function mainly verifies
+
+    # Create directory structure if needed
     mkdir -p "${NANODX_STATIC}"
 
-    # Check if nanoDx folder exists in pipeline root (old location)
+    # Check if nanoDx folder exists in pipeline root (old location from previous versions)
     if [ -d "${PIPELINE_DIR}/nanoDx" ] && [ ! -d "${NANODX_DIR}" ]; then
         print_info "Moving nanoDx folder from pipeline root to data/reference/..."
         mv "${PIPELINE_DIR}/nanoDx" "${REFERENCE_DIR}/"
         print_success "Moved nanoDx to data/reference/"
     fi
 
-    # Download nanoDx model files from Zenodo if not present
+    # Check if nanoDx model files are present (should be from reference_core.tar.gz)
+    # Only download from Zenodo as fallback if files are missing
     local files_to_download=(
         "Capper_et_al.h5"
         "Capper_et_al.h5.md5"
@@ -356,12 +359,13 @@ setup_nanodx_classifier() {
     done
 
     if [ "$all_files_present" = true ]; then
-        print_success "nanoDx model files already present"
+        print_success "nanoDx classifier files verified (from reference_core.tar.gz)"
         echo ""
         return
     fi
 
-    print_info "Downloading nanoDx model files from Zenodo..."
+    print_warning "nanoDx model files missing - downloading from Zenodo as fallback..."
+    print_info "(Note: These should have been included in reference_core.tar.gz)"
 
     for file in "${files_to_download[@]}"; do
         if [ ! -f "${NANODX_STATIC}/${file}" ]; then
@@ -443,11 +447,11 @@ download_reference_files() {
     print_warning "Total download size: ~30-35 GB (core) + ~20 GB (optional)"
     echo ""
 
-    # Download core reference bundle
+    # Download core reference bundle (includes nanoDx classifier)
     if [ ! -f "${DATA_DIR}/.reference_core_downloaded" ]; then
-        print_info "Downloading core reference files..."
+        print_info "Downloading core reference files (includes nanoDx classifier)..."
         download_file "reference_core.tar.gz" "${PIPELINE_DIR}/reference_core.tar.gz"
-        extract_archive "${PIPELINE_DIR}/reference_core.tar.gz" "${PIPELINE_DIR}"
+        extract_archive "${PIPELINE_DIR}/reference_core.tar.gz" "${REFERENCE_DIR}"
         rm "${PIPELINE_DIR}/reference_core.tar.gz"
         touch "${DATA_DIR}/.reference_core_downloaded"
         echo ""
@@ -512,7 +516,7 @@ download_reference_files() {
         echo ""
     fi
 
-    # Setup nanoDx classifier (from Zenodo record 14006255)
+    # Verify nanoDx classifier (included in reference_core.tar.gz)
     setup_nanodx_classifier
 
     # Download optional large files (Svanna database, etc.)
