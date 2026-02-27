@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### `Added`
+- Added automated Zenodo upload script (`upload_to_zenodo.sh`) for reference file distribution
+  - Supports creating new deposits, new versions, or uploading to existing drafts
+  - Implements bucket-based upload API with progress bars
+  - Includes metadata management and publishing workflow
+  - Fixed multiple issues through versions 5.0-5.5 (stdout/stderr, variable scoping, Content-Type header)
+- Added packaging script (`package_for_zenodo.sh`) to prepare reference files for Zenodo
+  - Creates properly formatted archives: Assembly.zip, general.zip, humandb.tar.gz, reference_core.tar.gz, etc.
+  - Handles file verification and size reporting
+  - Provides upload instructions for both automated and manual workflows
+- Added unified setup script (`setup_pipeline.sh`) for streamlined installation
+  - Single command setup for both Docker and Singularity/Apptainer
+  - Automatically downloads all reference files from Zenodo (DOI: 10.5281/zenodo.18802824)
+  - Handles container downloads and Nextflow installation
+  - Eliminates need for manual reference file downloads
 - Added configurable SNV filtering thresholds in annotation configuration
   - `snv_depth_threshold` parameter (default: 10) for minimum sequencing depth filtering
   - `snv_gq_threshold` parameter (default: 10) for minimum Genotype Quality filtering
@@ -26,6 +40,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - HTML reports: `execution_report-{mode}_{sample_id}_{timestamp}.html`
 
 ### `Changed`
+- Updated Zenodo record reference from 17589248 (v4) to 18802824 (v1)
+  - New DOI: 10.5281/zenodo.18802824
+  - Concept DOI: 10.5281/zenodo.18802823
+  - Updated in `setup_pipeline.sh` to download from new record
+- Simplified reference file structure to avoid redundant file movements
+  - Files are now extracted directly to their final locations
+  - `general.zip` remains compressed (required for Sturgeon classifier)
+  - Other archives (Assembly.zip, r1041_e82_400bps_sup_v420.zip, svanna-data.zip) are automatically extracted
+- Updated README.md to reflect automated setup workflow
+  - Documented unified `setup_pipeline.sh` usage for both Docker and Singularity
+  - Removed external download requirement for gencode.v48.annotation.gff3 (now included in reference_core.tar.gz)
+  - Updated Quick Start section with automated setup commands
+  - Simplified Required Reference Data section to emphasize automation
+- Removed deprecated documentation files
+  - `ZENODO_FILES_GUIDE.md` (superseded by packaging script)
+  - `ZENODO_UPLOAD_GUIDE.md` (superseded by upload script)
+  - `smart_sample_monitor.sh` (unused utility)
 - **BREAKING**: Renamed "analysis" to "annotation" throughout the entire pipeline
   - Module renamed: `modules/analysis.nf` → `modules/annotation.nf`
   - Config renamed: `conf/analysis.config` → `conf/annotation.config`

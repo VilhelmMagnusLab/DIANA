@@ -26,16 +26,18 @@ The nWGS pipeline follows a modular architecture with three main Nextflow module
 
 ### Prerequisites
 - **Docker** (Desktop/Local) or **Singularity/Apptainer** (HPC)
-- **Nextflow** (auto-installed by setup scripts)
+- **Nextflow** (auto-installed by setup script)
+- **Internet connection** for downloading reference files from Zenodo
 
-### One-Command Setup & Run
+### Automated Setup & Run
+
+The pipeline now features a unified setup script that automatically downloads all reference files from Zenodo:
 
 **For Docker (Desktop/Local):**
 ```bash
 git clone https://github.com/VilhelmMagnusLab/nWGS_pipeline.git
 cd nWGS_pipeline
-chmod +x setup_docker.sh
-./setup_docker.sh
+./setup_pipeline.sh docker
 ./run_pipeline_docker.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
 ```
 
@@ -43,10 +45,17 @@ chmod +x setup_docker.sh
 ```bash
 git clone https://github.com/VilhelmMagnusLab/nWGS_pipeline.git
 cd nWGS_pipeline
-chmod +x setup_singularity.sh
-./setup_singularity.sh
+./setup_pipeline.sh singularity
 ./run_pipeline_singularity.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
 ```
+
+**What the setup script does:**
+- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.18802824](https://doi.org/10.5281/zenodo.18802824))
+- Extracts and organizes files into the correct directory structure
+- Downloads and sets up Docker containers or Singularity images
+- Installs Nextflow if not already available
+
+**Note:** First-time setup downloads ~14 GB of reference data and may take 10-30 minutes depending on your internet connection.
 
 ## Pipeline Modules
 
@@ -266,47 +275,57 @@ Output directory (configured via params.path_output):
 
 ## Required Reference Data
 
-### Reference Files Required
-The following reference files must be downloaded and placed in the `data/reference/` directory:
+### Automated Download (Recommended)
 
-**Analysis-specific files:**
-- `EPIC_sites_NEW.bed` - Methylation sites
-- `MGMT_CpG_Island.hg38.bed` - MGMT CpG islands
-- `roi.protein_coding.bed` - Region of interest BED file (protein-coding genes for SNV screening and BAM extraction; must be proper 10-field BED format)
-- `TERTp_variants.bed` - TERT promoter variants
-- `human_GRCh38_trf.bed` - Tandem repeat regions
-- `Others` file downloaded from Zenodo should be put into `data/reference/`
+**The `setup_pipeline.sh` script automatically downloads and sets up all required reference files from Zenodo.**
 
-**Note:** The `roi.protein_coding.bed` is a region of interest (ROI) BED file. For this pipeline, OCC (Onco-Comprehensive-Coverage) genes are used, but any custom ROI BED file can be substituted. This file is used for:
-  - Extracting regions of interest during BAM merging (mergebam module)
-  - SNV screening regions for variant calling (ClairS-TO analysis)
-  - Ensure this file is properly formatted with exactly 10 tab-separated fields per line
+Simply run:
+```bash
+./setup_pipeline.sh docker    # For Docker users
+# or
+./setup_pipeline.sh singularity    # For Singularity users
+```
 
-**Annotation databases (place in `data/humandb/`):**
-- `hg38_refGene.txt` - RefGene annotation
-- `hg38_refGeneMrna.fa` - RefGene mRNA sequences
-- `hg38_clinvar_20240611.txt` - ClinVar annotations
-- `hg38_cosmic100coding2024.txt` - Cosmic annotations
+The script will:
+1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.18802824)](https://doi.org/10.5281/zenodo.18802824)
+2. Extract and organize all files into the correct directory structure
+3. Set up NanoDx classifier models
+4. Configure all required paths
 
-**svanna databases (place in `data/reference/`):**
-- `svanna-data.zip` - svanna database need to be unzip after download and place into the reference folder or the database can be downloaded from (https://github.com/monarch-initiative/SvAnna)
+### Manual Setup (Advanced Users Only)
 
-**nanoDX script and files (place in `data/reference/`):**
+If you prefer manual setup or need to customize the reference files:
 
-The nanoDX folder in the pipeline root should be moved into the `data/reference` folder and copy the following downloded files from https://zenodo.org/records/14006255 into `nanoDx/static/`:
-- `Capper_et_al.h5` (model file)
-- `Capper_et_al.h5.md5` (checksum)
-- `Capper_et_al_NN.pkl` (neural network)
+**Core reference files** (automatically placed in `data/reference/`):
+- `reference_core.tar.gz` - Contains GRCh38 reference genome, BED files, and annotations including:
+  - `GRCh38.fa` and `GRCh38.fa.fai` - Human reference genome
+  - `EPIC_sites_NEW.bed` - Methylation sites
+  - `MGMT_CpG_Island.hg38.bed` - MGMT CpG islands
+  - `roi.protein_coding.bed` - Region of interest BED file (protein-coding genes for SNV screening and BAM extraction)
+  - `TERTp_variants.bed` - TERT promoter variants
+  - `human_GRCh38_trf.bed` - Tandem repeat regions
+  - `CNV_genes_tuned.csv` - CNV gene annotations
+  - `nanoDx/` - NanoDx neural network classifier (with models from Zenodo)
 
-**ONT basecalling model (place directory in `data/reference/`):**
-- `r1041_e82_400bps_sup_v420/`  # Required by ClairS-TO; used via `clairsto_models`. The model ZIP file `r1041_e82_400bps_sup_v420.zip` can be downloaded from Zenodo and then unzipped.
+**Annotation databases** (automatically placed in `data/humandb/`):
+- `humandb.tar.gz` - Contains ANNOVAR annotation databases:
+  - `hg38_refGene.txt` - RefGene annotation
+  - `hg38_refGeneMrna.fa` - RefGene mRNA sequences
+  - `hg38_clinvar_20240611.txt` - ClinVar annotations
+  - `hg38_cosmic100coding2024.txt` - Cosmic annotations
 
-**Assembly folder (included in Zenodo download, place in `data/reference/`):**
-- `Assembly/` - Assembly reference folder required for vcfcircos visualization (included in Zenodo download. The file need to be unzip after download)
-  - **Important:** Ensure the correct path to the reference directory is configured in your `option.json` file
-  - The "Static" parameter in `option.json` should point to your `data/reference` directory path
+**Additional reference files** (automatically extracted to `data/reference/`):
+- `general.zip` - Sturgeon classifier model (kept as zip, not extracted)
+- `Assembly.zip` - Assembly folder for vcfcircos visualization (automatically extracted)
+- `r1041_e82_400bps_sup_v420.zip` - ONT basecalling model for ClairS-TO (automatically extracted)
+- `svanna-data.zip` - Svanna structural variant annotation database (optional, automatically extracted)
 
-**Download files from [Zenodo](https://doi.org/10.5281/zenodo.15916972) and place them in the appropriate directories.**
+**Note on roi.protein_coding.bed:** This ROI BED file uses OCC (Onco-Comprehensive-Coverage) genes but can be substituted with any custom ROI BED file. It's used for:
+- Extracting regions of interest during BAM merging (mergebam module)
+- SNV screening regions for variant calling (ClairS-TO analysis)
+- Ensure proper BED format with exactly 10 tab-separated fields per line
+
+**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.18802824)](https://doi.org/10.5281/zenodo.18802824)
 
 ### Directory Structure Setup
 After downloading the reference files, your directory structure should look like this:
@@ -332,11 +351,6 @@ data/
     ├── hg38_clinvar_20240611.txt
     └── hg38_cosmic100coding2024.txt
 ```
-
-### External Downloads Required
-**Place this file in `data/reference/`:**
-- **Gencode annotation**: [Gencode v48](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_48/gencode.v48.annotation.gff3.gz)
-  - Download and place as: `gencode.v48.annotation.gff3`
 
 ## ACE Tumor Content Calculation
 

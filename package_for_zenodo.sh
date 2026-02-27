@@ -2,7 +2,7 @@
 ################################################################################
 # Package nWGS Pipeline Files for Zenodo Upload
 ################################################################################
-# This script packages all reference files for upload to Zenodo record 15916972.
+# This script packages all reference files for upload to Zenodo record 17589248.
 # It creates all necessary archives in the correct format.
 #
 # Source directories:
@@ -174,12 +174,22 @@ copy_general_zip() {
 }
 
 create_assembly_zip() {
-    print_header "Creating Assembly.zip"
+    print_header "Handling Assembly.zip"
 
+    local source_zip="${REFERENCE_DIR}/Assembly.zip"
     local source_dir="${REFERENCE_DIR}/Assembly"
     local output_file="${OUTPUT_DIR}/Assembly.zip"
 
-    if check_file_exists "$source_dir" "Assembly directory"; then
+    # Try to copy existing zip first
+    if [ -f "$source_zip" ]; then
+        cp "$source_zip" "$output_file"
+
+        local size=$(stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file")
+        local size_human=$(human_readable_size $size)
+
+        print_success "Copied Assembly.zip ($size_human)"
+    # Otherwise create from directory
+    elif [ -d "$source_dir" ]; then
         print_info "Creating Assembly.zip from ${source_dir}..."
 
         cd "${REFERENCE_DIR}"
@@ -191,7 +201,7 @@ create_assembly_zip() {
 
         print_success "Created Assembly.zip ($size_human)"
     else
-        print_warning "Assembly directory not found - skipping"
+        print_warning "Assembly not found (neither zip nor directory) - skipping"
         print_info "If you need it, download from previous Zenodo version"
     fi
     echo ""
@@ -298,7 +308,7 @@ verify_packages() {
 print_next_steps() {
     print_header "Next Steps"
 
-    echo "Files are ready for Zenodo upload to record 15916972!"
+    echo "Files are ready for Zenodo upload to record 17589248!"
     echo ""
     echo -e "${CYAN}Option 1: Automated Upload (Recommended)${NC}"
     echo "  1. Get your Zenodo API token from:"
@@ -310,7 +320,7 @@ print_next_steps() {
     echo -e "     ${GREEN}./upload_to_zenodo.sh --token \"\$ZENODO_TOKEN\" --files-dir $OUTPUT_DIR${NC}"
     echo ""
     echo -e "${CYAN}Option 2: Manual Web Upload${NC}"
-    echo "  1. Go to: https://zenodo.org/record/15916972"
+    echo "  1. Go to: https://zenodo.org/records/17589248"
     echo "  2. Click 'New version'"
     echo "  3. Delete old files"
     echo "  4. Upload files from: $OUTPUT_DIR"
@@ -336,7 +346,7 @@ main() {
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║        nWGS Pipeline - Package Files for Zenodo               ║
-║          https://doi.org/10.5281/zenodo.15916972              ║
+║          https://zenodo.org/records/17589248                  ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 EOF
