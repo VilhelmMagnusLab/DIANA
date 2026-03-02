@@ -16,8 +16,8 @@ def start_time = new Date()
 def validateParameters() {
     params.run_mode = params.run_mode_annotation ?: 'rmd'
     println "Annotation run mode: ${params.run_mode}"
-    if (!['mgmt', 'svannasv', 'cnv', 'roi', 'tertp', 'rmd'].contains(params.run_mode)) {
-        error "ERROR: Invalid run_mode '${params.run_mode}' for annotation. Valid modes: mgmt, svannasv, cnv, roi, tertp, rmd"
+    if (!['mgmt', 'svannasv', 'cnv', 'roi', 'tertp', 'rmd', 'all'].contains(params.run_mode)) {
+        error "ERROR: Invalid run_mode '${params.run_mode}' for annotation. Valid modes: mgmt, svannasv, cnv, roi, tertp, rmd, all"
     }
 }
 
@@ -63,7 +63,7 @@ process extract_epic {
     tuple val(sample_id), path("${sample_id}_MGMT_header.bed"), emit: MGMTheaderout
     tuple val(sample_id), path("${sample_id}_wf_mods.bedmethyl_intersect.bed"), emit: sturgeonbedinput
     tuple val(sample_id), path("${sample_id}_EpicSelect_m.bed")
-    tuple val(sample_id), path("${sample_id}_mnpflex_input.bed")
+    tuple val(sample_id), path("${sample_id}_mnpflex_input.bed"), emit: mnpflex_bed
 
     script:
     """
@@ -126,7 +126,7 @@ process sturgeon {
 
     output:
     path("${sample_id}_bedmethyl_sturgeon.bed")
-    path("${sample_id}_bedmethyl_sturgeon_general.pdf"), optional: true
+    tuple val(sample_id), path("${sample_id}_bedmethyl_sturgeon_general.pdf"), optional: true, emit: sturgeon_pdf
     path("${sample_id}_bedmethyl_sturgeon_general.csv"), optional: true
 
 
@@ -220,7 +220,7 @@ process tsne_plot {
 
     output:
     tuple val(sample_id), path("${sample_id}_tsne_plot.pdf"), emit: tsne_out
-    tuple val(sample_id), path("${sample_id}_tsne_plot.html")
+    tuple val(sample_id), path("${sample_id}_tsne_plot.html"), emit: tsne_html
 
     script:
     """
@@ -646,7 +646,7 @@ process clairs_to_annotate {
     publishDir "${params.output_path}/routine_annotation/${sample_id}/snv_annotation", mode: "copy", overwrite: true
 
     input:
-    tuple val(sample_id), path(clairsto_output_dir), path(snv_vcf), path(indel_vcf)
+    tuple val(sample_id), path('clairsto_output'), path(snv_vcf), path(indel_vcf)
 
     output:
     //tuple val(sample_id), path('clairsto_output/')
@@ -659,8 +659,8 @@ process clairs_to_annotate {
     """
     # VCF index files (.tbi) should already exist from the epi2me:run_clairs_to process
     # bcftools concat requires these index files to be present
-    # Use the clairsto_output_dir to access both VCF files and their .tbi index files
-    bcftools concat -a -d all ${clairsto_output_dir}/snv.vcf.gz ${clairsto_output_dir}/indel.vcf.gz -Oz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
+    # The directory is staged as 'clairsto_output' to access both VCF files and their .tbi index files
+    bcftools concat -a -d all clairsto_output/snv.vcf.gz clairsto_output/indel.vcf.gz -Oz -o ${sample_id}_merge_snv_indel_claisto.vcf.gz
 
     convert2annovar.pl ${sample_id}_merge_snv_indel_claisto.vcf.gz \
         --format vcf4 \
@@ -947,6 +947,54 @@ process markdown_report {
     """
 }
 
+// Copy result files to routine_results folder for easy access
+process copy_results_to_summary {
+    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(mnpflex_bed)
+    tuple val(sample_id), path(sturgeon_pdf)
+    tuple val(sample_id), path(tsne_html)
+    tuple val(sample_id), path(svanna_html)
+
+    output:
+    path("${sample_id}_mnpflex_input.bed"), optional: true
+    path("${sample_id}_bedmethyl_sturgeon_general.pdf"), optional: true
+    path("${sample_id}_tsne_plot.html"), optional: true
+    path("${sample_id}_occ_svanna_annotation.html"), optional: true
+
+    script:
+    """
+    # Copy files dereferencing symlinks
+    # Use temp names first, then rename to avoid "same file" error
+    if [ -f "${mnpflex_bed}" ]; then
+        cp -L ${mnpflex_bed} temp_mnpflex.bed
+        mv temp_mnpflex.bed ${sample_id}_mnpflex_input.bed
+        echo "Created ${sample_id}_mnpflex_input.bed"
+    fi
+
+    if [ -f "${sturgeon_pdf}" ]; then
+        cp -L ${sturgeon_pdf} temp_sturgeon.pdf
+        mv temp_sturgeon.pdf ${sample_id}_bedmethyl_sturgeon_general.pdf
+        echo "Created ${sample_id}_bedmethyl_sturgeon_general.pdf"
+    fi
+
+    if [ -f "${tsne_html}" ]; then
+        cp -L ${tsne_html} temp_tsne.html
+        mv temp_tsne.html ${sample_id}_tsne_plot.html
+        echo "Created ${sample_id}_tsne_plot.html"
+    fi
+
+    if [ -f "${svanna_html}" ]; then
+        cp -L ${svanna_html} temp_svanna.html
+        mv temp_svanna.html ${sample_id}_occ_svanna_annotation.html
+        echo "Created ${sample_id}_occ_svanna_annotation.html"
+    fi
+
+    echo "Files ready for publishing:"
+    ls -lh ${sample_id}_* 2>/dev/null || echo "No output files created"
+    """
+}
 
 // ACE tumor content calculation and copy number analysis
 process ace_tmc {
@@ -1038,6 +1086,7 @@ workflow annotation {
 
 
         // Initialize channels as empty by default
+        def annotatecnv_results = null
         def annotatecnv_out = Channel.empty()
         def merge_annotation_out = Channel.empty()
         def crossNN_out = Channel.empty()
@@ -1060,7 +1109,13 @@ workflow annotation {
                 }
             println "Sample thresholds (from epi2me_sample_id_file): ${sample_thresholds}"
         } else if (params.run_mode_order) {
-            sample_thresholds = [:]
+            // Load sample IDs from bam_sample_id_file and initialize with null thresholds
+            def sample_ids = file(params.bam_sample_id_file).readLines().collect { line ->
+                // Extract only the sample ID part (first column), removing flow cell ID
+                line.trim().split(/\s+/)[0]
+            }
+            // Initialize sample_thresholds with null values for ACE calculation
+            sample_thresholds = sample_ids.collectEntries { [(it): null] }
             println "Sample thresholds (run_mode_order): ${sample_thresholds}"
         } else {
             sample_thresholds = loadSampleThresholds()
@@ -1126,8 +1181,8 @@ workflow annotation {
                 //log.info "SV file path: ${sv}"
 
                 // Create index file path from the published SV file location
-                def sv_file = file("${params.path}/routine_epi2me/${sample_id}/${sample_id}.sniffles.vcf.gz")
-                def sv_index = file("${params.path}/routine_epi2me/${sample_id}/${sample_id}.sniffles.vcf.gz.tbi")
+                def sv_file = file("${params.output_path}/routine_epi2me/${sample_id}/${sample_id}.sniffles.vcf.gz")
+                def sv_index = file("${params.output_path}/routine_epi2me/${sample_id}/${sample_id}.sniffles.vcf.gz.tbi")
 
                 tuple(
                     sample_id,
@@ -1425,7 +1480,7 @@ workflow annotation {
                 .filter { it != null }
 
         // MGMT analysis
-        if (params.run_mode in ['mgmt', 'rmd']) {
+        if (params.run_mode in ['mgmt', 'rmd', 'all'] || params.run_mode_order) {
             println "Running MGMT Analysis..."
             
             // Create MGMT channel that works for combined modes (order and epiannotation)
@@ -1510,7 +1565,7 @@ workflow annotation {
         }
 
         // Svanna analysis
-        if (params.run_mode in ['svannasv', 'rmd']) {
+        if (params.run_mode in ['svannasv', 'rmd', 'all'] || params.run_mode_order) {
             println "Running Svanna Analysis..."
             
             svannasv(boosts_svanna_channel)
@@ -1530,12 +1585,22 @@ workflow annotation {
             
             // Assign fusion events channel when SV analysis is run
             fusion_events_channel = svannasv_fusion_events.out.filterfusioneventout
+
+            // Copy result files to routine_results for easy access
+            if (params.run_mode_order || params.run_mode_epiannotation) {
+                copy_results_to_summary(
+                    extract_epic.out.mnpflex_bed,
+                    sturgeon.out.sturgeon_pdf,
+                    tsne_plot.out.tsne_html,
+                    svannasv.out.rmdsvannahtml
+                )
+            }
         }
 
         // OCC analysis
         // NOTE: Variant calling (Clair3/ClairS-TO) is now handled by epi2me workflow
         // This section reads pre-existing VCF files from epi2me output and runs annotation
-        if (params.run_mode in ['roi', 'rmd']) {
+        if (params.run_mode in ['roi', 'rmd', 'all'] || params.run_mode_order) {
             println "Running ROI Analysis (annotation of pre-existing VCFs from epi2me)..."
 
             // Step 1: Create channels for VCF files
@@ -1544,16 +1609,16 @@ workflow annotation {
             def clair3_annot_input = (params.run_mode_epiannotation || params.run_mode_order) ?
                 input_data.map { args ->
                     def sample_id = args[0]
-                    def clair3_output_dir = file("${params.path}/routine_epi2me/${sample_id}/output_clair3")
-                    def pileup_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
-                    def merge_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
+                    def clair3_output_dir = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3")
+                    def pileup_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
+                    def merge_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
                     tuple(sample_id, clair3_output_dir, pileup_vcf, merge_vcf)
                 }.view { "Clair3 annotation input: $it" } :
                 Channel.fromList(sample_thresholds.keySet().collect())
                     .map { sample_id ->
-                        def clair3_output_dir = file("${params.path}/routine_epi2me/${sample_id}/output_clair3")
-                        def pileup_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
-                        def merge_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
+                        def clair3_output_dir = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3")
+                        def pileup_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
+                        def merge_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
 
                         if (!clair3_output_dir.exists() || !pileup_vcf.exists() || !merge_vcf.exists()) {
                             error "ERROR: Clair3 VCF files not found for ${sample_id}. Please run epi2me workflow with SNV mode first."
@@ -1566,16 +1631,16 @@ workflow annotation {
             def clairsto_annot_input = (params.run_mode_epiannotation || params.run_mode_order) ?
                 input_data.map { args ->
                     def sample_id = args[0]
-                    def clairsto_output_dir = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output")
-                    def snv_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
-                    def indel_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
+                    def clairsto_output_dir = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output")
+                    def snv_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
+                    def indel_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
                     tuple(sample_id, clairsto_output_dir, snv_vcf, indel_vcf)
                 } :
                 Channel.fromList(sample_thresholds.keySet().collect())
                     .map { sample_id ->
-                        def clairsto_output_dir = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output")
-                        def snv_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
-                        def indel_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
+                        def clairsto_output_dir = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output")
+                        def snv_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
+                        def indel_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
 
                         if (!clairsto_output_dir.exists() || !snv_vcf.exists() || !indel_vcf.exists()) {
                             error "ERROR: ClairS-TO VCF files not found for ${sample_id}. Please run epi2me workflow with SNV mode first."
@@ -1623,7 +1688,7 @@ workflow annotation {
          }
 
         // tertp analysis
-        if (params.run_mode in ['tertp', 'rmd']) {
+        if (params.run_mode in ['tertp', 'rmd', 'all'] || params.run_mode_order) {
             println "Running tertp Analysis..."
             igv_tools(boosts_igv_channel)
         //    igv_tools.out.tertp_out_igv.view { "tertp output: $it" }
@@ -1631,7 +1696,7 @@ workflow annotation {
         }
 
         // CNV analysis (now handles both CNV and RMD modes)
-        if (params.run_mode in ['cnv', 'rmd'] || params.run_mode_order) {
+        if (params.run_mode in ['cnv', 'rmd', 'all'] || params.run_mode_order) {
             println "Running CNV Analysis..."
             
             // Handle sample_thresholds for different run modes
@@ -1746,9 +1811,9 @@ workflow annotation {
                         println "Processing epi2me results for sample: ${sample_id} from epi2me output"
 
                         // Use published epi2me output directory
-                        def segs_vcf_path = "${params.path}/routine_epi2me/${sample_id}/${sample_id}_segs.vcf"
-                        def bins_bed_path = "${params.path}/routine_epi2me/${sample_id}/${sample_id}_bins.bed"
-                        def segs_bed_path = "${params.path}/routine_epi2me/${sample_id}/${sample_id}_segs.bed"
+                        def segs_vcf_path = "${params.output_path}/routine_epi2me/${sample_id}/${sample_id}_segs.vcf"
+                        def bins_bed_path = "${params.output_path}/routine_epi2me/${sample_id}/${sample_id}_bins.bed"
+                        def segs_bed_path = "${params.output_path}/routine_epi2me/${sample_id}/${sample_id}_segs.bed"
 
                         println "Checking file existence:"
                         println "  segs_vcf_path: ${segs_vcf_path}"
@@ -1871,8 +1936,7 @@ workflow annotation {
             // Run annotatecnv
             annotatecnv(annotatecnv_input)
             annotatecnv_results = annotatecnv.out
-            //annotatecnv.out.rmdcnvtumornumber.each { println "Annotatecnv results: $it" }
-            
+
             // Run plot_genomic_regions for coverage analysis
             //plot_genomic_regions(boosts_plot_genomic_regions_channel)
         }
@@ -1880,21 +1944,15 @@ workflow annotation {
         // Statistics mode - cramino is now run by epi2me workflow
         // Analysis workflow reads the pre-generated cramino outputs
         // RMD report generation
-        if (params.run_mode in ['rmd'] || params.run_mode_order || params.run_mode_epiannotation) {
+        if (params.run_mode in ['rmd', 'all'] || params.run_mode_order || params.run_mode_epiannotation) {
             println "Running RMD Report Generation..."
-            
-            // Ensure annotatecnv_results is defined for run_mode_order
-            if (params.run_mode_order && !annotatecnv_results) {
-                println "WARNING: annotatecnv_results not found in run_mode_order. This may indicate an issue with CNV analysis."
-                println "Attempting to create fallback annotatecnv_results..."
-                
-                // Create a minimal fallback for run_mode_order
-                annotatecnv_results = Channel.empty()
-            }
-            
+
+            // annotatecnv_results is set by CNV section which always runs before RMD
+            // No fallback needed - if CNV section ran, annotatecnv_results is defined
+
             // Reuse MGMT outputs from earlier analysis if available
             // If MGMT analysis was not run, we need to run it here
-            if (!(params.run_mode in ['mgmt', 'rmd'])) {
+            if (!(params.run_mode in ['mgmt', 'rmd', 'all'])) {
                 println "MGMT analysis not run earlier, running now for RMD report..."
                 
                 // Create channel for MGMT analysis
@@ -1981,7 +2039,7 @@ workflow annotation {
             }
 
             // Svanna analysis - reuse outputs if already run
-            if (!(params.run_mode in ['svannasv', 'rmd'])) {
+            if (!(params.run_mode in ['svannasv', 'rmd', 'all'])) {
                 println "Svanna analysis not run earlier, running now for RMD report..."
         svannasv(boosts_svanna_channel)
         rmd_svanna_html = svannasv.out.rmdsvannahtml
@@ -2009,7 +2067,7 @@ workflow annotation {
             }
 
             // ROI analysis - reuse outputs if already run
-            if (!(params.run_mode in ['roi', 'rmd'])) {
+            if (!(params.run_mode in ['roi', 'rmd', 'all'])) {
                 println "ROI analysis not run earlier, running annotation for RMD report..."
                 // NOTE: Variant calling should have been done by epi2me workflow
                 // Read pre-existing VCF files from epi2me output directory
@@ -2017,12 +2075,12 @@ workflow annotation {
                 // Step 1: Read pre-existing VCF files
                 def clair3_annot_input = Channel.fromList(sample_thresholds.keySet().collect())
                     .map { sample_id ->
-                        def clair3_output_dir = file("${params.path}/routine_epi2me/${sample_id}/output_clair3")
-                        def pileup_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
-                        def merge_vcf = file("${params.path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
+                        def clair3_output_dir = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3")
+                        def pileup_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3/pileup.vcf.gz")
+                        def merge_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/output_clair3/merge_output.vcf.gz")
 
-                        // Skip existence check in epiannotation mode (files created by epi2me workflow)
-                        if (!params.run_mode_epiannotation && (!clair3_output_dir.exists() || !pileup_vcf.exists() || !merge_vcf.exists())) {
+                        // Skip existence check in epiannotation and run_mode_order (files created by epi2me workflow)
+                        if (!params.run_mode_epiannotation && !params.run_mode_order && (!clair3_output_dir.exists() || !pileup_vcf.exists() || !merge_vcf.exists())) {
                             error "ERROR: Clair3 VCF files not found for ${sample_id}. Please run epi2me workflow with SNV mode first."
                         }
 
@@ -2031,12 +2089,12 @@ workflow annotation {
 
                 def clairsto_annot_input = Channel.fromList(sample_thresholds.keySet().collect())
                     .map { sample_id ->
-                        def clairsto_output_dir = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output")
-                        def snv_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
-                        def indel_vcf = file("${params.path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
+                        def clairsto_output_dir = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output")
+                        def snv_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output/snv.vcf.gz")
+                        def indel_vcf = file("${params.output_path}/routine_epi2me/${sample_id}/clairsto_output/indel.vcf.gz")
 
-                        // Skip existence check in epiannotation mode (files created by epi2me workflow)
-                        if (!params.run_mode_epiannotation && (!clairsto_output_dir.exists() || !snv_vcf.exists() || !indel_vcf.exists())) {
+                        // Skip existence check in epiannotation and run_mode_order (files created by epi2me workflow)
+                        if (!params.run_mode_epiannotation && !params.run_mode_order && (!clairsto_output_dir.exists() || !snv_vcf.exists() || !indel_vcf.exists())) {
                             error "ERROR: ClairS-TO VCF files not found for ${sample_id}. Please run epi2me workflow with SNV mode first."
                         }
 
@@ -2063,7 +2121,7 @@ workflow annotation {
             // For 'rmd' mode, igv_tools and plot_genomic_regions were already run in tertp section
             // For 'tertp' mode, they were also already run
             // For other modes (rmd, cnv, stat, etc), we need to run them now
-            if (!(params.run_mode in ['tertp', 'rmd'])) {
+            if (!(params.run_mode in ['tertp', 'rmd', 'all'])) {
                 println "Running tertp analysis for RMD report..."
                 igv_tools(boosts_igv_channel)
                 plot_genomic_regions(boosts_plot_genomic_regions_channel)
@@ -2075,9 +2133,9 @@ workflow annotation {
             println "Reading Cramino statistics from epi2me output..."
             def cramino_output_ch = Channel.fromList(sample_thresholds.keySet().collect())
                 .map { sample_id ->
-                    def cramino_file = file("${params.path}/routine_epi2me/${sample_id}/cramino/${sample_id}_cramino_statistics.txt")
-                    // Skip existence check in epiannotation mode (files created by epi2me workflow)
-                    if (!params.run_mode_epiannotation && !cramino_file.exists()) {
+                    def cramino_file = file("${params.output_path}/routine_epi2me/${sample_id}/cramino/${sample_id}_cramino_statistics.txt")
+                    // Skip existence check in epiannotation and run_mode_order (files created by epi2me workflow)
+                    if (!params.run_mode_epiannotation && !params.run_mode_order && !cramino_file.exists()) {
                         error "ERROR: Cramino statistics file not found for ${sample_id}. Please run epi2me workflow with 'stat' or 'rmd' mode first."
                     }
                     tuple(sample_id, cramino_file)
@@ -2117,11 +2175,11 @@ workflow annotation {
             if (!cramino_output_ch) {
                 error "Cramino statistics not found. Make sure Cramino analysis runs before RMD generation."
             }
-            
+
             if (!plot_genomic_regions.out.plot_genomic_regions_out) {
                 error "Genomic regions plot results not found. Make sure tertp analysis runs before RMD generation."
             }
-            
+
             mergecnv_out = annotatecnv_results.rmdcnvtumornumber
             .combine(merge_annotation.out.occmergeout, by:0)
             .combine(crossNN.out.rmdnanodx, by: 0)
