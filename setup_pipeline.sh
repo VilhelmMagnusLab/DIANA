@@ -648,10 +648,11 @@ setup_singularity_containers() {
             echo -e "  ${CYAN}Pulling${NC} $image_name..."
 
             # Pull the image without authentication
-            # Add --disable-cache to avoid OCI registry caching issues
+            # Add --disable-cache and --no-https to avoid OCI registry authentication issues
             SINGULARITY_DOCKER_USERNAME="" SINGULARITY_DOCKER_PASSWORD="" \
             APPTAINER_DOCKER_USERNAME="" APPTAINER_DOCKER_PASSWORD="" \
-            $SINGULARITY_CMD pull --disable-cache --dir "${PIPELINE_DIR}/containers/" "docker://$image_name:latest" 2>&1 | \
+            SINGULARITY_NOHTTPS=1 APPTAINER_NOHTTPS=1 \
+            $SINGULARITY_CMD pull --disable-cache --no-https --dir "${PIPELINE_DIR}/containers/" "docker://$image_name:latest" 2>&1 | \
                 grep -v "INFO:" || true
 
             # Verify the image was downloaded
