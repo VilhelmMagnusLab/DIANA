@@ -465,7 +465,7 @@ download_reference_files() {
     if [ ! -f "${DATA_DIR}/.humandb_downloaded" ]; then
         print_info "Downloading ANNOVAR databases..."
         download_file "humandb.tar.gz" "${PIPELINE_DIR}/humandb.tar.gz"
-        extract_archive "${PIPELINE_DIR}/humandb.tar.gz" "${PIPELINE_DIR}"
+        extract_archive "${PIPELINE_DIR}/humandb.tar.gz" "${HUMANDB_DIR}"
         rm "${PIPELINE_DIR}/humandb.tar.gz"
         touch "${DATA_DIR}/.humandb_downloaded"
         echo ""
@@ -625,6 +625,10 @@ setup_singularity_containers() {
     elif command -v singularity &> /dev/null; then
         SINGULARITY_CMD="singularity"
         print_info "Using Singularity"
+    else
+        print_error "Neither Singularity nor Apptainer found"
+        print_info "This should have been caught by prerequisites check"
+        exit 1
     fi
 
     mkdir -p "${PIPELINE_DIR}/containers"
@@ -644,12 +648,21 @@ setup_singularity_containers() {
             echo -e "  ${CYAN}Pulling${NC} $image_name..."
 
             # Pull the image without authentication
+            # Add --disable-cache to avoid OCI registry caching issues
             SINGULARITY_DOCKER_USERNAME="" SINGULARITY_DOCKER_PASSWORD="" \
             APPTAINER_DOCKER_USERNAME="" APPTAINER_DOCKER_PASSWORD="" \
-            $SINGULARITY_CMD pull --dir "${PIPELINE_DIR}/containers/" "docker://$image_name:latest" 2>&1 | \
+            $SINGULARITY_CMD pull --disable-cache --dir "${PIPELINE_DIR}/containers/" "docker://$image_name:latest" 2>&1 | \
                 grep -v "INFO:" || true
 
-            echo -e "  ${GREEN}✓${NC} Pulled $image_name"
+            # Verify the image was downloaded
+            if [ -f "$image_file" ]; then
+                echo -e "  ${GREEN}✓${NC} Pulled $image_name"
+            else
+                echo -e "  ${RED}✗${NC} Failed to pull $image_name"
+                print_error "Container image download failed: $image_name"
+                print_info "Please check your internet connection and Docker Hub access"
+                exit 1
+            fi
         fi
     }
 
