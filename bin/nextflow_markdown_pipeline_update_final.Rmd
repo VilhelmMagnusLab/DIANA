@@ -839,8 +839,8 @@ if (nrow(mcf_filtered) > 0) {
 \newpage
 ## Dimensionality Reduction Plot
 
-The dimensionality reduction plot are only intended for visual inspection, not classification.  
-```{r, out.height = "250px", fig.align = 'center', echo=FALSE}
+The dimensionality reduction plot are only intended for visual inspection, not classification.
+```{r, out.width = "100%", fig.align = 'center', echo=FALSE}
 # Include t-SNE plot for methylation classification
 knitr::include_graphics(tsneplot)
 ```

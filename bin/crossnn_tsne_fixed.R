@@ -291,7 +291,7 @@ p <- ggplot(df, aes(x = X1, y = X2, color = Dx)) +
     y = "Dimension 2"
   ) +
 
-  # Enhanced legend (matching original logic)
+  # Enhanced legend with 5 columns
   guides(
     colour = guide_legend(
       title = "Methylation class",
@@ -312,15 +312,23 @@ p <- ggplot(df, aes(x = X1, y = X2, color = Dx)) +
   theme(
     legend.text = ggtext::element_markdown(size = 7),
     legend.position = "right"
-  )
+  ) +
 
-# Keep simple coordinate system
+  # Use fixed coordinates with adjusted ratio to make plot larger in markdown
+  # Ratio < 1 makes the plot taller relative to its width
+  coord_fixed(ratio = 0.7)
 
-# Save enhanced PDF
+# Save enhanced PDF with dynamic width based on number of legend items
 if (!is.null(opt$pdf)) {
-  ggsave(plot = p, width = 14, height = 7, filename = opt$pdf,
+  # Calculate width based on number of unique classes
+  # Pancan has ~100+ classes, Capper has ~40-50 classes
+  n_classes <- length(unique(df$Dx))
+  # Use wider plot for datasets with many classes (increased for better legend display)
+  plot_width <- if (n_classes > 50) 22 else 14
+
+  ggsave(plot = p, width = plot_width, height = 7, filename = opt$pdf,
          dpi = 300, bg = "white")
-  message("Saved enhanced PDF: ", opt$pdf)
+  message("Saved enhanced PDF: ", opt$pdf, " (width=", plot_width, " for ", n_classes, " classes)")
 }
 
 # ---------- ENHANCED INTERACTIVE PLOT ----------
