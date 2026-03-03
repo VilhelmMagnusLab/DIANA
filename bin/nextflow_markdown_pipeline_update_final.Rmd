@@ -645,11 +645,11 @@ tryCatch({
     } else {
         # Handle empty file or header-only case
         if (knitr::is_html_output()) {
-            cat("<p style='text-align: center; color: #666;'><em>No fusion event was detected in this sample.</em></p>")
+            cat("<p style='text-align: center; color: #666;'><em>No fusion event break point detected in this sample.</em></p>")
         } else if (knitr::is_latex_output()) {
-            cat("No fusion event was detected in this sample.")
+            cat("No fusion event break point detected in this sample.")
         } else {
-            cat("No fusion event was detected in this sample.")
+            cat("No fusion event break point detected in this sample.")
         }
     }
 }, error = function(e) {
@@ -658,11 +658,11 @@ tryCatch({
     cat(error_msg, "\n")
     
     if (knitr::is_html_output()) {
-        cat("<p style='text-align: center; color: #666;'><em>No fusion event was detected in this sample.</em></p>")
+        cat("<p style='text-align: center; color: #666;'><em>No fusion event break point detected in this sample.</em></p>")
     } else if (knitr::is_latex_output()) {
-        cat("No fusion event was detected in this sample.")
+        cat("No fusion event break point detected in this sample.")
     } else {
-        cat("No fusion event was detected in this sample.")
+        cat("No fusion event break point detected in this sample.")
     }
 })
 ```

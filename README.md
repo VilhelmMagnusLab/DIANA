@@ -50,7 +50,7 @@ cd nWGS_pipeline
 ```
 
 **What the setup script does:**
-- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.18802824](https://doi.org/10.5281/zenodo.18802824))
+- Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.18847372](https://doi.org/10.5281/zenodo.18847372))
 - Extracts and organizes files into the correct directory structure
 - Downloads and sets up Docker containers or Singularity images
 - Installs Nextflow if not already available
@@ -309,7 +309,7 @@ Simply run:
 ```
 
 The script will:
-1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.18802824)](https://doi.org/10.5281/zenodo.18802824)
+1. Download reference data from [Zenodo (DOI: 10.5281/zenodo.18847372)](https://doi.org/10.5281/zenodo.18847372)
 2. Extract and organize all files into the correct directory structure
 3. Set up NanoDx classifier models
 4. Configure all required paths
@@ -347,7 +347,7 @@ If you prefer manual setup or need to customize the reference files:
 - SNV screening regions for variant calling (ClairS-TO analysis)
 - Ensure proper BED format with exactly 10 tab-separated fields per line
 
-**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.18802824)](https://doi.org/10.5281/zenodo.18802824)
+**Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.18847372)](https://doi.org/10.5281/zenodo.18847372)
 
 ### Directory Structure Setup
 After downloading the reference files, your directory structure should look like this:
@@ -485,7 +485,7 @@ Choose your preferred container engine:
 
 ## Quick Setup Guide
 
-1. **Download reference files** from [Zenodo](https://doi.org/10.5281/zenodo.15916972)
+1. **Download reference files** from [Zenodo](https://doi.org/10.5281/zenodo.18847372)
 2. **Place files** in appropriate directories (`data/reference/` and `data/humandb/`)
 3. **Update paths** in configuration files (`conf/*.config`)
 4. **Choose container engine** (Docker or Singularity/Apptainer)
