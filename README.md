@@ -76,11 +76,33 @@ Three independent analysis types:
 
 ### 3. **Annotation Pipeline** (`--run_mode_annotation`)
 - **MGMT methylation analysis** using EPIC array sites
-- **NanoDx neural network classification**
+- **NanoDx neural network classification** with dual classifier support:
+  - **Capper et al. classifier** (default) - Optimized for brain tumors
+  - **Pan-cancer classifier v5i** - Broader tumor type coverage (use `--pancan` flag)
 - **Structural variant annotation** with Svanna
 - **SNV annotation** with Clair3 (germline) and ClairS-TO (somatic), filtered by configurable Depth and GQ thresholds
 - **CNV analysis** with ACE tumor content determination
 - **Comprehensive reporting** (HTML, IGV snapshots, Circos plots, Markdown)
+
+#### Methylation Classifier Selection
+
+The pipeline supports two NanoDx methylation classifiers:
+
+| Classifier | Flag | Recommended For | Description |
+|------------|------|-----------------|-------------|
+| **Capper et al.** | (default) | Brain tumors | Default classifier optimized for CNS tumor classification |
+| **Pan-cancer v5i** | `--pancan` | Broader tumor types | Extended classifier covering wider range of tumor types |
+
+**Example usage:**
+```bash
+# Default - Capper et al. classifier
+./run_pipeline_singularity.sh --run_mode_order --sample_id SAMPLE_001
+
+# Pan-cancer classifier
+./run_pipeline_singularity.sh --run_mode_order --sample_id SAMPLE_001 --pancan
+```
+
+The `--pancan` flag works with all run modes and can be combined with any pipeline configuration.
 
 ## Pipeline Run Modes
 
