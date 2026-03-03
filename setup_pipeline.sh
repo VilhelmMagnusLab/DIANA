@@ -37,7 +37,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-ZENODO_RECORD="18802824"  # nWGS pipeline reference files v1 (DOI: 10.5281/zenodo.18802824)
+ZENODO_RECORD="18847372"  # nWGS pipeline reference files v2 (DOI: 10.5281/zenodo.18847372)
 BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
 PIPELINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_DIR="${PIPELINE_DIR}/data"
