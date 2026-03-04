@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# Zenodo Upload Script for nWGS Pipeline Reference Files
+# Zenodo Upload Script for Diana Pipeline Reference Files
 ################################################################################
 # This script automates uploading reference files to Zenodo using the API.
 # It supports large file uploads, progress tracking, and resumable uploads.
@@ -78,7 +78,7 @@ print_info() {
 
 show_usage() {
     cat << 'USAGE'
-Zenodo Upload Script for nWGS Pipeline Reference Files
+Zenodo Upload Script for Diana Pipeline Reference Files
 
 This script automates uploading reference files to Zenodo using the API.
 
@@ -284,7 +284,7 @@ get_existing_deposit() {
 create_new_deposit() {
     print_header "Creating New Zenodo Deposit"
 
-    print_info "Creating a brand new Zenodo record for nWGS Pipeline v5.0"
+    print_info "Creating a brand new Zenodo record for Diana Pipeline v5.0"
     echo "" >&2
 
     # Create new empty deposit
@@ -294,9 +294,9 @@ create_new_deposit() {
         -H "Content-Type: application/json" \
         -d '{
             "metadata": {
-                "title": "nWGS Pipeline Reference Files - v5.0",
+                "title": "Diana Pipeline Reference Files - v5.0",
                 "upload_type": "dataset",
-                "description": "Reference files for the nWGS (Nanopore Whole Genome Sequencing) pipeline for brain tumor analysis.",
+                "description": "Reference files for the Diana (Nanopore Whole Genome Sequencing) pipeline for brain tumor analysis.",
                 "creators": [{"name": "VilhelmMagnusLab"}],
                 "access_right": "open",
                 "license": "cc-by-4.0"
@@ -518,9 +518,9 @@ update_metadata() {
     local metadata=$(cat <<EOF
 {
   "metadata": {
-    "title": "nWGS Pipeline Reference Files - v5.0",
+    "title": "Diana Pipeline Reference Files - v5.0",
     "upload_type": "dataset",
-    "description": "<p>Reference files for the nWGS (Nanopore Whole Genome Sequencing) pipeline for brain tumor analysis.</p><p><strong>Contents:</strong></p><ul><li><strong>reference_core.tar.gz</strong> - Core reference files (GRCh38, BED files, annotations)</li><li><strong>humandb.tar.gz</strong> - ANNOVAR annotation databases</li><li><strong>general.zip</strong> - Sturgeon classifier model (keep as zip)</li><li><strong>Assembly.zip</strong> - vcfcircos assembly data</li><li><strong>r1041_e82_400bps_sup_v420.zip</strong> - Dorado basecalling model</li><li><strong>svanna-data.zip</strong> - Svanna structural variant annotation database (optional)</li></ul><p><strong>Installation:</strong></p><pre>git clone https://github.com/VilhelmMagnusLab/nWGS_pipeline.git\ncd nWGS_pipeline\n./setup_pipeline.sh docker</pre><p>The setup script automatically downloads and organizes all reference files.</p>",
+    "description": "<p>Reference files for the Diana (Nanopore Whole Genome Sequencing) pipeline for brain tumor analysis.</p><p><strong>Contents:</strong></p><ul><li><strong>reference_core.tar.gz</strong> - Core reference files (GRCh38, BED files, annotations)</li><li><strong>humandb.tar.gz</strong> - ANNOVAR annotation databases</li><li><strong>general.zip</strong> - Sturgeon classifier model (keep as zip)</li><li><strong>Assembly.zip</strong> - vcfcircos assembly data</li><li><strong>r1041_e82_400bps_sup_v420.zip</strong> - Dorado basecalling model</li><li><strong>svanna-data.zip</strong> - Svanna structural variant annotation database (optional)</li></ul><p><strong>Installation:</strong></p><pre>git clone https://github.com/VilhelmMagnusLab/Diana.git\ncd Diana\n./setup_pipeline.sh docker</pre><p>The setup script automatically downloads and organizes all reference files.</p>",
     "creators": [
       {
         "name": "VilhelmMagnusLab",
@@ -624,7 +624,7 @@ main() {
     cat << "EOF"
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
-║           Zenodo Upload Script for nWGS Pipeline              ║
+║           Zenodo Upload Script for Diana Pipeline              ║
 ║              Automated Reference File Upload                  ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝

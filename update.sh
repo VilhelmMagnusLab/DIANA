@@ -16,7 +16,7 @@ fi
 current_branch="$(git rev-parse --abbrev-ref HEAD)"
 
 # Always define public upstream for end users
-UPSTREAM_URL="https://github.com/VilhelmMagnusLab/nWGS_pipeline.git"
+UPSTREAM_URL="https://github.com/VilhelmMagnusLab/Diana.git"
 if git remote get-url upstream >/dev/null 2>&1; then
   existing_upstream_url="$(git remote get-url upstream)"
   if [ "$existing_upstream_url" != "$UPSTREAM_URL" ]; then

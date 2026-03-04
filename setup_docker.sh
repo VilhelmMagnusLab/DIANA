@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# nWGS Pipeline Docker Setup Script
-# This script helps users set up and run the nWGS pipeline using Docker images
+# Diana Pipeline Docker Setup Script
+# This script helps users set up and run the Diana pipeline using Docker images
 
 set -e
 
 echo "=========================================="
-echo "nWGS Pipeline Docker Setup"
+echo "Diana Pipeline Docker Setup"
 echo "=========================================="
 
 # Check if Docker is installed
@@ -43,7 +43,7 @@ WORK_DIR_PARENT=${WORK_DIR_PARENT:-~/Documents}
 WORK_DIR_PARENT="${WORK_DIR_PARENT/#\~/$HOME}"
 
 # Create the main working directory
-WORK_DIR="${WORK_DIR_PARENT}/routine_nWGS"
+WORK_DIR="${WORK_DIR_PARENT}/routine_diana"
 echo "Creating working directory structure at: $WORK_DIR"
 
 mkdir -p "$WORK_DIR/routine_bams/merge_bams"
@@ -94,7 +94,7 @@ echo "   This may take several minutes on first run..."
 
 # Core analysis images
 echo "Pulling core analysis images..."
-pull_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
+pull_if_not_exists "vilhelmmagnuslab/diana_default_images"
 pull_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
 pull_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
 pull_if_not_exists "vilhelmmagnuslab/clair3_amd64"
@@ -120,7 +120,7 @@ echo "✓ All Docker images pulled successfully"
 cat > run_pipeline_docker.sh << 'EOF'
 #!/bin/bash
 
-# nWGS Pipeline Runner Script for Docker
+# Diana Pipeline Runner Script for Docker
 # Usage: ./run_pipeline_docker.sh [run_mode] [other_nextflow_options]
 
 set -e
@@ -146,7 +146,7 @@ else
     echo "Using default analysis configuration: $CONFIG"
 fi
 
-echo " Starting nWGS pipeline with Docker containers..."
+echo " Starting Diana pipeline with Docker containers..."
 echo "   Configuration: $CONFIG"
 echo "   Arguments: $@"
 
@@ -165,7 +165,7 @@ chmod +x run_pipeline_docker.sh
 cat > test_pipeline_docker.sh << 'EOF'
 #!/bin/bash
 
-# Quick test script for the nWGS pipeline (Docker)
+# Quick test script for the Diana pipeline (Docker)
 # This will run a minimal test to verify everything is working
 
 set -e

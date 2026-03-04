@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Quick validation script for nWGS pipeline setup
+# Quick validation script for Diana pipeline setup
 # This script provides a quick health check of your setup
 
 set -e
 
 echo "=========================================="
-echo "nWGS Pipeline Setup Validation"
+echo "Diana Pipeline Setup Validation"
 echo "=========================================="
 
 # Determine container system

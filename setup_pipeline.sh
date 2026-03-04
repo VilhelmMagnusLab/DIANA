@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# nWGS Pipeline - Automated Setup Script
+# Diana Pipeline - Automated Setup Script
 ################################################################################
 # This script automatically downloads all reference files from Zenodo and
 # sets up the pipeline for immediate use.
@@ -37,7 +37,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-ZENODO_RECORD="18847372"  # nWGS pipeline reference files v2 (DOI: 10.5281/zenodo.18847372)
+ZENODO_RECORD="18847372"  # Diana pipeline reference files v2 (DOI: 10.5281/zenodo.18847372)
 BASE_URL="https://zenodo.org/record/${ZENODO_RECORD}/files"
 PIPELINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DATA_DIR="${PIPELINE_DIR}/data"
@@ -592,7 +592,7 @@ setup_docker_containers() {
 
     # Core analysis images
     echo "Core analysis images:"
-    pull_docker_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
+    pull_docker_if_not_exists "vilhelmmagnuslab/diana_default_images"
     pull_docker_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
     pull_docker_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
     pull_docker_if_not_exists "vilhelmmagnuslab/clair3_amd64"
@@ -669,7 +669,7 @@ setup_singularity_containers() {
 
     # Core analysis images
     echo "Core analysis images:"
-    pull_singularity_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/diana_default_images"
     pull_singularity_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
     pull_singularity_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
     pull_singularity_if_not_exists "vilhelmmagnuslab/clair3_amd64"
@@ -746,11 +746,11 @@ create_quick_start_guide() {
     print_header "Creating Quick Start Guide"
 
     cat > "${PIPELINE_DIR}/QUICKSTART.md" << 'EOF'
-# nWGS Pipeline - Quick Start Guide
+# Diana Pipeline - Quick Start Guide
 
 ## 🎉 Setup Complete!
 
-Your nWGS pipeline is ready to use. All reference files have been downloaded from Zenodo and containers are configured.
+Your Diana pipeline is ready to use. All reference files have been downloaded from Zenodo and containers are configured.
 
 ---
 
@@ -854,8 +854,8 @@ params {
 **Working Directories** (configure paths for your system):
 ```groovy
 params {
-    path = "/path/to/nWGS_pipeline"
-    path_output = "/path/to/routine_nWGS"
+    path = "/path/to/Diana"
+    path_output = "/path/to/routine_diana"
 }
 ```
 
@@ -962,7 +962,7 @@ This script automatically:
 - **Software versions**: `SOFTWARE_VERSIONS.md`
 - **Container information**: `CONTAINERS.md`
 - **Changelog**: `CHANGELOG.md`
-- **GitHub issues**: https://github.com/VilhelmMagnusLab/nWGS_pipeline/issues
+- **GitHub issues**: https://github.com/VilhelmMagnusLab/Diana/issues
 
 ---
 
@@ -1040,7 +1040,7 @@ main() {
     cat << "EOF"
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
-║           nWGS Pipeline - Automated Setup                     ║
+║           Diana Pipeline - Automated Setup                     ║
 ║        Nanopore Whole Genome Sequencing Analysis              ║
 ║                                                               ║
 ║           Zenodo: 10.5281/zenodo.15916972                     ║

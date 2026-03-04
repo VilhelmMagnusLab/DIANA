@@ -1447,7 +1447,7 @@ tryCatch({
 
 ### Disclaimer 
 
-This nanopore whole genome sequencing (nWGS) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
+This nanopore whole genome sequencing (Diana) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
 
-#### Report generated on `r Sys.time()` | nWGS Pipeline version: `r pipeline_version`
+#### Report generated on `r Sys.time()` | Diana Pipeline version: `r pipeline_version`
 

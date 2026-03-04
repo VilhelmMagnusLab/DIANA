@@ -13,13 +13,13 @@
 # - Significant performance improvement: ~60 processes cached per subsequent sample
 #
 # Version 2.0:
-# - Hardcoded sample_ids file path: /data/routine_nWGS/sample_ids_bam.txt
+# - Hardcoded sample_ids file path: /data/routine_diana/sample_ids_bam.txt
 # - Command-line --data-dir takes precedence over input_dir from mergebam.config
 #   (passed to pipeline as --input_dir override)
 # - Resume disabled by default, use --resume flag to enable caching
 #
 # Monitors ONT basecalled individual BAM files independently and triggers
-# the nWGS pipeline immediately when ANY sample's final_summary file becomes ready.
+# the Diana pipeline immediately when ANY sample's final_summary file becomes ready.
 # Features intelligent config parsing, dynamic subdirectory detection, and
 # robust error handling. This script should be run once the ONT sequencing is started
 #
@@ -57,7 +57,7 @@ readonly SCRIPT_VERSION="2.1"
 readonly SCRIPT_DATE="2025-11-17"
 
 # HARDCODED CONFIGURATION
-readonly HARDCODED_SAMPLE_IDS_FILE="/home/godzilla/routine_nWGS/sample_ids_bam.txt"
+readonly HARDCODED_SAMPLE_IDS_FILE="/home/godzilla/routine_diana/sample_ids_bam.txt"
 
 # Detect script location for finding pipeline directory
 # Resolve symlinks to find the actual script location
@@ -237,7 +237,7 @@ resolve_variables() {
 
     # Extract base variables
     local base_path=$(extract_config_value "$config_file" "path")
-    local nwgs_dir=$(extract_config_value "$config_file" "nWGS_dir")
+    local diana_dir=$(extract_config_value "$config_file" "diana_dir")
 
     # Replace variable patterns
     if [[ -n "$base_path" ]]; then
@@ -245,9 +245,9 @@ resolve_variables() {
         resolved_path="${resolved_path//\$\{path\}/$base_path}"
     fi
 
-    if [[ -n "$nwgs_dir" ]]; then
-        resolved_path="${resolved_path//\$\{params.nWGS_dir\}/$nwgs_dir}"
-        resolved_path="${resolved_path//\$\{nWGS_dir\}/$nwgs_dir}"
+    if [[ -n "$diana_dir" ]]; then
+        resolved_path="${resolved_path//\$\{params.diana_dir\}/$diana_dir}"
+        resolved_path="${resolved_path//\$\{diana_dir\}/$diana_dir}"
     fi
 
     echo "$resolved_path"

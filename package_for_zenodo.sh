@@ -1,13 +1,13 @@
 #!/bin/bash
 ################################################################################
-# Package nWGS Pipeline Files for Zenodo Upload
+# Package Diana Pipeline Files for Zenodo Upload
 ################################################################################
 # This script packages all reference files for upload to Zenodo record 17589248.
 # It creates all necessary archives in the correct format.
 #
 # Source directories:
-#   - /home/godzilla/nWGS_pipeline/data/reference/
-#   - /home/godzilla/nWGS_pipeline/data/humandb/
+#   - /home/godzilla/Diana/data/reference/
+#   - /home/godzilla/Diana/data/humandb/
 #
 # Usage:
 #   ./package_for_zenodo.sh [output_directory]
@@ -29,7 +29,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 # Configuration
-PIPELINE_DIR="/home/godzilla/nWGS_pipeline"
+PIPELINE_DIR="/home/godzilla/Diana"
 REFERENCE_DIR="${PIPELINE_DIR}/data/reference"
 HUMANDB_DIR="${PIPELINE_DIR}/data/humandb"
 OUTPUT_DIR="${1:-${PIPELINE_DIR}/zenodo_upload}"
@@ -345,7 +345,7 @@ main() {
     cat << "EOF"
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
-║        nWGS Pipeline - Package Files for Zenodo               ║
+║        Diana Pipeline - Package Files for Zenodo               ║
 ║          https://zenodo.org/records/17589248                  ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝

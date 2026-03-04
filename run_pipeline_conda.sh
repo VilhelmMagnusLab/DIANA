@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# nWGS Pipeline Runner Script for Conda Environment
+# Diana Pipeline Runner Script for Conda Environment
 set -e
 
 # Configurable log paths with defaults
@@ -35,9 +35,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Activate conda environment
-echo "Activating conda environment: nwgs_env"
+echo "Activating conda environment: diana_env"
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate nwgs_env
+conda activate diana_env
 
 # Check if Nextflow is installed in the conda environment
 if ! command -v nextflow &> /dev/null; then
@@ -46,7 +46,7 @@ if ! command -v nextflow &> /dev/null; then
     exit 1
 fi
 
-echo "Using: conda environment (nwgs_env) - no containers"
+echo "Using: conda environment (diana_env) - no containers"
 
 # Auto-detect config file based on arguments
 CONFIG="conf/annotation.config"  # Default config
@@ -70,7 +70,7 @@ else
     echo " Using default annotation configuration: $CONFIG"
 fi
 
-echo " Starting nWGS pipeline with conda environment (no containers)..."
+echo " Starting Diana pipeline with conda environment (no containers)..."
 echo "   Log directory: ${LOG_BASE_DIR}"
 
 # Store the original directory

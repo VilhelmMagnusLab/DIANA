@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Quick debug script to test sample loading
-SAMPLE_IDS_FILE="/home/chbope/extension/nWGS_manuscript_data/data/testdata/sample_ids_bam.txt"
+SAMPLE_IDS_FILE="/home/chbope/extension/diana_manuscript_data/data/testdata/sample_ids_bam.txt"
 
 echo "=== Debug Sample Loading ==="
 echo "File: $SAMPLE_IDS_FILE"
