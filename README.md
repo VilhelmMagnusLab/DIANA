@@ -8,7 +8,7 @@
 
 ## Overview
 
-Diana (Diagnostic Integrated Analytics for Nucleic Alteration) is a comprehensive bioinformatics pipeline for analyzing nucleic alteration. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
+Diagnostic Integrated Analytics for Nucleic Alteration (DIANA) is a comprehensive bioinformatics pipeline for analyzing nucleic alteration. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
 
 ## Pipeline Schematic
 
@@ -225,7 +225,7 @@ Pipeline directory:
 └── smart_sample_monitor_v2.sh  # Automated monitoring script
 
 Pipeline data directory (configured via params.path):
-/data/routine_diana/Diana/data/
+/data/
 ├── reference/                    # Reference files (GRCh38, BED files, etc.)
 └── humandb/                      # Annotation databases
 
@@ -244,7 +244,7 @@ Input data directory (configured via params.input_dir in mergebam.config):
 └── ...
 
 Output directory (configured via params.path_output):
-/data/routine_diana/
+routine_diana/
 ├── sample_ids_bam.txt           # Sample IDs for BAM merging
 │
 ├── routine_bams/                # Processed BAM files (Mergebam module)
