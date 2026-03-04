@@ -1753,19 +1753,16 @@ workflow annotation {
                 .filter { it != null }
         } else {
             ace_input = Channel
-                .fromPath("${params.cnv_rds}/**/*_copyNumbersCalled.rds")
-                .map { rds_file ->
-                    // Extract sample ID: everything before "_copyNumbersCalled.rds"
-                    def sample_id = rds_file.name.toString().replaceAll(/_copyNumbersCalled\.rds$/, '')
-                            if (samples_needing_ace.contains(sample_id)) {
-                        println "Found matching RDS file for sample ${sample_id}: ${rds_file}"
-                                tuple(sample_id, rds_file)
+                .fromList(samples_needing_ace.collect { sid ->
+                    def rds_file = file("${params.cnv_rds}/${sid}/${sid}_copyNumbersCalled.rds")
+                    if (rds_file.exists()) {
+                        println "Found matching RDS file for sample ${sid}: ${rds_file}"
+                        tuple(sid, rds_file)
                     } else {
-                        println "Skipping RDS file for sample ${sample_id} (not in samples_needing_ace)"
+                        println "WARNING: RDS file not found for sample ${sid}: ${rds_file}"
                         null
                     }
-                }
-                .filter { it != null }
+                }.findAll { it != null })
         }
 
                 // Run ACE analysis
