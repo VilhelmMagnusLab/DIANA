@@ -5,35 +5,39 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+UPSTREAM_URL="https://github.com/VilhelmMagnusLab/DIANA.git"
+
 if [ ! -d .git ]; then
-  echo "[update] This directory is not a git clone." >&2
-  echo "[update] To enable one-command updates, clone the repo with git:" >&2
-  echo "        git clone <REPO_URL> && cd <repo>" >&2
-  echo "[update] Or re-download the latest ZIP from GitHub." >&2
-  exit 1
+  echo "[update] No git repository found (ZIP install detected)."
+  echo "[update] Initializing git and connecting to $UPSTREAM_URL ..."
+  git init -q
+  git remote add origin "$UPSTREAM_URL"
+  git fetch origin --depth=1 -q
+  git checkout -q -b main --track origin/main
+  echo "[update] Done. Repository initialized. Future updates will be fast."
+  echo "[update] Current commit: $(git rev-parse --short HEAD)"
+  exit 0
 fi
 
 current_branch="$(git rev-parse --abbrev-ref HEAD)"
 
-# Always define public upstream for end users
-UPSTREAM_URL="https://github.com/VilhelmMagnusLab/Diana.git"
+# Use 'upstream' if it exists, otherwise fall back to 'origin'
 if git remote get-url upstream >/dev/null 2>&1; then
-  existing_upstream_url="$(git remote get-url upstream)"
-  if [ "$existing_upstream_url" != "$UPSTREAM_URL" ]; then
-    echo "[update] Setting upstream to $UPSTREAM_URL"
+  FETCH_REMOTE="upstream"
+  existing_url="$(git remote get-url upstream)"
+  if [ "$existing_url" != "$UPSTREAM_URL" ]; then
+    echo "[update] Updating upstream remote to $UPSTREAM_URL"
     git remote set-url upstream "$UPSTREAM_URL"
   fi
 else
-  echo "[update] Adding upstream $UPSTREAM_URL"
-  git remote add upstream "$UPSTREAM_URL"
+  FETCH_REMOTE="origin"
 fi
 
-echo "[update] Fetching latest changes from upstream (shallow fetch for speed)..."
-# Use shallow fetch to only get the latest changes, reducing download time
-git fetch upstream --depth=1 --tags --prune
+echo "[update] Fetching latest changes from $FETCH_REMOTE (shallow fetch for speed)..."
+git fetch "$FETCH_REMOTE" --depth=1 --tags --prune
 
-# Detect upstream default branch (fallback to main)
-upstream_default_branch="$(git symbolic-ref -q --short refs/remotes/upstream/HEAD 2>/dev/null | cut -d'/' -f2 || true)"
+# Detect default branch (fallback to main)
+upstream_default_branch="$(git symbolic-ref -q --short refs/remotes/${FETCH_REMOTE}/HEAD 2>/dev/null | cut -d'/' -f2 || true)"
 if [ -z "${upstream_default_branch:-}" ]; then
   upstream_default_branch="main"
 fi
@@ -46,9 +50,8 @@ if ! git diff-index --quiet HEAD --; then
   git stash push -u -m "$msg" >/dev/null
 fi
 
-echo "[update] Pulling latest changes from 'upstream/$upstream_default_branch'..."
-# Use fast-forward only to ensure clean updates without merge commits
-git pull --ff-only upstream "$upstream_default_branch"
+echo "[update] Pulling latest changes from '$FETCH_REMOTE/$upstream_default_branch'..."
+git pull --ff-only "$FETCH_REMOTE" "$upstream_default_branch"
 
 if [ "$stashed" -eq 1 ]; then
   echo "[update] Restoring stashed changes..."
