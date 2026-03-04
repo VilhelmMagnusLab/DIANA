@@ -325,8 +325,8 @@ create_directories() {
     mkdir -p "${ROUTINE_DIR}/routine_results"
 
     # Create sample ID files if they don't exist
-    [ -f "${ROUTINE_DIR}/sample_ids_bam.txt" ]    || touch "${ROUTINE_DIR}/sample_ids_bam.txt"
-    [ -f "${ROUTINE_DIR}/sample_ids_master.txt" ] || touch "${ROUTINE_DIR}/sample_ids_master.txt"
+    [ -f "${ROUTINE_DIR}/sample_ids.txt" ]     || touch "${ROUTINE_DIR}/sample_ids.txt"
+    [ -f "${ROUTINE_DIR}/sample_ids_bam.txt" ] || touch "${ROUTINE_DIR}/sample_ids_bam.txt"
 
     print_success "Created routine_diana/ structure at: ${ROUTINE_DIR}"
     echo ""
