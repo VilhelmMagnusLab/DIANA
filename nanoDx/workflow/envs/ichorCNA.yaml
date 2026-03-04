@@ -1,6 +1,0 @@
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - r-ichorcna=0.3.2
-  - hmmcopy=0.1.1

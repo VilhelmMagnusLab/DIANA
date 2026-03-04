@@ -1,9 +1,0 @@
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - r-ggplot2=3.1.0
-  - bioconductor-rsamtools
-  - r-rcolorbrewer=1.1_2
-  - r-data.table=1.11.4
-  - r-scales

@@ -1,6 +1,0 @@
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - igvtools=2.3.93
-  - samtools=1.9

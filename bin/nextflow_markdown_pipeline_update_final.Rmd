@@ -1423,11 +1423,11 @@ tryCatch({
     } else {
         # Handle empty file or header-only case
         if (knitr::is_html_output()) {
-            cat("<p style='text-align: center; color: #666;'><em>No fusion event was detected in this sample.</em></p>")
+            cat("<p style='text-align: center; color: #666;'><em>No fusion event break point detected in this sample.</em></p>")
         } else if (knitr::is_latex_output()) {
-            cat("No fusion event was detected in this sample.")
+            cat("No fusion event break point detected in this sample.")
         } else {
-            cat("No fusion event was detected in this sample.")
+            cat("No fusion event break point detected in this sample.")
         }
     }
 }, error = function(e) {
@@ -1436,18 +1436,18 @@ tryCatch({
     cat(error_msg, "\n")
     
     if (knitr::is_html_output()) {
-        cat("<p style='text-align: center; color: #666;'><em>No fusion event was detected in this sample.</em></p>")
+        cat("<p style='text-align: center; color: #666;'><em>No fusion event break point detected in this sample.</em></p>")
     } else if (knitr::is_latex_output()) {
-        cat("No fusion event was detected in this sample.")
+        cat("No fusion event break point detected in this sample.")
     } else {
-        cat("No fusion event was detected in this sample.")
+        cat("No fusion event break point detected in this sample.")
     }
 })
 ```
 
 ### Disclaimer 
 
-This nanopore whole genome sequencing (Diana) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
+Diagnostic Integrated Analytics for Nucleic Alteration pipeline (DIANA) is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
 
-#### Report generated on `r Sys.time()` | Diana Pipeline version: `r pipeline_version`
+#### Report generated on `r Sys.time()` | DIANA Pipeline version: `r pipeline_version`
 
