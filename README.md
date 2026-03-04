@@ -8,7 +8,7 @@
 
 ## Overview
 
-Diana is a comprehensive bioinformatics pipeline for analyzing Central Nervous System (CNS) samples using Oxford Nanopore sequencing data. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
+Diana (Diagnostic Integrated Analytics for Nucleic Alteration) is a comprehensive bioinformatics pipeline for analyzing nucleic alteration. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
 
 ## Pipeline Schematic
 
