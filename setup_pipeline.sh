@@ -18,12 +18,14 @@
 #   --skip-optional          Skip downloading optional large files (~20 GB)
 #   --skip-containers        Skip container setup (only download reference files)
 #   --skip-reference         Skip reference file download (only setup containers)
+#   --config-only            Only create directories and install Nextflow (no images, no Zenodo)
 #   --help                   Show this help message
 #
 # Examples:
 #   ./setup_pipeline.sh docker
 #   ./setup_pipeline.sh singularity --skip-optional
 #   ./setup_pipeline.sh docker --skip-containers
+#   ./setup_pipeline.sh singularity --config-only
 ################################################################################
 
 set -e  # Exit on error
@@ -49,6 +51,7 @@ CONTAINER_SYSTEM=""
 SKIP_OPTIONAL=false
 SKIP_CONTAINERS=false
 SKIP_REFERENCE=false
+CONFIG_ONLY=false
 
 ################################################################################
 # Helper Functions
@@ -191,6 +194,12 @@ parse_args() {
                 SKIP_REFERENCE=true
                 shift
                 ;;
+            --config-only)
+                SKIP_REFERENCE=true
+                SKIP_CONTAINERS=true
+                CONFIG_ONLY=true
+                shift
+                ;;
             --help|-h)
                 show_usage
                 exit 0
@@ -286,6 +295,7 @@ create_directories() {
     mkdir -p "${PIPELINE_DIR}/logs"
     mkdir -p "${PIPELINE_DIR}/containers"
     mkdir -p "${REFERENCE_DIR}/nanoDx/static"
+    mkdir -p "${PIPELINE_DIR}/.empty_r_overlay"
 
     print_success "Created directory structure"
     echo ""
