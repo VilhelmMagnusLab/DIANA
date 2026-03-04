@@ -20,7 +20,7 @@ set -e
 
 # Configuration
 MONITOR_DIR="${1:-/home/chbope/extension/trash/}"
-PIPELINE_BASE_DIR="${2:-/home/chbope/Documents/nanopore/nWGS_manuscript/nWGS_pipeline_docker_test/}"
+PIPELINE_BASE_DIR="${2:-/home/chbope/Documents/nanopore/diana_manuscript/Diana_docker_test/}"
 NEXTFLOW_WORK_DIR="${3:-/home/chbope/extension/trash/}"
 
 # Adaptive checking intervals (in seconds)
@@ -213,7 +213,7 @@ echo
 echo "Waiting 10 seconds before starting pipeline..."
 sleep 10
 
-echo "=== Starting nWGS Pipeline ==="
+echo "=== Starting Diana Pipeline ==="
 echo "Command: bash $PIPELINE_BASE_DIR/run_pipeline_singularity.sh --run_mode_order -w '$NEXTFLOW_WORK_DIR'"
 echo
 

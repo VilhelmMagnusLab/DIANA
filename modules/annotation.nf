@@ -243,7 +243,7 @@ process tsne_plot {
     echo "Using Rscript from: \$(which Rscript)"
 
     # Run the memory-optimized t-SNE script (uses 30k probes instead of 100k to reduce RAM usage)
-    Rscript ${params.nWGS_dir}/bin/crossnn_tsne_fixed.R \\
+    Rscript ${params.diana_dir}/bin/crossnn_tsne_fixed.R \\
         --color-map ${color_map} \\
         --bed ${epic_bed} \\
         --trainingset ${training_set} \\
@@ -2238,7 +2238,7 @@ workflow annotation {
                     nanodx_classifier,
                     file("${params.ref_dir}/snv_target_genes.txt"),
                     file(params.roi_protein_coding_bed),
-                    file("${params.nWGS_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd")
+                    file("${params.diana_dir}/bin/nextflow_markdown_pipeline_update_final.Rmd")
                 ]
             }.view()
 

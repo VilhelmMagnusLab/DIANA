@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# nWGS Pipeline Singularity/Apptainer Setup Script
+# Diana Pipeline Singularity/Apptainer Setup Script
 set -e
 
 echo "=========================================="
-echo "nWGS Pipeline Singularity/Apptainer Setup"
+echo "Diana Pipeline Singularity/Apptainer Setup"
 echo "=========================================="
 
 # Check if Singularity or Apptainer is installed
@@ -44,7 +44,7 @@ WORK_DIR_PARENT=${WORK_DIR_PARENT:-~/Documents}
 WORK_DIR_PARENT="${WORK_DIR_PARENT/#\~/$HOME}"
 
 # Create the main working directory
-WORK_DIR="${WORK_DIR_PARENT}/routine_nWGS"
+WORK_DIR="${WORK_DIR_PARENT}/routine_diana"
 echo "Creating working directory structure at: $WORK_DIR"
 
 mkdir -p "$WORK_DIR/routine_bams/merge_bams"
@@ -69,7 +69,7 @@ echo "   This may take several minutes on first run..."
 # Function to pull image if it doesn't exist
 pull_if_not_exists() {
     local image_name=$1
-    # Extract just the image name from the repository path (e.g., "vilhelmmagnuslab/nwgs_default_images" -> "nwgs_default_images")
+    # Extract just the image name from the repository path (e.g., "vilhelmmagnuslab/diana_default_images" -> "diana_default_images")
     local image_basename=$(basename "$image_name")
     local image_file="containers/${image_basename}_latest.sif"
     
@@ -83,7 +83,7 @@ pull_if_not_exists() {
 
 # Core analysis images
 echo "Pulling core analysis images..."
-pull_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
+pull_if_not_exists "vilhelmmagnuslab/diana_default_images"
 pull_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
 pull_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
 pull_if_not_exists "vilhelmmagnuslab/clair3_amd64"
@@ -109,7 +109,7 @@ echo "✓ All Singularity/Apptainer images pulled successfully"
 cat > run_pipeline_singularity.sh << 'EOF'
 #!/bin/bash
 
-# nWGS Pipeline Runner Script for Singularity/Apptainer
+# Diana Pipeline Runner Script for Singularity/Apptainer
 set -e
 
 # Check if Nextflow is installed
@@ -147,7 +147,7 @@ else
     echo " Using default annotation configuration: $CONFIG"
 fi
 
-echo " Starting nWGS pipeline with Singularity/Apptainer containers..."
+echo " Starting Diana pipeline with Singularity/Apptainer containers..."
 echo "   Configuration: $CONFIG"
 echo "   Arguments: $@"
 
@@ -166,7 +166,7 @@ chmod +x run_pipeline_singularity.sh
 cat > test_pipeline_singularity.sh << 'EOF'
 #!/bin/bash
 
-# Quick test script for the nWGS pipeline with Singularity/Apptainer
+# Quick test script for the Diana pipeline with Singularity/Apptainer
 set -e
 
 echo " Running quick pipeline test with Singularity/Apptainer..."
@@ -221,4 +221,4 @@ echo "Before starting the pipeline, make sure that all paths for each mode are c
 echo "set in the appropriate config files: conf/annotation.config, conf/epi2me.config, and conf/mergebam.config"
 echo "For more information, see the README.md file."
 echo ""
-echo "Happy analyzing! 🧬 with nWGS pipeline" 
+echo "Happy analyzing! 🧬 with Diana pipeline" 

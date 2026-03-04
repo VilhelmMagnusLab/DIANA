@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #==============================================================================
-# nWGS Pipeline Report Generator (Singularity Version)
+# Diana Pipeline Report Generator (Singularity Version)
 #==============================================================================
 #
 # DESCRIPTION:
 #   This script generates comprehensive PDF reports for nanopore whole genome 
-#   sequencing (nWGS) analysis results using R Markdown within a Singularity 
+#   sequencing (Diana) analysis results using R Markdown within a Singularity 
 #   container. It processes multiple samples and creates detailed reports 
 #   containing methylation analysis, structural variant annotation, copy number 
 #   variation analysis, SNV calling results, and quality assessment metrics. 
@@ -23,12 +23,12 @@
 # REQUIREMENTS:
 #   - Singularity container with R and required packages
 #   - Sample IDs file with tumor content information
-#   - All analysis results from the nWGS pipeline
+#   - All analysis results from the Diana pipeline
 #   - R Markdown template file
 #
 # INPUT FILES:
 #   - sample_ids.txt: Two-column file with sample ID and tumor content (decimal)
-#     Location: /data/routine_nWGS/sample_ids.txt
+#     Location: /data/routine_diana/sample_ids.txt
 #   - Various analysis result files from routine_analysis/{sample_id}/ directories
 #   - The PATH for each analysis result file is configured in the script.
 #
@@ -41,7 +41,7 @@
 #   - Container must include: rmarkdown, data.table, kableExtra, and other R packages
 #   - Default image: markdown_images_28feb2025_latest.sif
 #
-# AUTHOR: nWGS Pipeline Development Team
+# AUTHOR: Diana Pipeline Development Team
 # DATE: 2024
 #==============================================================================
 
@@ -59,9 +59,9 @@ fi
 echo "Using Singularity image: $SINGULARITY_IMAGE"
 
 # Define base paths based on current pipeline structure
-PIPELINE_DIR="/data/routine_nWGS_pipeline/nWGS_pipeline"
+PIPELINE_DIR="/data/routine_diana/Diana"
 REFERENCE_PATH="${PIPELINE_DIR}/data/reference"
-OUTPUT_PATH="/data/routine_nWGS"
+OUTPUT_PATH="/data/routine_diana"
 
 # Sample IDs file path (hardcoded location for routine processing)
 samples_file="${OUTPUT_PATH}/sample_ids.txt"

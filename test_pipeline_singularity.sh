@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Quick test script for the nWGS pipeline with Singularity/Apptainer
+# Quick test script for the Diana pipeline with Singularity/Apptainer
 set -e
 
 echo " Running quick pipeline test with Singularity/Apptainer..."

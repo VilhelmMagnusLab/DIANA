@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# nWGS Pipeline Runner Script for Docker
+# Diana Pipeline Runner Script for Docker
 set -e
 
 # Configurable log paths with defaults
@@ -70,7 +70,7 @@ else
     echo " Using default analysis configuration: $CONFIG"
 fi
 
-echo " Starting nWGS pipeline with Docker containers..."
+echo " Starting Diana pipeline with Docker containers..."
 echo "   Log directory: ${LOG_BASE_DIR}"
 
 if [ "$USE_CONFIG_FILE" = true ]; then

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# nWGS Pipeline Runner Script for Singularity/Apptainer
+# Diana Pipeline Runner Script for Singularity/Apptainer
 set -e
 
 # Check if Nextflow is installed
@@ -46,7 +46,7 @@ else
     echo " Using default annotation configuration: $CONFIG"
 fi
 
-echo " Starting nWGS pipeline with Singularity/Apptainer containers..."
+echo " Starting Diana pipeline with Singularity/Apptainer containers..."
 if [ -n "$CONFIG" ]; then
     echo "   Configuration: $CONFIG"
 fi

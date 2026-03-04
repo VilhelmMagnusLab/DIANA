@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Quick test script for the nWGS pipeline with Docker
+# Quick test script for the Diana pipeline with Docker
 # This will run a comprehensive test to verify everything is working
 
 set -e
 
 echo "=========================================="
-echo "nWGS Pipeline Docker Test"
+echo "Diana Pipeline Docker Test"
 echo "=========================================="
 
 # Test 1: Environment Check
@@ -44,7 +44,7 @@ echo ""
 echo "3. Testing Docker Images..."
 echo "   Checking for required images..."
 required_images=(
-    "vilhelmmagnuslab/nwgs_default_images:latest"
+    "vilhelmmagnuslab/diana_default_images:latest"
     "vilhelmmagnuslab/ace_1.24.0:latest"
     "vilhelmmagnuslab/clair3_amd64:latest"
     "vilhelmmagnuslab/nanodx_images_3feb25:latest"
@@ -126,7 +126,7 @@ fi
 # Test 9: Container Test
 echo ""
 echo "9. Testing Container Access..."
-if docker run --rm vilhelmmagnuslab/nwgs_default_images:latest --help &> /dev/null; then
+if docker run --rm vilhelmmagnuslab/diana_default_images:latest --help &> /dev/null; then
     echo "   ✓ Default container is accessible"
 else
     echo "   ❌ Default container test failed"

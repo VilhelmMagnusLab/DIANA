@@ -1,22 +1,22 @@
-# nWGS_pipeline: Nanopore Whole Genome Sequencing Pipeline
+# Diana: Nanopore Whole Genome Sequencing Pipeline
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.10.1-23aa62.svg)](https://www.nextflow.io/)
 [![run with apptainer](https://img.shields.io/badge/run%20with-apptainer-1d355c.svg?labelColor=000000)](https://apptainer.org/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed.svg?labelColor=000000)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/VilhelmMagnusLab/nWGS_pipeline/releases)
+[![Release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/VilhelmMagnusLab/Diana/releases)
 
 ## Overview
 
-nWGS_pipeline is a comprehensive bioinformatics pipeline for analyzing Central Nervous System (CNS) samples using Oxford Nanopore sequencing data. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
+Diana is a comprehensive bioinformatics pipeline for analyzing Central Nervous System (CNS) samples using Oxford Nanopore sequencing data. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
 
 ## Pipeline Schematic
 
-The nWGS pipeline follows a modular architecture with three main Nextflow modules (run_mode_mergebam, run_mode_epi2me and run_mode_annotation) that can be run independently or sequentially:
+The Diana pipeline follows a modular architecture with three main Nextflow modules (run_mode_mergebam, run_mode_epi2me and run_mode_annotation) that can be run independently or sequentially:
 
 <div align="center">
 
-![nWGS Pipeline Schematic](nWGS.png)
+![Diana Pipeline Schematic](nWGS.png)
 
 </div>
 
@@ -35,16 +35,16 @@ The pipeline now features a unified setup script that automatically downloads al
 
 **For Docker (Desktop/Local):**
 ```bash
-git clone https://github.com/VilhelmMagnusLab/nWGS_pipeline.git
-cd nWGS_pipeline
+git clone https://github.com/VilhelmMagnusLab/Diana.git
+cd Diana
 ./setup_pipeline.sh docker
 ./run_pipeline_docker.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
 ```
 
 **For Singularity/Apptainer (HPC):**
 ```bash
-git clone https://github.com/VilhelmMagnusLab/nWGS_pipeline.git
-cd nWGS_pipeline
+git clone https://github.com/VilhelmMagnusLab/Diana.git
+cd Diana
 ./setup_pipeline.sh singularity
 ./run_pipeline_singularity.sh --run_mode_order --sample_id YOUR_SAMPLE_ID
 ```
@@ -155,6 +155,7 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 
 # Epi2me analyses
 ./run_pipeline_docker.sh --run_mode_epi2me all          # All Epi2me analyses
+./run_pipeline_docker.sh --run_mode_epi2me stat         # QC statistics (cramino) only
 ./run_pipeline_docker.sh --run_mode_epi2me modkit       # Modified base calling only
 ./run_pipeline_docker.sh --run_mode_epi2me cnv          # CNV analysis only
 ./run_pipeline_docker.sh --run_mode_epi2me sv           # Structural variants only
@@ -177,6 +178,7 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 
 # Epi2me analyses
 ./run_pipeline_singularity.sh --run_mode_epi2me all          # All Epi2me analyses
+./run_pipeline_singularity.sh --run_mode_epi2me stat         # QC statistics (cramino) only
 ./run_pipeline_singularity.sh --run_mode_epi2me modkit       # Modified base calling only
 ./run_pipeline_singularity.sh --run_mode_epi2me cnv          # CNV analysis only
 ./run_pipeline_singularity.sh --run_mode_epi2me sv           # Structural variants only
@@ -211,7 +213,7 @@ The pipeline uses a standardized directory structure with separate input and out
 
 ```
 Pipeline directory:
-/data/routine_nWGS_pipeline/nWGS_pipeline/
+/data/routine_diana/Diana/
 ├── conf/                         # Configuration files
 │   ├── mergebam.config          # Mergebam module config
 │   ├── epi2me.config            # Epi2me module config
@@ -223,7 +225,7 @@ Pipeline directory:
 └── smart_sample_monitor_v2.sh  # Automated monitoring script
 
 Pipeline data directory (configured via params.path):
-/data/routine_nWGS_pipeline/nWGS_pipeline/data/
+/data/routine_diana/Diana/data/
 ├── reference/                    # Reference files (GRCh38, BED files, etc.)
 └── humandb/                      # Annotation databases
 
@@ -242,7 +244,7 @@ Input data directory (configured via params.input_dir in mergebam.config):
 └── ...
 
 Output directory (configured via params.path_output):
-/data/routine_nWGS/
+/data/routine_diana/
 ├── sample_ids_bam.txt           # Sample IDs for BAM merging
 │
 ├── routine_bams/                # Processed BAM files (Mergebam module)
@@ -411,7 +413,7 @@ The pipeline uses three main path parameters that must be configured:
 ```groovy
 // conf/annotation.config, conf/epi2me.config, conf/mergebam.config
 params {
-    path = "/data/routine_nWGS_pipeline/nWGS_pipeline/data"
+    path = "/data/routine_diana/Diana/data"
     // Contains: reference/, humandb/ directories
 }
 ```
@@ -430,7 +432,7 @@ params {
 ```groovy
 // conf/mergebam.config, conf/epi2me.config, conf/annotation.config
 params {
-    path_output = "/data/routine_nWGS"
+    path_output = "/data/routine_diana"
     // Contains: sample_ids_bam.txt, routine_bams/, routine_epi2me/, routine_results/
 }
 ```
@@ -554,7 +556,7 @@ The pipeline includes `smart_sample_monitor_v2.sh` for **automated monitoring an
 - **Resume Control**: Disabled by default for fresh runs; use `-r` to enable caching
 - **Symlink Resolution**: Works correctly when installed as global command
 - **Portable Execution**: Automatically finds pipeline directory from any location
-- **Sample IDs File**: Hardcoded to `/data/routine_nWGS/sample_ids_bam.txt`
+- **Sample IDs File**: Hardcoded to `/data/routine_diana/sample_ids_bam.txt`
 
 ### Basic Usage:
 
@@ -583,7 +585,7 @@ Install the monitor as a global command accessible from any directory:
 ```bash
 # Create user bin directory and symbolic link
 mkdir -p ~/bin
-ln -sf /data/routine_nWGS_pipeline/nWGS_pipeline/smart_sample_monitor_v2.sh ~/bin/smart_sample_monitor
+ln -sf /data/routine_diana/Diana/smart_sample_monitor_v2.sh ~/bin/smart_sample_monitor
 
 # Add ~/bin to PATH (run once)
 cat >> ~/.bashrc << 'EOF'
@@ -603,7 +605,7 @@ which smart_sample_monitor
 
 **System-wide installation (Requires sudo):**
 ```bash
-sudo ln -sf /data/routine_nWGS_pipeline/nWGS_pipeline/smart_sample_monitor_v2.sh /usr/local/bin/smart_sample_monitor
+sudo ln -sf /data/routine_diana/Diana/smart_sample_monitor_v2.sh /usr/local/bin/smart_sample_monitor
 ```
 
 **Then use from anywhere:**
@@ -632,7 +634,7 @@ smart_sample_monitor -d /data/WGS_27102025 -w /data/trash -r
 
 ### Workflow:
 
-1. **Initialize**: Load sample IDs from `/data/routine_nWGS/sample_ids_bam.txt`
+1. **Initialize**: Load sample IDs from `/data/routine_diana/sample_ids_bam.txt`
 2. **Monitor**: Check each sample directory for `final_summary_*_*_*.txt`
 3. **Queue**: Mark ready samples for processing
 4. **Execute**: Run `--run_mode_order` for each sample sequentially
@@ -680,7 +682,7 @@ ls -la containers/*.sif                        # Singularity
   - [DOCKER_SETUP.md](DOCKER_SETUP.md) - Docker installation and setup
   - [SINGULARITY_SETUP.md](SINGULARITY_SETUP.md) - Singularity/Apptainer setup
   - [docs/GLOBAL_COMMAND_SETUP.md](docs/GLOBAL_COMMAND_SETUP.md) - Global command installation
-- **Issues**: [GitHub Issues](https://github.com/VilhelmMagnusLab/nWGS_pipeline/issues)
+- **Issues**: [GitHub Issues](https://github.com/VilhelmMagnusLab/Diana/issues)
 - **Contact**: 
   - Christian Domilongo Bope (chbope@ous-hf.no / christianbope@gmail.com)
   - Skarphedinn Halldorsson (skahal@ous-hf.no / skabbi@gmail.com)
@@ -698,4 +700,4 @@ If you use this pipeline in your research, please cite:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
-This nanopore whole genome sequencing (nWGS) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician.
+This nanopore whole genome sequencing (Diana) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician.
