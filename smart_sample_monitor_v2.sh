@@ -57,7 +57,7 @@ readonly SCRIPT_VERSION="2.1"
 readonly SCRIPT_DATE="2025-11-17"
 
 # HARDCODED CONFIGURATION
-readonly HARDCODED_SAMPLE_IDS_FILE="/home/godzilla/routine_diana/sample_ids_bam.txt"
+readonly HARDCODED_SAMPLE_IDS_FILE="${HOME}/routine_diana/sample_ids_bam.txt"
 
 # Detect script location for finding pipeline directory
 # Resolve symlinks to find the actual script location
@@ -72,7 +72,7 @@ SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 # Default configuration
 readonly DEFAULT_CONFIG_FILE="conf/mergebam.config"
 readonly DEFAULT_PIPELINE_DIR="$SCRIPT_DIR"
-readonly DEFAULT_NEXTFLOW_WORK_DIR="/home/godzilla/trash"
+readonly DEFAULT_NEXTFLOW_WORK_DIR="${HOME}/trash"
 readonly DEFAULT_CHECK_INTERVAL=300
 readonly DEFAULT_TIMEOUT=259200
 

@@ -61,6 +61,7 @@ echo "Creating package directories..."
 mkdir -p data/reference
 mkdir -p data/humandb
 mkdir -p containers
+mkdir -p .empty_r_overlay
 
 # Pull Singularity/Apptainer images
 echo "   Pulling Singularity/Apptainer images..."
