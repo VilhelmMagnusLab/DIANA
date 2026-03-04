@@ -19,6 +19,7 @@
 #   --skip-containers        Skip container setup (only download reference files)
 #   --skip-reference         Skip reference file download (only setup containers)
 #   --config-only            Only create directories and install Nextflow (no images, no Zenodo)
+#   --work-dir DIR           Parent directory for routine_diana/ (default: $HOME)
 #   --help                   Show this help message
 #
 # Examples:
@@ -52,6 +53,7 @@ SKIP_OPTIONAL=false
 SKIP_CONTAINERS=false
 SKIP_REFERENCE=false
 CONFIG_ONLY=false
+WORK_DIR_PARENT=""
 
 ################################################################################
 # Helper Functions
@@ -200,6 +202,10 @@ parse_args() {
                 CONFIG_ONLY=true
                 shift
                 ;;
+            --work-dir)
+                WORK_DIR_PARENT="$2"
+                shift 2
+                ;;
             --help|-h)
                 show_usage
                 exit 0
@@ -297,7 +303,32 @@ create_directories() {
     mkdir -p "${REFERENCE_DIR}/nanoDx/static"
     mkdir -p "${PIPELINE_DIR}/.empty_r_overlay"
 
-    print_success "Created directory structure"
+    print_success "Created pipeline directory structure"
+    echo ""
+
+    # Create routine_diana working directory
+    if [ -z "$WORK_DIR_PARENT" ]; then
+        echo "Where should the routine_diana/ working directory be created?"
+        read -p "  Parent directory [default: $HOME]: " WORK_DIR_PARENT
+        WORK_DIR_PARENT=${WORK_DIR_PARENT:-$HOME}
+    fi
+
+    # Expand tilde
+    WORK_DIR_PARENT="${WORK_DIR_PARENT/#\~/$HOME}"
+    local ROUTINE_DIR="${WORK_DIR_PARENT}/routine_diana"
+
+    print_info "Creating working directory at: ${ROUTINE_DIR}"
+    mkdir -p "${ROUTINE_DIR}/routine_bams/merge_bams"
+    mkdir -p "${ROUTINE_DIR}/routine_bams/roi_bams"
+    mkdir -p "${ROUTINE_DIR}/routine_epi2me"
+    mkdir -p "${ROUTINE_DIR}/routine_annotation"
+    mkdir -p "${ROUTINE_DIR}/routine_results"
+
+    # Create sample ID files if they don't exist
+    [ -f "${ROUTINE_DIR}/sample_ids_bam.txt" ]    || touch "${ROUTINE_DIR}/sample_ids_bam.txt"
+    [ -f "${ROUTINE_DIR}/sample_ids_master.txt" ] || touch "${ROUTINE_DIR}/sample_ids_master.txt"
+
+    print_success "Created routine_diana/ structure at: ${ROUTINE_DIR}"
     echo ""
 }
 
@@ -657,12 +688,7 @@ setup_singularity_containers() {
         else
             echo -e "  ${CYAN}Pulling${NC} $image_name..."
 
-            # Pull the image without authentication
-            # Add --disable-cache and --no-https to avoid OCI registry authentication issues
-            SINGULARITY_DOCKER_USERNAME="" SINGULARITY_DOCKER_PASSWORD="" \
-            APPTAINER_DOCKER_USERNAME="" APPTAINER_DOCKER_PASSWORD="" \
-            SINGULARITY_NOHTTPS=1 APPTAINER_NOHTTPS=1 \
-            $SINGULARITY_CMD pull --disable-cache --no-https --dir "${PIPELINE_DIR}/containers/" "docker://$image_name:latest" 2>&1 | \
+            $SINGULARITY_CMD pull --dir "${PIPELINE_DIR}/containers/" "docker://$image_name:latest" 2>&1 | \
                 grep -v "INFO:" || true
 
             # Verify the image was downloaded
