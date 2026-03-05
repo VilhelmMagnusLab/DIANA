@@ -494,8 +494,12 @@ run_sample_pipeline() {
         log "INFO" "Resume disabled - running fresh pipeline"
     fi
 
-    # Build command with optional input_dir override
+    # Build command with optional overrides
     local pipeline_cmd="bash run_pipeline_singularity.sh --run_mode_order -w \"$work_dir\" $resume_flag"
+
+    # Always pass the routine_diana path so the pipeline writes to the correct location
+    pipeline_cmd="$pipeline_cmd --path_output=\"$DIANA_ROUTINE_DIR\""
+    log "INFO" "Using routine_diana path: $DIANA_ROUTINE_DIR"
 
     if [[ "$USER_SPECIFIED_DATA_DIR" == true ]]; then
         pipeline_cmd="$pipeline_cmd --input_dir=\"$BASE_DATA_DIR\""
