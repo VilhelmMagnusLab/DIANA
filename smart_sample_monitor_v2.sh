@@ -56,9 +56,6 @@ readonly SCRIPT_NAME="Smart Sample Monitor v2"
 readonly SCRIPT_VERSION="2.1"
 readonly SCRIPT_DATE="2025-11-17"
 
-# HARDCODED CONFIGURATION
-readonly HARDCODED_SAMPLE_IDS_FILE="${HOME}/routine_diana/sample_ids_bam.txt"
-
 # Detect script location for finding pipeline directory
 # Resolve symlinks to find the actual script location
 SOURCE="${BASH_SOURCE[0]}"
@@ -68,6 +65,13 @@ while [ -h "$SOURCE" ]; do
     [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+# Load routine_diana path from setup if available, otherwise fall back to $HOME/routine_diana
+DIANA_ROUTINE_DIR="${HOME}/routine_diana"
+if [ -f "${SCRIPT_DIR}/.diana_env" ]; then
+    source "${SCRIPT_DIR}/.diana_env"
+fi
+readonly HARDCODED_SAMPLE_IDS_FILE="${DIANA_ROUTINE_DIR}/sample_ids_bam.txt"
 
 # Default configuration
 readonly DEFAULT_CONFIG_FILE="conf/mergebam.config"

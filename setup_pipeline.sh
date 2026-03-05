@@ -324,9 +324,13 @@ create_directories() {
     mkdir -p "${ROUTINE_DIR}/routine_annotation"
     mkdir -p "${ROUTINE_DIR}/routine_results"
 
-    # Create sample ID files if they don't exist
+    # Create sample ID files if they don't exist, ensure writable
     [ -f "${ROUTINE_DIR}/sample_ids.txt" ]     || touch "${ROUTINE_DIR}/sample_ids.txt"
     [ -f "${ROUTINE_DIR}/sample_ids_bam.txt" ] || touch "${ROUTINE_DIR}/sample_ids_bam.txt"
+    chmod 664 "${ROUTINE_DIR}/sample_ids.txt" "${ROUTINE_DIR}/sample_ids_bam.txt"
+
+    # Save chosen path so other scripts (smart_sample_monitor_v2.sh etc.) can find it
+    echo "DIANA_ROUTINE_DIR=${ROUTINE_DIR}" > "${PIPELINE_DIR}/.diana_env"
 
     print_success "Created routine_diana/ structure at: ${ROUTINE_DIR}"
 
