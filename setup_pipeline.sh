@@ -329,6 +329,20 @@ create_directories() {
     [ -f "${ROUTINE_DIR}/sample_ids_bam.txt" ] || touch "${ROUTINE_DIR}/sample_ids_bam.txt"
 
     print_success "Created routine_diana/ structure at: ${ROUTINE_DIR}"
+
+    # Update config files if the user chose a non-default path
+    if [ "${WORK_DIR_PARENT}" != "${HOME}" ]; then
+        print_info "Custom path detected — updating config files to use: ${ROUTINE_DIR}"
+        local configs=("${PIPELINE_DIR}/conf/annotation.config" \
+                       "${PIPELINE_DIR}/conf/epi2me.config" \
+                       "${PIPELINE_DIR}/conf/mergebam.config")
+        for cfg in "${configs[@]}"; do
+            if [ -f "$cfg" ]; then
+                sed -i "s|System.getProperty('user.home')|'${WORK_DIR_PARENT}'|g" "$cfg"
+                print_success "Updated: $(basename $cfg)"
+            fi
+        done
+    fi
     echo ""
 }
 
