@@ -647,7 +647,7 @@ setup_docker_containers() {
 
     # Core analysis images
     echo "Core analysis images:"
-    pull_docker_if_not_exists "vilhelmmagnuslab/diana_default_images"
+    pull_docker_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
     pull_docker_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
     pull_docker_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
     pull_docker_if_not_exists "vilhelmmagnuslab/clair3_amd64"
@@ -719,7 +719,7 @@ setup_singularity_containers() {
 
     # Core analysis images
     echo "Core analysis images:"
-    pull_singularity_if_not_exists "vilhelmmagnuslab/diana_default_images"
+    pull_singularity_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
     pull_singularity_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
     pull_singularity_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
     pull_singularity_if_not_exists "vilhelmmagnuslab/clair3_amd64"

@@ -94,7 +94,7 @@ echo "   This may take several minutes on first run..."
 
 # Core analysis images
 echo "Pulling core analysis images..."
-pull_if_not_exists "vilhelmmagnuslab/diana_default_images"
+pull_if_not_exists "vilhelmmagnuslab/nwgs_default_images"
 pull_if_not_exists "vilhelmmagnuslab/ace_1.24.0"
 pull_if_not_exists "vilhelmmagnuslab/annotcnv_images_27feb1025"
 pull_if_not_exists "vilhelmmagnuslab/clair3_amd64"
