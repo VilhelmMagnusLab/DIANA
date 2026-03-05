@@ -106,6 +106,7 @@
 
     # Environment files
     .env
+    .diana_env
     .conda/
     conda-meta/
 
