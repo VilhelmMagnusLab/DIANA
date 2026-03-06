@@ -110,9 +110,9 @@ pull_if_not_exists "vilhelmmagnuslab/sturgeon_amd64_21jan"
 
 # Epi2me images
 echo "Pulling Epi2me analysis images..."
-pull_if_not_exists "vilhelmmagnuslab/snifflesv252_update_latest"
-pull_if_not_exists "vilhelmmagnuslab/qdnaseq_amd64_latest"
-pull_if_not_exists "vilhelmmagnuslab/modkit_latest"
+pull_if_not_exists "vilhelmmagnuslab/snifflesv252_update"
+pull_if_not_exists "vilhelmmagnuslab/qdnaseq_amd64"
+pull_if_not_exists "vilhelmmagnuslab/modkit"
 
 echo "✓ All Docker images pulled successfully"
 

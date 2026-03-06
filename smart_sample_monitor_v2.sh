@@ -6,6 +6,11 @@
 #
 # Version History:
 #
+# Version 2.2 (2026-03-06):
+# - Added Docker support alongside Singularity/Apptainer
+# - Auto-detects container engine; override with -e/--engine, --docker, --singularity
+# - Pipeline script selected at runtime (run_pipeline_docker.sh or run_pipeline_singularity.sh)
+#
 # Version 2.1 (2025-11-17):
 # - Fixed cache sharing: Use shared work directory instead of per-sample directories
 # - All samples now share /data/trash/ work directory for optimal cache reuse
@@ -53,8 +58,8 @@ set -eo pipefail
 
 # Script metadata
 readonly SCRIPT_NAME="Smart Sample Monitor v2"
-readonly SCRIPT_VERSION="2.1"
-readonly SCRIPT_DATE="2025-11-17"
+readonly SCRIPT_VERSION="2.2"
+readonly SCRIPT_DATE="2026-03-06"
 
 # Detect script location for finding pipeline directory
 # Resolve symlinks to find the actual script location
@@ -91,6 +96,7 @@ BASE_DATA_DIR=""
 SAMPLE_IDS_FILE="$HARDCODED_SAMPLE_IDS_FILE"
 USER_SPECIFIED_DATA_DIR=false
 RESUME_ENABLED=false
+CONTAINER_ENGINE=""   # "singularity", "docker", or "apptainer" — auto-detected if unset
 
 # Tracking arrays
 declare -A SAMPLE_STATUS=()      # "pending", "ready", "running", "completed", "failed"
@@ -144,6 +150,9 @@ ${YELLOW}OPTIONS:${NC}
     -c, --config FILE       Configuration file to parse (default: conf/mergebam.config)
     -i, --interval SEC      Check interval in seconds (default: 300)
     -t, --timeout SEC       Maximum wait time per sample (default: 432000 = 5 days)
+    -e, --engine ENGINE     Container engine: singularity, apptainer, or docker (default: auto-detect)
+        --docker            Shorthand for --engine docker
+        --singularity       Shorthand for --engine singularity
     -r, --resume            Enable Nextflow resume (use cached results)
     -v, --verbose           Enable verbose logging
     -h, --help              Show this help message
@@ -494,8 +503,17 @@ run_sample_pipeline() {
         log "INFO" "Resume disabled - running fresh pipeline"
     fi
 
+    # Select pipeline script based on container engine
+    local pipeline_script
+    case "$CONTAINER_ENGINE" in
+        singularity|apptainer) pipeline_script="run_pipeline_singularity.sh" ;;
+        docker)                pipeline_script="run_pipeline_docker.sh" ;;
+        *) die "Container engine not set — run validate_environment first" ;;
+    esac
+    log "INFO" "Using pipeline script: $pipeline_script (engine: $CONTAINER_ENGINE)"
+
     # Build command with optional overrides
-    local pipeline_cmd="bash run_pipeline_singularity.sh --run_mode_order -w \"$work_dir\" $resume_flag"
+    local pipeline_cmd="bash $pipeline_script --run_mode_order -w \"$work_dir\" $resume_flag"
 
     # Always pass the routine_diana path so the pipeline writes to the correct location
     pipeline_cmd="$pipeline_cmd --path_output=\"$DIANA_ROUTINE_DIR\""
@@ -733,6 +751,18 @@ parse_arguments() {
                 RESUME_ENABLED=true
                 shift
                 ;;
+            -e|--engine)
+                CONTAINER_ENGINE="$2"
+                shift 2
+                ;;
+            --docker)
+                CONTAINER_ENGINE="docker"
+                shift
+                ;;
+            --singularity)
+                CONTAINER_ENGINE="singularity"
+                shift
+                ;;
             -v|--verbose)
                 VERBOSE=true
                 shift
@@ -753,10 +783,46 @@ parse_arguments() {
     done
 }
 
+detect_container_engine() {
+    if [[ -n "$CONTAINER_ENGINE" ]]; then
+        # Validate user-supplied engine
+        case "$CONTAINER_ENGINE" in
+            singularity|apptainer|docker) ;;
+            *) die "Unknown container engine: $CONTAINER_ENGINE. Valid options: singularity, apptainer, docker" ;;
+        esac
+        log "INFO" "Container engine (user-specified): $CONTAINER_ENGINE"
+        return
+    fi
+
+    # Auto-detect: prefer whichever run_pipeline_* script is present
+    if [[ -f "$PIPELINE_DIR/run_pipeline_singularity.sh" ]] && \
+       ( command -v singularity &>/dev/null || command -v apptainer &>/dev/null ); then
+        CONTAINER_ENGINE="singularity"
+    elif [[ -f "$PIPELINE_DIR/run_pipeline_docker.sh" ]] && command -v docker &>/dev/null; then
+        CONTAINER_ENGINE="docker"
+    elif [[ -f "$PIPELINE_DIR/run_pipeline_singularity.sh" ]]; then
+        CONTAINER_ENGINE="singularity"   # script exists even if binary not in PATH
+    elif [[ -f "$PIPELINE_DIR/run_pipeline_docker.sh" ]]; then
+        CONTAINER_ENGINE="docker"
+    else
+        die "No run_pipeline_singularity.sh or run_pipeline_docker.sh found in $PIPELINE_DIR"
+    fi
+
+    log "INFO" "Container engine (auto-detected): $CONTAINER_ENGINE"
+}
+
 validate_environment() {
     # Check directories
     [[ -d "$PIPELINE_DIR" ]] || die "Pipeline directory not found: $PIPELINE_DIR"
-    [[ -f "$PIPELINE_DIR/run_pipeline_singularity.sh" ]] || die "Pipeline script not found: $PIPELINE_DIR/run_pipeline_singularity.sh"
+
+    detect_container_engine
+
+    local pipeline_script
+    case "$CONTAINER_ENGINE" in
+        singularity|apptainer) pipeline_script="$PIPELINE_DIR/run_pipeline_singularity.sh" ;;
+        docker)                pipeline_script="$PIPELINE_DIR/run_pipeline_docker.sh" ;;
+    esac
+    [[ -f "$pipeline_script" ]] || die "Pipeline script not found: $pipeline_script"
 
     # Create work directory
     mkdir -p "$NEXTFLOW_WORK_DIR" || die "Cannot create work directory: $NEXTFLOW_WORK_DIR"
@@ -770,7 +836,7 @@ validate_environment() {
 
 show_configuration() {
     log "INFO" "=== $SCRIPT_NAME v$SCRIPT_VERSION (${SCRIPT_DATE}) ==="
-    log "SUCCESS" "Version 2.1 - Cache sharing enabled for optimal performance"
+    log "SUCCESS" "Version 2.2 - Docker + Singularity/Apptainer support"
     log "INFO" "Configuration:"
     log "INFO" "  Data directory: $BASE_DATA_DIR"
     if [[ "$USER_SPECIFIED_DATA_DIR" == true ]]; then
@@ -788,6 +854,7 @@ show_configuration() {
     else
         log "INFO" "  Timeout: $((TIMEOUT/60))min"
     fi
+    log "INFO" "  Container engine: ${CONTAINER_ENGINE:-auto-detect}"
     log "INFO" "  Resume mode: $RESUME_ENABLED"
     log "INFO" "  Verbose: $VERBOSE"
 }

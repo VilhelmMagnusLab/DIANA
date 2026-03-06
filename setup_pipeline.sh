@@ -668,9 +668,9 @@ setup_docker_containers() {
 
     # Epi2me images
     echo "Epi2me analysis images:"
-    pull_docker_if_not_exists "vilhelmmagnuslab/snifflesv252_update_latest"
-    pull_docker_if_not_exists "vilhelmmagnuslab/qdnaseq_amd64_latest"
-    pull_docker_if_not_exists "vilhelmmagnuslab/modkit_latest"
+    pull_docker_if_not_exists "vilhelmmagnuslab/snifflesv252_update"
+    pull_docker_if_not_exists "vilhelmmagnuslab/qdnaseq_amd64"
+    pull_docker_if_not_exists "vilhelmmagnuslab/modkit"
     echo ""
 }
 

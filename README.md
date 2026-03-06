@@ -561,7 +561,7 @@ The pipeline includes `smart_sample_monitor_v2.sh` for **automated monitoring an
 ### Basic Usage:
 
 ```bash
-# Run from pipeline directory with default config
+# Run from pipeline directory with default config (auto-detects Singularity or Docker)
 ./smart_sample_monitor_v2.sh
 
 # Monitor specific data directory (overrides config)
@@ -575,6 +575,16 @@ The pipeline includes `smart_sample_monitor_v2.sh` for **automated monitoring an
 
 # Combination: resume + verbose
 ./smart_sample_monitor_v2.sh -d /data/WGS_27102025 -r -v
+
+# Force Docker (useful when both Docker and Singularity are available)
+./smart_sample_monitor_v2.sh --docker -d /data/WGS_27102025
+
+# Force Singularity/Apptainer
+./smart_sample_monitor_v2.sh --singularity -d /data/WGS_27102025
+
+# Explicit engine flag (equivalent to --docker / --singularity)
+./smart_sample_monitor_v2.sh -e docker -d /data/WGS_27102025 -r -v
+./smart_sample_monitor_v2.sh -e singularity -d /data/WGS_27102025 -r -v
 ```
 
 ### Global Command Installation:
@@ -616,6 +626,9 @@ smart_sample_monitor -d /data/WGS_27102025 -v
 
 # Monitor with custom work directory
 smart_sample_monitor -d /data/WGS_27102025 -w /data/trash -r
+
+# Force Docker from anywhere
+smart_sample_monitor --docker -d /data/WGS_27102025 -v
 ```
 
 ### Command-Line Options:
@@ -628,6 +641,9 @@ smart_sample_monitor -d /data/WGS_27102025 -w /data/trash -r
 | `-c` | `--config` | Config file to parse | `conf/mergebam.config` |
 | `-i` | `--interval` | Check interval in seconds | 300 (5 min) |
 | `-t` | `--timeout` | Maximum wait time in seconds | 432000 (5 days) |
+| `-e` | `--engine` | Container engine: `singularity`, `apptainer`, or `docker` | Auto-detect |
+| | `--docker` | Shorthand for `--engine docker` | - |
+| | `--singularity` | Shorthand for `--engine singularity` | - |
 | `-r` | `--resume` | Enable Nextflow resume | Disabled |
 | `-v` | `--verbose` | Enable verbose logging | Disabled |
 | `-h` | `--help` | Show help message | - |
