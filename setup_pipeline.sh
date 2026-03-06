@@ -1087,6 +1087,16 @@ print_completion_message() {
 # Main Execution
 ################################################################################
 
+update_options_json() {
+    local options_file="${REFERENCE_DIR}/options.json"
+    if [ -f "$options_file" ]; then
+        sed -i "s|\"Static\": \".*\"|\"Static\": \"${REFERENCE_DIR}\"|" "$options_file"
+        print_success "Updated options.json Static path to: ${REFERENCE_DIR}"
+    else
+        print_info "options.json not found yet — will be updated after reference download"
+    fi
+}
+
 main() {
     clear
 
@@ -1129,6 +1139,7 @@ EOF
     create_directories
     install_nextflow
     download_reference_files
+    update_options_json
     setup_containers
     validate_setup
     create_quick_start_guide
