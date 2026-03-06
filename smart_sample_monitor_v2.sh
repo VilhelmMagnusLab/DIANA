@@ -515,16 +515,9 @@ run_sample_pipeline() {
         # not just the single sample we think we're running. We need to check ALL samples
         # and mark them as completed if they have markdown reports.
 
-        # Get result_path from annotation.config
-        local annotation_config="${PIPELINE_DIR}/conf/annotation.config"
-        local result_path=$(extract_config_value "$annotation_config" "result_path")
-
-        # If result_path has variables, resolve them
-        if [[ "$result_path" =~ \$\{ ]]; then
-            local annotation_base_path=$(extract_config_value "$annotation_config" "path")
-            result_path="${result_path//\$\{params.path\}/$annotation_base_path}"
-            result_path="${result_path//\$\{path\}/$annotation_base_path}"
-        fi
+        # Build result_path from DIANA_ROUTINE_DIR (already resolved from .diana_env or default)
+        # Cannot parse Groovy expressions from annotation.config in bash, so use the known structure
+        local result_path="${DIANA_ROUTINE_DIR}/routine_results"
 
         # Check ALL samples (not just the one we think we're running)
         # because Nextflow processes all samples in the sample_ids file
