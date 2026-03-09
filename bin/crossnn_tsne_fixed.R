@@ -296,7 +296,7 @@ p <- ggplot(df, aes(x = X1, y = X2, color = Dx)) +
     colour = guide_legend(
       title = "Methylation class",
       title.position = "top",
-      ncol = 5,
+      ncol = 6,
       override.aes = list(
         shape = ifelse(names(hexCol) != "unknown", 15, 3),
         size = ifelse(names(hexCol) != "unknown", 3, 5),  # Make unknown cross bigger (size 5)
