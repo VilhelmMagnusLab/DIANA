@@ -47,8 +47,6 @@ def loadSampleThresholds() {
 
 // Extract EPIC methylation sites and MGMT CpG islands from bedmethyl data
 process extract_epic {
-    cpus 2
-    memory '2 GB'
     label 'epic'
     tag "${sample_id}"
     publishDir "${params.output_path}/routine_annotation/${sample_id}/methylation/", mode: "copy", overwrite: true
@@ -115,8 +113,6 @@ process nanodx {
 
 //Sturgeon classifier
 process sturgeon {
-    cpus 4
-    memory '2 GB'
     label 'epic'
     publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/sturgeon", mode: "copy", overwrite: true
     publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_bedmethyl_sturgeon_general.pdf"
