@@ -716,4 +716,5 @@ If you use this pipeline in your research, please cite:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer
-This nanopore whole genome sequencing (Diana) pipeline is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician.
+
+Diagnostic Integrated Analytics for Nucleic Alterations pipeline (DIANA) is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
