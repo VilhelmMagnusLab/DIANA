@@ -76,7 +76,7 @@ Three independent analysis types:
 
 #### PacBio HiFi Data: BAM Alignment Pre-processing
 
-PacBio HiFi BAM files from the sequencer are typically **unaligned**. Before running the pipeline (specifically before modkit modified base calling), the BAM must be aligned to the reference genome. Use the following command:
+PacBio HiFi BAM files from the sequencer need to be **unaligned**. Before running the pipeline (specifically before modkit modified base calling), the BAM must be aligned to the reference genome. Use the following command:
 
 ```bash
 samtools fastq -T MM,ML /path/to/input.hifi_reads.bam \
