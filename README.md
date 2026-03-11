@@ -20,7 +20,7 @@ The Diana pipeline follows a modular architecture with four main Nextflow module
 
 </div>
 
-*Pipeline workflow showing the flow from Nanopore BAM files through Mergebam, Epi2me, and Annotation modules to final PDF reports.*
+*Pipeline workflow showing the flow from BAM files through Mergebam, Epi2me, and Annotation modules to final PDF reports.*
 
 ## Quick Start
 
