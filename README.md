@@ -12,7 +12,7 @@ Diagnostic Integrated Analytics for Nucleic Alteration (DIANA) is a comprehensiv
 
 ## Pipeline Schematic
 
-The Diana pipeline follows a modular architecture with three main Nextflow modules (run_mode_mergebam, run_mode_epi2me and run_mode_annotation) that can be run independently or sequentially:
+The Diana pipeline follows a modular architecture with four main Nextflow modules that can be run independently or sequentially:
 
 <div align="center">
 
