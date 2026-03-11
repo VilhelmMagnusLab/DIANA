@@ -74,6 +74,21 @@ Three independent analysis types:
 | **Structural Variants** | Sniffles2 | Structural variant detection | `*.sniffles.vcf.gz` |
 | **Copy Number Variation** | QDNAseq | CNV detection | `*_segs.bed`, `*_bins.bed`, `*_segs.vcf` |
 
+#### PacBio HiFi Data: BAM Alignment Pre-processing
+
+PacBio HiFi BAM files from the sequencer are typically **unaligned**. Before running the pipeline (specifically before modkit modified base calling), the BAM must be aligned to the reference genome. Use the following command:
+
+```bash
+samtools fastq -T MM,ML /path/to/input.hifi_reads.bam \
+    | minimap2 -y -ax map-hifi -t 4 /path/to/GRCh38_reference.fa - \
+    | samtools sort -@ 4 -o /path/to/output.hifi_reads.aligned.bam
+
+# Then index the aligned BAM
+samtools index /path/to/output.hifi_reads.aligned.bam
+```
+
+> **Important:** The `-T MM,ML` flag in `samtools fastq` is required to preserve the base modification tags (MM and ML) that encode 5mC methylation information. Without these tags, modkit will not be able to extract methylation calls.
+
 ### 3. **Annotation Pipeline** (`--run_mode_annotation`)
 - **MGMT methylation analysis** using EPIC array sites
 - **NanoDx neural network classification** with dual classifier support:
