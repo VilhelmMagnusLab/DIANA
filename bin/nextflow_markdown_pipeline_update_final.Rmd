@@ -1447,7 +1447,7 @@ tryCatch({
 
 ### Disclaimer 
 
-Diagnostic Integrated Analytics for Nucleic Alterations pipeline (DIANA) is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
+Diagnostic Integrated Analytics for Neoplasm Alterations pipeline (DIANA) is an investigational research tool that has not undergone full clinical validation. Any clinical use or interpretation of its results is entirely at the discretion and responsibility of the treating physician
 
 #### Report generated on `r Sys.time()` | DIANA Pipeline version: `r pipeline_version`
 
