@@ -35,10 +35,9 @@ process merge_bam_files {
     """
     ulimit -n 50000
     echo "Merging BAM files for sample: ${sample_id}"
-    for bam in ${bam_files}; do
-        echo "Processing file: \${bam}" # Print each BAM file being merged
-    done
-    samtools merge -@ ${params.threads} -f ${sample_id}.merged.bam ${bam_files.join(' ')}
+    printf '%s\\n' ${bam_files.join(' ')} > bam_list.txt
+    echo "Total BAM files: \$(wc -l < bam_list.txt)"
+    samtools merge -@ ${params.threads} -f -b bam_list.txt ${sample_id}.merged.bam
     samtools index -@ ${params.threads} ${sample_id}.merged.bam
     """
 }
