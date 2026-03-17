@@ -1051,7 +1051,6 @@ def hg19_450model_ch = Channel.value(file(params.hg19_450model))
 def vcf2circos_json_ch = Channel.value(file(params.vcf2circos_json))
 def genecode_bed_ch = Channel.value(file(params.genecode_bed))
 def occ_fusion_genes_list_ch = Channel.value(file(params.occ_fusion_genes_list))
-def occ_genes_ch = Channel.value(file(params.occ_genes))
 def refgene_ch = Channel.value(file(params.refgene))
 def hg38_refgenemrna_ch = Channel.value(file(params.hg38_refgenemrna))
 def clinvar_ch = Channel.value(file(params.clinvar))
@@ -1424,7 +1423,7 @@ workflow annotation {
                 if (bam_file.exists() && bai_file.exists()) {
                     tuple(
                         sample_id,
-                        bam_file,    // ← Now using merged BAM
+                        bam_file,    // <- Now using merged BAM
                         bai_file,
                         ref,
                         ref_bai
@@ -1666,7 +1665,7 @@ workflow annotation {
             // Step 4: Combine results and create input for merge_annotation
             combine_file = clair3_results
                 .combine(clairsto_results, by: 0)
-                .combine(occ_genes_ch)
+                .combine(occ_fusion_genes_list_ch)
                 .map { sample_id, pileup_file, merge_file, clairsto_file, occ_genes ->
                     println "Creating merge input for sample: $sample_id"
                     tuple(
@@ -2101,7 +2100,7 @@ workflow annotation {
                 clair3_out = clair3_annotate.out.clair3output
                 clairs_to_out = clairs_to_annotate.out.annotateandfilter_clairstoout
             combine_file = clair3_out.combine(clairs_to_out, by: 0)
-                .combine(occ_genes_ch)
+                .combine(occ_fusion_genes_list_ch)
                 .map { sample_id, pileup_file, merge_file, clairsto_file, occ_genes ->
                     tuple(sample_id, merge_file, pileup_file, clairsto_file, occ_genes)
     }

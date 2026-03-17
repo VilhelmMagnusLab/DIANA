@@ -42,7 +42,7 @@ process run_epi2me_modkit {
       ${sample_id}.wf_mods.bedmethyl \
       --ref ${reference_genome} \
       --interval-size ${params.interval_size} \
-      --threads ${task.cpus} \ 
+      --threads ${task.cpus} \
       --log-filepath ${sample_id}_modkit.log \
       --cpg \
       --combine-strands

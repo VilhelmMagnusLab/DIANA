@@ -315,7 +315,8 @@ merge_variant_caller_output <- function(Merged_file, Pileup_file, Somatic_file, 
 
   # Load OCC genes
   tryCatch({
-    occgenes <- readRDS(occgenes)
+    occgenes <- readLines(occgenes)
+    occgenes <- occgenes[nchar(trimws(occgenes)) > 0]
     print(paste("Loaded", length(occgenes), "OCC genes"))
   }, error = function(e) {
     print(paste("Error loading OCC genes:", e$message))

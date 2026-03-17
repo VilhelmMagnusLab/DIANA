@@ -344,6 +344,7 @@ If you prefer manual setup or need to customize the reference files:
   - `TERTp_variants.bed` - TERT promoter variants
   - `human_GRCh38_trf.bed` - Tandem repeat regions
   - `CNV_genes_tuned.csv` - CNV gene annotations
+  - `occ_fusions_genes.txt` - User-defined region of interest gene list for SV/fusion filtering and SNV annotation (one gene per line; can be replaced with any custom gene list)
   - `nanoDx/` - NanoDx neural network classifier (with models from Zenodo)
 
 **Annotation databases** (automatically placed in `data/humandb/`):
@@ -364,6 +365,8 @@ If you prefer manual setup or need to customize the reference files:
 - SNV screening regions for variant calling (ClairS-TO analysis)
 - Ensure proper BED format with exactly 10 tab-separated fields per line
 
+**Note on occ_fusions_genes.txt:** Plain-text gene list (one gene symbol per line) used for SV/fusion event filtering and SNV annotation. This file can be replaced with any custom gene list of interest — for example, a laboratory-specific panel of oncology-relevant genes. The default list contains 204 genes covering common fusion partners and oncogenes.
+
 **Manual download:** If needed, all reference files are available at [Zenodo (DOI: 10.5281/zenodo.18847372)](https://doi.org/10.5281/zenodo.18847372)
 
 ### Directory Structure Setup
@@ -382,6 +385,7 @@ data/
 │   ├── TERTp_variants.bed
 │   ├── human_GRCh38_trf.bed
 │   ├── CNV_genes_tuned.csv
+│   ├── occ_fusions_genes.txt
 │   └── etc
 │
 └── humandb/                     # Annotation databases
