@@ -1,4 +1,4 @@
-# Diana: Diagnostic Integrated Analytics for Neoplastic Alterations
+# Diana: An integrated pipeline for long-read whole-genome sequencing of tumor samples
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.10.1-23aa62.svg)](https://www.nextflow.io/)
 [![run with apptainer](https://img.shields.io/badge/run%20with-apptainer-1d355c.svg?labelColor=000000)](https://apptainer.org/)
@@ -8,11 +8,11 @@
 
 ## Overview
 
-DIANA is a comprehensive bioinformatics pipeline for analyzing Neoplastic alteration. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
+ Diagnostic Integrated Analytics for Neoplastic Alterations (DIANA) is a comprehensive bioinformatics pipeline for analyzing Neoplastic alteration. It integrates multiple analyses including CNV detection, methylation profiling, structural variant calling, and MGMT promoter status determination.
 
 ## Pipeline Schematic
 
-The Diana pipeline follows a modular architecture with four main Nextflow modules that can be run independently or sequentially:
+DIANA pipeline follows a modular architecture with four main Nextflow modules that can be run independently or sequentially:
 
 <div align="center">
 
