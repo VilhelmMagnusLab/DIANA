@@ -1,4 +1,4 @@
-# Diana: An integrated pipeline for long-read whole-genome sequencing of tumor samples
+# DIANA: An integrated pipeline for long-read whole-genome sequencing of tumor samples
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.10.1-23aa62.svg)](https://www.nextflow.io/)
 [![run with apptainer](https://img.shields.io/badge/run%20with-apptainer-1d355c.svg?labelColor=000000)](https://apptainer.org/)
