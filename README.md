@@ -26,6 +26,7 @@ DIANA pipeline follows a modular architecture with four main Nextflow modules th
 
 ### Prerequisites
 - **Docker** (Desktop/Local) or **Singularity/Apptainer** (HPC)
+- **Java 11–21** (auto-installed by setup script if missing; required by Nextflow)
 - **Nextflow** (auto-installed by setup script)
 - **Internet connection** for downloading reference files from Zenodo
 
@@ -50,10 +51,11 @@ cd Diana
 ```
 
 **What the setup script does:**
+- Checks for compatible Java (11–21) and installs it if missing
+- Installs Nextflow and adds it to PATH via `.diana_env`
 - Downloads all reference files from Zenodo (DOI: [10.5281/zenodo.18847372](https://doi.org/10.5281/zenodo.18847372))
 - Extracts and organizes files into the correct directory structure
 - Downloads and sets up Docker containers or Singularity images
-- Installs Nextflow if not already available
 
 **Note:** First-time setup downloads ~14 GB of reference data and may take 10-30 minutes depending on your internet connection.
 
@@ -493,39 +495,17 @@ snv_gq_threshold = 5
 **Note:** These thresholds only affect the variants shown in the Markdown PDF reports. The raw VCF files contain all called variants regardless of these filters.
 
 ### Container Configuration
-Choose your preferred container engine:
+Choose your preferred container engine and run the unified setup script:
 
-**For Docker:**
-- Uncomment Docker containers in configuration files
-- Comment out Singularity/Apptainer containers
-- Run: `./setup_docker.sh`
+```bash
+# For Docker
+./setup_pipeline.sh docker
 
-**For Singularity/Apptainer:**
-- Use default Singularity/Apptainer containers
-- Run: `./setup_singularity.sh`
+# For Singularity/Apptainer
+./setup_pipeline.sh singularity
+```
 
-## Quick Setup Guide
-
-1. **Download reference files** from [Zenodo](https://doi.org/10.5281/zenodo.18847372)
-2. **Place files** in appropriate directories (`data/reference/` and `data/humandb/`)
-3. **Update paths** in configuration files (`conf/*.config`)
-4. **Choose container engine** (Docker or Singularity/Apptainer)
-5. **Run setup script**:
-   ```bash
-   # For Docker
-   ./setup_docker.sh
-   
-   # For Singularity/Apptainer  
-   ./setup_singularity.sh
-   ```
-6. **Test the pipeline**:
-   ```bash
-   # For Docker
-   ./test_pipeline_docker.sh
-   
-   # For Singularity/Apptainer
-   ./test_pipeline_singularity.sh
-   ```
+The setup script handles Java, Nextflow, reference files, and container images in one step.
 
 ### Work Directory Customization
 You can specify a custom temporary work directory using the `-w` flag. This is useful for:
@@ -543,20 +523,6 @@ You can specify a custom temporary work directory using the `-w` flag. This is u
 ```
 
 **Note:** The `-w` flag sets Nextflow's work directory where temporary files and intermediate results are stored during pipeline execution. By default nextflow create a folder `work` in the working directory.
-
-### Log Output Customization
-You can specify a custom log directory using the `--log-dir` flag.
-
-**Example:**
-```bash
-# Docker
-./run_pipeline_docker.sh --run_mode_annotation mgmt --log-dir /path/to/logs 
-
-# Singularity/Apptainer
-./run_pipeline_singularity.sh  --run_mode_annotation mgmt --log-dir /path/to/logs
-```
-
-**Note:** Logs include execution reports, timelines, traces, and Nextflow logs, automatically organized by sample ID.
 
 ## Automated Sample Monitoring
 

@@ -746,18 +746,101 @@ setup_singularity_containers() {
     echo ""
 }
 
-install_nextflow() {
-    if ! check_command nextflow; then
-        print_header "Installing Nextflow"
+install_java() {
+    print_header "Checking Java"
 
-        cd "${PIPELINE_DIR}"
-        curl -s https://get.nextflow.io | bash
-        chmod +x nextflow
-
-        print_success "Nextflow installed to ${PIPELINE_DIR}/nextflow"
-        print_info "You can run it with: ./nextflow or add it to your PATH"
-        echo ""
+    # Check if java exists and extract major version
+    local java_ok=false
+    if check_command java; then
+        local java_ver
+        java_ver=$(java -version 2>&1 | head -1 | sed -E 's/.*version "([0-9]+)[._].*/\1/')
+        if [[ "$java_ver" =~ ^[0-9]+$ ]] && [ "$java_ver" -ge 11 ] && [ "$java_ver" -le 21 ]; then
+            print_success "Java ${java_ver} is compatible with Nextflow (requires 11–21)"
+            echo ""
+            return
+        elif [[ "$java_ver" =~ ^[0-9]+$ ]]; then
+            print_warning "Java ${java_ver} found but Nextflow requires Java 11–21 — installing Java 21..."
+        else
+            print_warning "Could not determine Java version — installing Java 21..."
+        fi
+    else
+        print_warning "Java not found — installing Java 21 (required by Nextflow)..."
     fi
+
+    # Try package managers in order
+    if check_command apt-get; then
+        print_info "Installing Java 21 via apt..."
+        sudo apt-get update -qq
+        sudo apt-get install -y openjdk-21-jdk 2>/dev/null || \
+        sudo apt-get install -y openjdk-17-jdk
+    elif check_command dnf; then
+        print_info "Installing Java 21 via dnf..."
+        sudo dnf install -y java-21-openjdk 2>/dev/null || \
+        sudo dnf install -y java-17-openjdk
+    elif check_command yum; then
+        print_info "Installing Java 21 via yum..."
+        sudo yum install -y java-21-openjdk 2>/dev/null || \
+        sudo yum install -y java-17-openjdk
+    else
+        # Fallback: download Temurin 21 JRE from Adoptium
+        print_info "No package manager found — downloading Temurin 21 JRE from Adoptium..."
+        local jre_url="https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jre/hotspot/normal/eclipse"
+        local jre_tar="${PIPELINE_DIR}/temurin21.tar.gz"
+        local jre_dir="${PIPELINE_DIR}/jre"
+
+        if check_command curl; then
+            curl -L "$jre_url" -o "$jre_tar" --progress-bar
+        else
+            wget -q --show-progress "$jre_url" -O "$jre_tar"
+        fi
+
+        mkdir -p "$jre_dir"
+        tar -xzf "$jre_tar" -C "$jre_dir" --strip-components=1
+        rm "$jre_tar"
+
+        export JAVA_HOME="$jre_dir"
+        export PATH="$jre_dir/bin:$PATH"
+        echo "export JAVA_HOME=${jre_dir}" >> "${PIPELINE_DIR}/.diana_env"
+        echo "export PATH=${jre_dir}/bin:\$PATH" >> "${PIPELINE_DIR}/.diana_env"
+        print_info "Temurin 21 installed to ${jre_dir} — JAVA_HOME saved to .diana_env"
+    fi
+
+    # Verify installation succeeded
+    if check_command java; then
+        local installed_ver
+        installed_ver=$(java -version 2>&1 | head -1 | sed -E 's/.*version "([0-9]+)[._].*/\1/')
+        print_success "Java ${installed_ver} installed successfully"
+    else
+        print_error "Java installation failed — please install Java 11–21 manually"
+        print_info "  Ubuntu/Debian: sudo apt-get install openjdk-21-jdk"
+        print_info "  RHEL/CentOS:   sudo dnf install java-21-openjdk"
+        print_info "  Download:      https://adoptium.net"
+        exit 1
+    fi
+    echo ""
+}
+
+install_nextflow() {
+    print_header "Installing Nextflow"
+
+    if check_command nextflow; then
+        print_success "Nextflow already installed: $(nextflow -version 2>&1 | head -1 | xargs)"
+        echo ""
+        return
+    fi
+
+    cd "${PIPELINE_DIR}"
+    curl -s https://get.nextflow.io | bash
+    chmod +x nextflow
+
+    # Add to PATH via .diana_env so pipeline runner scripts find it without re-installing
+    if ! grep -q "nextflow" "${PIPELINE_DIR}/.diana_env" 2>/dev/null; then
+        echo "export PATH=${PIPELINE_DIR}:\$PATH" >> "${PIPELINE_DIR}/.diana_env"
+    fi
+
+    print_success "Nextflow installed to ${PIPELINE_DIR}/nextflow"
+    print_info "PATH updated in .diana_env — source it or open a new shell to use 'nextflow' directly"
+    echo ""
 }
 
 validate_setup() {
@@ -949,12 +1032,6 @@ Specify a custom temporary work directory (useful for large datasets):
 ./run_pipeline_docker.sh --run_mode_order -w /path/to/work/dir
 ```
 
-### Custom Log Directory
-
-```bash
-./run_pipeline_docker.sh --run_mode_order --log-dir /path/to/logs
-```
-
 ### Resume Failed Runs
 
 Nextflow automatically caches completed processes. Resume from where it stopped:
@@ -1104,8 +1181,8 @@ main() {
     cat << "EOF"
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
-║           Diana Pipeline - Automated Setup                     ║
-║        Nanopore Whole Genome Sequencing Analysis              ║
+║                    DIANA-Automated Setup                      ║
+║    Diagnostic Integrated Analytics for Neoplastic Alterations ║
 ║                                                               ║
 ║           Zenodo: 10.5281/zenodo.15916972                     ║
 ║                                                               ║
@@ -1137,6 +1214,7 @@ EOF
     # Run setup steps
     check_prerequisites
     create_directories
+    install_java
     install_nextflow
     download_reference_files
     update_options_json

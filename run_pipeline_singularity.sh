@@ -5,9 +5,10 @@ set -e
 
 # Check if Nextflow is installed
 if ! command -v nextflow &> /dev/null; then
-    echo " Nextflow is not installed. Installing Nextflow..."
-    curl -s https://get.nextflow.io | bash
-    export PATH="$PWD:$PATH"
+    echo " Nextflow is not installed."
+    echo "   Please run setup_pipeline.sh first: ./setup_pipeline.sh singularity"
+    echo "   Or source .diana_env if setup was already done: source .diana_env"
+    exit 1
 fi
 
 # Check if Singularity/Apptainer is available
