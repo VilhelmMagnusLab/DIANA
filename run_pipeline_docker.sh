@@ -36,16 +36,16 @@ CONFIG="conf/annotation.config"  # Default config
 USE_CONFIG_FILE=false
 
 # Check if run_mode_order is specified (highest priority)
-if printf '%s\n' "${NEXTFLOW_ARGS[@]}" | grep -q "--run_mode_order"; then
+if printf '%s\n' "${NEXTFLOW_ARGS[@]}" | grep -qF -- "--run_mode_order"; then
     CONFIG=""
     USE_CONFIG_FILE=false
     echo " Using sequential order mode (configs loaded by nextflow.config)"
 # Check if epi2me mode is specified
-elif printf '%s\n' "${NEXTFLOW_ARGS[@]}" | grep -q "--run_mode_epi2me"; then
+elif printf '%s\n' "${NEXTFLOW_ARGS[@]}" | grep -qF -- "--run_mode_epi2me"; then
     CONFIG="conf/epi2me.config"
     USE_CONFIG_FILE=false
     echo " Using Epi2me configuration (via nextflow.config): $CONFIG"
-elif printf '%s\n' "${NEXTFLOW_ARGS[@]}" | grep -q "--run_mode_mergebam"; then
+elif printf '%s\n' "${NEXTFLOW_ARGS[@]}" | grep -qF -- "--run_mode_mergebam"; then
     CONFIG="conf/mergebam.config"
     USE_CONFIG_FILE=false
     echo " Using Mergebam configuration (via nextflow.config): $CONFIG"
