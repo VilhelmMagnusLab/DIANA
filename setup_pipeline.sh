@@ -324,9 +324,13 @@ create_directories() {
     mkdir -p "${ROUTINE_DIR}/routine_annotation"
     mkdir -p "${ROUTINE_DIR}/routine_results"
 
-    # Create sample ID files if they don't exist, ensure writable
-    [ -f "${ROUTINE_DIR}/sample_ids.txt" ]     || touch "${ROUTINE_DIR}/sample_ids.txt"
-    [ -f "${ROUTINE_DIR}/sample_ids_bam.txt" ] || touch "${ROUTINE_DIR}/sample_ids_bam.txt"
+    # Create sample ID files with default demo sample if they don't exist
+    if [ ! -f "${ROUTINE_DIR}/sample_ids.txt" ]; then
+        echo "diana-001" > "${ROUTINE_DIR}/sample_ids.txt"
+    fi
+    if [ ! -f "${ROUTINE_DIR}/sample_ids_bam.txt" ]; then
+        printf "diana-001\tPBE00000\n" > "${ROUTINE_DIR}/sample_ids_bam.txt"
+    fi
     chmod 664 "${ROUTINE_DIR}/sample_ids.txt" "${ROUTINE_DIR}/sample_ids_bam.txt"
 
     # Save chosen path so other scripts (smart_sample_monitor_v2.sh etc.) can find it
@@ -505,6 +509,19 @@ download_reference_files() {
     echo ""
     print_warning "Total download size: ~30-35 GB (core) + ~20 GB (optional)"
     echo ""
+
+    # Download demo/test data (diana_dummy)
+    if [ ! -d "${DATA_DIR}/diana_dummy" ]; then
+        print_info "Downloading demo test data (diana_dummy.tar.gz)..."
+        download_file "diana_dummy.tar.gz" "${PIPELINE_DIR}/diana_dummy.tar.gz"
+        extract_archive "${PIPELINE_DIR}/diana_dummy.tar.gz" "${DATA_DIR}"
+        rm "${PIPELINE_DIR}/diana_dummy.tar.gz"
+        print_success "Demo data extracted to data/diana_dummy/"
+        echo ""
+    else
+        print_success "Demo data (diana_dummy) already present"
+        echo ""
+    fi
 
     # Download core reference bundle (includes nanoDx classifier)
     if [ ! -f "${DATA_DIR}/.reference_core_downloaded" ]; then

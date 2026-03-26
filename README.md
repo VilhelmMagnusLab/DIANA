@@ -59,6 +59,24 @@ cd Diana
 
 **Note:** First-time setup downloads ~14 GB of reference data and may take 10-30 minutes depending on your internet connection.
 
+### Test with Demo Data
+
+A minimal test dataset (`diana_dummy`) is automatically downloaded and extracted into `data/diana_dummy/` by `setup_pipeline.sh`. It contains a single sample (`diana-001`) with a small BAM file and the required `final_summary` trigger file, mirroring the expected input structure.
+
+After setup completes, run the pipeline on the demo data:
+
+```bash
+# Docker
+bash smart_sample_monitor_v2.sh -d data/diana_dummy
+
+# Singularity/Apptainer
+bash smart_sample_monitor_v2.sh --singularity -d data/diana_dummy
+```
+
+The monitor will detect the `final_summary` file in `diana_dummy/diana-001/`, trigger the full pipeline, and write results to `~/routine_diana/routine_results/diana-001/`.
+
+> The sample ID files created by `setup_pipeline.sh` already contain `diana-001` / `PBE00000` — no manual configuration needed.
+
 ## Pipeline Modules
 
 The pipeline consists of three main modules that can be run independently or sequentially:

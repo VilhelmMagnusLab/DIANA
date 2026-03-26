@@ -473,6 +473,7 @@ upload_files() {
 
     # Define files to upload (in order of size - smallest first for faster initial upload)
     local files_to_upload=(
+        "diana_dummy.tar.gz"
         "Assembly.zip"
         "general.zip"
         "r1041_e82_400bps_sup_v420.zip"
