@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### `Added`
+- Added automatic PacBio/ONT platform detection to `run_clair3` and `run_clairs_to` in `modules/epi2me.nf`, so a mix of ONT and PacBio samples can be processed by the same pipeline run without a manual flag
+  - Both processes read the input BAM's `@RG PL:` tag via `samtools view -H | grep -oP 'PL:\K[A-Za-z0-9_]+'`
+  - `run_clair3`: `PL:PACBIO` switches to `--platform="hifi"` with `--model_path="/opt/models/hifi_revio"`; otherwise unchanged (`--platform="ont"` with the existing `clair3_model_path`/`clair3_model_path_hac` params)
+  - `run_clairs_to`: `PL:PACBIO` switches to `--platform="hifi_revio"`; otherwise unchanged (`--platform="ont_r10_dorado_4khz"`)
+  - A BAM with no `@RG PL` tag falls back to the ONT path, matching prior behavior
 - Added `bin/classify_sv_v5.py`, replacing the multi-script Perl/Python fusion pipeline previously used by `svannasv_fusion_events`
   - Single BEDTools/bcftools-based script: classifies SVs, detects gene fusions, and filters by ROI gene list in one pass
   - New SV-level outputs: `sv_classified.tsv`, `sv_bnd.tsv`, `sv_breakpoints.tsv`, `sv_fusions.tsv`, `sv_fusions_any_any.tsv`, `sv_fusions_any_gbm.tsv`, `sv_fusions_both_gbm.tsv`, `sv_fusions_gbm_protein.tsv`, `sv_gbm_genes.tsv`, `sv_breakpoints_gbm.tsv`

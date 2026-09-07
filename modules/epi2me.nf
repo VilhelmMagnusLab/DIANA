@@ -163,6 +163,19 @@ process run_clair3 {
     source /opt/conda/etc/profile.d/conda.sh
     conda activate clair3_v2 2>/dev/null || conda activate clair3 2>/dev/null || true
 
+    # Auto-detect platform from the BAM's @RG PL: tag -- PacBio and ONT reads
+    # have very different error profiles, and Clair3's model is platform-
+    # specific, so PacBio data must not be run through the ONT model.
+    PLATFORM_TAG=\$(samtools view -H $roi_bam | grep -m1 -oP 'PL:\\K[A-Za-z0-9_]+' || true)
+    if [ "\$PLATFORM_TAG" = "PACBIO" ]; then
+        CLAIR3_PLATFORM="hifi"
+        CLAIR3_MODEL_PATH="/opt/models/hifi_revio"
+        echo "Detected PacBio data (PL:PACBIO) -- using Clair3 hifi_revio model"
+    else
+        CLAIR3_PLATFORM="ont"
+        CLAIR3_MODEL_PATH="${params.clair3_model == "hac" ? params.clair3_model_path_hac : params.clair3_model_path}"
+    fi
+
     /opt/bin/run_clair3.sh \
         --bam_fn=$roi_bam \
         --ref_fn=$reference_genome  \
@@ -170,9 +183,9 @@ process run_clair3 {
         --var_pct_full=1 \
         --ref_pct_full=1 \
         --var_pct_phasing=1 \
-        --platform="ont" \
+        --platform="\$CLAIR3_PLATFORM" \
         --no_phasing_for_fa \
-        --model_path=${params.clair3_model == "hac" ? params.clair3_model_path_hac : params.clair3_model_path} \
+        --model_path="\$CLAIR3_MODEL_PATH" \
         --output=output_clair3
 
     # remove tmp folder
@@ -207,12 +220,22 @@ process run_clairs_to {
     source /opt/micromamba/etc/profile.d/micromamba.sh
     micromamba activate clairs-to
 
+    # Auto-detect platform from the BAM's @RG PL: tag -- see run_clair3 for
+    # why this matters. hifi_revio is ClairS-TO's supported PacBio platform.
+    PLATFORM_TAG=\$(samtools view -H ${roi_bam} | grep -m1 -oP 'PL:\\K[A-Za-z0-9_]+' || true)
+    if [ "\$PLATFORM_TAG" = "PACBIO" ]; then
+        CLAIRSTO_PLATFORM="hifi_revio"
+        echo "Detected PacBio data (PL:PACBIO) -- using ClairS-TO hifi_revio platform"
+    else
+        CLAIRSTO_PLATFORM="ont_r10_dorado_4khz"
+    fi
+
     # Run ClairS-TO (may produce empty VCFs if no variants found - this is normal)
     /opt/bin/run_clairs_to \
         --tumor_bam_fn=${roi_bam} \
         --ref_fn=${reference_genome} \
         --threads=${task.cpus} \
-        --platform="ont_r10_dorado_4khz" \
+        --platform="\$CLAIRSTO_PLATFORM" \
         --output_dir=clairsto_output \
         --bed_fn=${roi_protein_coding_bed} \
         --conda_prefix /opt/micromamba/envs/clairs-to || echo "ClairS-TO completed with warnings (possibly no variants found)"
