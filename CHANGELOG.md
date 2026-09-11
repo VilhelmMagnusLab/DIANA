@@ -5,6 +5,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.19] - 2026-09-11
+
 **Main changes since v1.0.18:**
 1. Added a user-configurable output directory: `-o`/`--output-dir` on `smart_sample_monitor_v2.sh` and `--output_path` (alias `--path_output`) on `--run_mode_order`, so different sample runs can target different project directories without editing config.
 2. Added a BAF plot to `routine_results/{sample_id}/{sample_id}_baf.pdf`, used to help evaluate sample contamination.
@@ -398,6 +400,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release Links
 
-[Unreleased]: https://github.com/VilhelmMagnusLab/nWGS_pipeline/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/VilhelmMagnusLab/DIANA/compare/v1.0.19...HEAD
+[1.0.19]: https://github.com/VilhelmMagnusLab/DIANA/compare/v1.0.18...v1.0.19
 [1.0.1]: https://github.com/VilhelmMagnusLab/nWGS_pipeline/compare/v1.0dev...v1.0.1
 [1.0dev]: https://github.com/VilhelmMagnusLab/nWGS_pipeline/releases/tag/v1.0dev 
