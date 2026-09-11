@@ -3,10 +3,15 @@
 # Diana Pipeline Runner Script for Docker
 set -e
 
-# Parse command line arguments
+# Parse command line arguments, translating the short -o/--output-dir flag into
+# Nextflow's --output_path param; everything else is passed through unchanged.
 NEXTFLOW_ARGS=()
 while [[ $# -gt 0 ]]; do
     case $1 in
+        -o|--output-dir)
+            NEXTFLOW_ARGS+=("--output_path" "$2")
+            shift 2
+            ;;
         *)
             NEXTFLOW_ARGS+=("$1")
             shift

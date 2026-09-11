@@ -114,6 +114,8 @@ Four independent analysis types:
 | **Copy Number Variation** | QDNAseq | CNV detection | `*_segs.bed`, `*_bins.bed`, `*_segs.vcf` |
 | **SNV Calling** | Clair3 (germline) + ClairS-TO (somatic) | Small variant calling on protein-coding ROI | `*.clair3.vcf.gz`, `*.clairsto.vcf.gz` |
 
+SNV calling also produces a **BAF/VAF plot**, used to help evaluate sample contamination. It's built from ClairS-TO's `snv.vcf.gz`. B-allele frequency for assumed germline variants and variant allele fraction for assumed somatic variants, both restricted to the ROI genes. Published to `routine_results/[sample_id]/[sample_id]_baf.pdf`.
+
 #### PacBio HiFi Data: BAM Alignment Pre-processing
 
 PacBio HiFi BAM files from the sequencer need to be **unaligned**. Before running the pipeline (specifically before modkit modified base calling), the BAM must be aligned to the reference genome. Use the following command:
@@ -186,6 +188,10 @@ All containers are automatically downloaded from [vilhelmmagnuslab Docker Hub](h
 
 # Singularity/Apptainer - Full pipeline starting from raw BAM files
 ./run_pipeline_singularity.sh --run_mode_order --sample_id T001
+
+# Send this run's output to a different project directory (accepts -o/--output-dir
+# or the long-form --output_path; --path_output also still works as an alias)
+./run_pipeline_singularity.sh --run_mode_order --sample_id T001 -o /data/routine_diana_projectA
 ```
 
 ### Epi2me + Annotation (When BAM files are already merged)
@@ -294,7 +300,7 @@ Input data directory (configured via params.input_dir in mergebam.config):
 │       └── final_summary_*_*_*.txt
 └── ...
 
-Output directory (configured via params.path_output):
+Output directory (configured via params.output_path, override per project with --output_path; params.path_output remains a working alias):
 routine_diana/
 ├── sample_ids_bam.txt           # Sample IDs for BAM merging
 │
@@ -341,6 +347,7 @@ routine_diana/
 │
 └── routine_results/             # Final published reports (per sample)
     └── [sample_id]/
+        ├── [sample_id]_baf.pdf                         # BAF/VAF plot — sample contamination check (ClairS-TO SNVs, ROI genes)
         ├── [sample_id]_bedmethyl_sturgeon_general.pdf  # Sturgeon classification
         ├── [sample_id]_markdown_pipeline_report.pdf    # Main comprehensive report
         ├── [sample_id]_mnpflex_input.bed               # MNP-Flex input format
@@ -629,9 +636,9 @@ The `generate_report.sh` script is provided for **additional report generation**
 
 The pipeline uses three main path parameters that must be configured:
 
-**1. Pipeline Data Path (`params.path`)** - Reference files and databases
+**1. Pipeline Data Path (`params.path`)** - Reference files and databases (annotation stage's input root)
 ```groovy
-// conf/annotation.config, conf/epi2me.config, conf/mergebam.config
+// conf/annotation.config
 params {
     path = "/data/routine_diana/Diana/data"
     // Contains: reference/, humandb/ directories
@@ -648,19 +655,27 @@ params {
 }
 ```
 
-**3. Output Path (`params.path_output`)** - Pipeline results
+**3. Output Path (`params.output_path`)** - Pipeline results
 ```groovy
-// conf/mergebam.config, conf/epi2me.config, conf/annotation.config
+// nextflow.config — single canonical default, shared by conf/mergebam.config,
+// conf/epi2me.config and conf/annotation.config
 params {
-    path_output = "/data/routine_diana"
-    // Contains: sample_ids_bam.txt, routine_bams/, routine_epi2me/, routine_results/
+    output_path = "/data/routine_diana"
+    // Contains: sample_ids_bam.txt, routine_bams/, routine_epi2me/, routine_annotation/, routine_results/
 }
 ```
+Override per project on the command line — no config edit needed:
+```bash
+nextflow run main.nf --run_mode_order --output_path /data/projectA/routine_diana ...
+# or, via the monitoring wrapper:
+./smart_sample_monitor_v2.sh -o /data/projectA/routine_diana
+```
+`--path_output` is still accepted as a back-compat alias for `--output_path`.
 
 **Key Points:**
 - `params.path`: Reference data (rarely changes)
 - `params.input_dir`: ONT sequencing input (changes per run)
-- `params.path_output`: Where all results are stored (consistent location)
+- `params.output_path`: Where all results are stored — set once in `nextflow.config`, override per project with `--output_path` (alias: `--path_output`)
 - The `input_dir` can be overridden using `--input_dir` flag or `smart_sample_monitor_v2.sh -d`
 
 ### SNV Filtering Configuration
@@ -737,6 +752,7 @@ The pipeline includes `smart_sample_monitor_v2.sh` for **automated monitoring an
 
 **Version 2 Enhancements:**
 - **CLI Data Directory Override**: `--data-dir` takes precedence over `mergebam.config`
+- **CLI Output Directory Override**: `-o`/`--output-dir` sets where *this run's* pipeline output is written (forwarded to Nextflow as `--output_path`) — lets different sample runs target different project directories without editing config or `.diana_env`. Does not relocate `sample_ids_bam.txt`, which stays at the fixed registry location either way
 - **Resume Control**: Disabled by default for fresh runs; use `-r` to enable caching
 - **Symlink Resolution**: Works correctly when installed as global command
 - **Portable Execution**: Automatically finds pipeline directory from any location
@@ -750,6 +766,9 @@ The pipeline includes `smart_sample_monitor_v2.sh` for **automated monitoring an
 
 # Monitor specific data directory (overrides config)
 ./smart_sample_monitor_v2.sh -d /data/WGS_27102025
+
+# Send this run's output to a different project directory
+./smart_sample_monitor_v2.sh -d /data/WGS_27102025 -o /data/routine_diana_projectA
 
 # Enable resume for cached results
 ./smart_sample_monitor_v2.sh -d /data/WGS_27102025 -r
@@ -820,6 +839,7 @@ smart_sample_monitor --docker -d /data/WGS_27102025 -v
 | Option | Long Form | Description | Default |
 |--------|-----------|-------------|---------|
 | `-d` | `--data-dir` | Base data directory (overrides config) | Auto-detect from config |
+| `-o` | `--output-dir` | Output directory for this run (forwarded to Nextflow as `--output_path`) | `.diana_env` or `$HOME/routine_diana` |
 | `-p` | `--pipeline` | Pipeline base directory | Auto-detected |
 | `-w` | `--workdir` | Nextflow work directory | `/data/trash` |
 | `-c` | `--config` | Config file to parse | `conf/mergebam.config` |
@@ -851,10 +871,10 @@ This script is essential for **routine ONT sequencing workflows** where:
 
 Instead of manually checking and starting the pipeline for each sample, the monitor **automatically detects completion** and starts processing immediately, **maximizing throughput** and **reducing manual intervention**.
 
-**Important:** Ensure all paths are correctly configured in `conf/mergebam.config`:
-- `params.path`: Reference data directory
-- `params.input_dir`: Default input directory (can be overridden with `-d`)
-- `params.path_output`: Output results directory
+**Important:** Ensure all paths are correctly configured:
+- `params.path` (`conf/mergebam.config`): Reference data directory
+- `params.input_dir` (`conf/mergebam.config`): Default input directory (can be overridden with `-d`)
+- `params.output_path` (`nextflow.config`): Output results directory (can be overridden with `-o`/`--output-dir`; `params.path_output` remains a working alias)
 
 **See [docs/GLOBAL_COMMAND_SETUP.md](docs/GLOBAL_COMMAND_SETUP.md) for detailed installation, troubleshooting, and advanced usage.** 
 

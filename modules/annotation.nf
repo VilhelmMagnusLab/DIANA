@@ -50,7 +50,7 @@ process extract_epic {
     label 'epic'
     tag "${sample_id}"
     publishDir "${params.output_path}/routine_annotation/${sample_id}/methylation/", mode: "copy", overwrite: true
-    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_mnpflex_input.bed"
+    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "*_mnpflex_input.bed"
 
     input:
     tuple val(sample_id), file(bedmethyl), file(epicsites), file(mgmt_cpg_island_hg38)
@@ -115,7 +115,7 @@ process nanodx {
 process sturgeon {
     label 'epic'
     publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/sturgeon", mode: "copy", overwrite: true
-    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_bedmethyl_sturgeon_general.pdf"
+    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "*_bedmethyl_sturgeon_general.pdf"
 
     input:
     tuple val(sample_id), path(sturgeon_bed), path(sturgeon_model)
@@ -207,7 +207,7 @@ process tsne_plot {
     label 'tsne'
     stageInMode 'copy'
     publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
-    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_tsne_plot.html"
+    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "*_tsne_plot.html"
 
     input:
     tuple val(sample_id), path(epic_bed)
@@ -312,7 +312,7 @@ process tsne_plot_pancan {
     label 'tsne'
     stageInMode 'copy'
     publishDir "${params.output_path}/routine_annotation/${sample_id}/classifier/nanodx", mode: "copy", overwrite: true
-    publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_tsne_plot_pancan.html"
+    publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "*_tsne_plot_pancan.html"
 
     input:
     tuple val(sample_id), path(epic_bed)
@@ -393,7 +393,7 @@ process svannasv {
 
   label 'svannasv'
    publishDir "${params.output_path}/routine_annotation/${sample_id}/structure_variant/svannasv/", mode: "copy", overwrite: true
-   publishDir "${params.path}/routine_results/${sample_id}", mode: "copy", overwrite: true, pattern: "*_roi_svanna_annotation.html"
+   publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "*_roi_svanna_annotation.html"
 
    input:
    tuple val(sample_id), path(wf_sv), path(wf_sv_tbi),path(roi_protein_coding_bed)

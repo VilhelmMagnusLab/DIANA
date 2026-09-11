@@ -58,6 +58,7 @@ The current release is tested exclusively on x86_64 Linux systems. ARM64 platfor
 | run_clair3 | clair3_amd64 |
 | run_clairs_to | clairsto_amd64 |
 | cramino_report | mgmt_nanopipe_cramino |
+| baf_extract | annotcnv_images_27feb1025 |
 
 ### Annotation Workflow (modules/annotation.nf)
 

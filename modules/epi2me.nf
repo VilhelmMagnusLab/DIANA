@@ -286,6 +286,36 @@ process cramino_report {
     """
 }
 
+// BAF/VAF plot from ClairS-TO's somatic SNV calls (germline BAF + somatic VAF, ROI genes)
+process baf_extract {
+    label 'baf_extract'
+    publishDir "${params.output_path}/routine_results/${sample_id}", mode: "copy", overwrite: true
+
+    input:
+    tuple val(sample_id), path(snv_vcf)
+
+    output:
+    tuple val(sample_id), path("${sample_id}_baf.pdf"), emit: bafplotout
+
+    script:
+    """
+    #!/bin/bash
+    set -e
+
+    # Check if we're in a container and use appropriate conda setup
+    if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
+        # Container environment
+        source /opt/conda/etc/profile.d/conda.sh
+        conda activate annotatecnv_env
+    else
+        # Local environment
+        source activate annotatecnv_env
+    fi
+
+    baf_extract.sh ${snv_vcf} . ${sample_id}
+    """
+}
+
 //---------------------------------------------------------------------
 // Workflow Definition
 //---------------------------------------------------------------------
@@ -357,7 +387,18 @@ workflow epi2me {
                 }
 
                 if (!bam || !bai || !bam.exists() || !bai.exists()) {
-                    error "BAM file or index file not found for sample ID: ${sample_id}. Tried both exact match (${sample_id}.merged.bam) and wildcard pattern (${sample_id}.*.bam)"
+                    // For standalone snv-only runs, a pre-existing roi.bam means the merged
+                    // BAM (and extract_roi) aren't needed at all for this sample — the roi_bam_ch
+                    // construction below reuses it directly. Only error out otherwise, since
+                    // every other run mode (modkit/cnv/sv/stat/all) needs the real merged BAM.
+                    def existingRoiBam = file("${params.roi_bam_folder}/${sample_id}.roi.bam")
+                    def existingRoiBai = file("${params.roi_bam_folder}/${sample_id}.roi.bam.bai")
+                    def roiBamAlreadyExists = existingRoiBam.exists() && existingRoiBai.exists()
+                    if (!(params.run_mode == 'snv' && roiBamAlreadyExists)) {
+                        error "BAM file or index file not found for sample ID: ${sample_id}. Tried both exact match (${sample_id}.merged.bam) and wildcard pattern (${sample_id}.*.bam)"
+                    }
+                    bam = null
+                    bai = null
                 }
 
                 return tuple(
@@ -377,9 +418,27 @@ workflow epi2me {
         clairsto_ch = Channel.empty()
         cramino_ch = Channel.empty()
         roi_bam_ch = Channel.empty()
+        baf_ch = Channel.empty()
+        clairsto_snv_vcf_ch = Channel.empty()
 
-        // extract_roi runs only for snv and all modes — output feeds into run_clair3 and run_clairs_to
-        if (params.run_mode in ['snv', 'all']) {
+        // extract_roi runs only for snv and all modes — output feeds into run_clair3 and run_clairs_to.
+        // For standalone snv mode only, a sample whose roi.bam already exists on disk skips
+        // extract_roi (and the merged-BAM requirement) entirely and reuses it directly — see
+        // the roiBamAlreadyExists check in input_channel above. 'all' mode always re-extracts,
+        // since it also needs the real merged BAM directly for modkit/cnv/sv/stat regardless.
+        if (params.run_mode == 'snv') {
+            def roi_branch = input_channel.branch { sid, bam, bai, ref, ref_bai ->
+                def existingRoiBam = file("${params.roi_bam_folder}/${sid}.roi.bam")
+                def existingRoiBai = file("${params.roi_bam_folder}/${sid}.roi.bam.bai")
+                reuse: existingRoiBam.exists() && existingRoiBai.exists()
+                    return tuple(sid, existingRoiBam, existingRoiBai)
+                extract: true
+                    return tuple(sid, bam, bai, file(params.roi_bed))
+            }
+
+            def extracted_roi_bam = extract_roi(roi_branch.extract).roi_bam
+            roi_bam_ch = roi_branch.reuse.mix(extracted_roi_bam)
+        } else if (params.run_mode == 'all') {
             roi_bam_ch = extract_roi(
                 input_channel.map { sid, bam, bai, ref, ref_bai ->
                     tuple(sid, bam, bai, file(params.roi_bed))
@@ -452,6 +511,14 @@ workflow epi2me {
 
             def clairsto_result = run_clairs_to(clairsto_input)
             clairsto_ch = clairsto_result.clairsto_output_dir  // Use one of the outputs for dependency tracking
+            clairsto_snv_vcf_ch = clairsto_result.snv_vcf
+        }
+
+        // BAF/VAF plot from ClairS-TO's somatic SNV calls — runs only for snv and all
+        // modes, same as run_clair3/run_clairs_to above (needs clairsto's snv_vcf output)
+        if (params.run_mode in ['snv', 'all']) {
+            def baf_result = baf_extract(clairsto_snv_vcf_ch)
+            baf_ch = baf_result.bafplotout
         }
 
         // Cramino statistics (runs for 'stat' mode or 'all' mode)
@@ -526,6 +593,7 @@ workflow epi2me {
             def snv_cramino_barrier = clair3_ch
                 .mix(clairsto_ch)
                 .mix(cramino_ch)
+                .mix(baf_ch)
                 .collect()
                 .map { true }  // single "all done" signal
 

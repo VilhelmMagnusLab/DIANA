@@ -5,7 +5,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**Main changes since v1.0.18:**
+1. Added a user-configurable output directory: `-o`/`--output-dir` on `smart_sample_monitor_v2.sh` and `--output_path` (alias `--path_output`) on `--run_mode_order`, so different sample runs can target different project directories without editing config.
+2. Added a BAF plot to `routine_results/{sample_id}/{sample_id}_baf.pdf`, used to help evaluate sample contamination.
+
 ### `Added`
+- Added roi.bam reuse to standalone `--run_mode_epi2me snv` in `modules/epi2me.nf`: a sample whose `{sample_id}.roi.bam`/`.bai` already exists in `params.roi_bam_folder` now skips `extract_roi` (and the merged-BAM existence requirement) entirely and reuses it directly, instead of unconditionally erroring with `"BAM file or index file not found"` when only the merged BAM is missing
+  - Scoped to standalone `snv` mode only — `all` mode still always re-extracts, since it also needs the real merged BAM directly for `modkit`/`cnv`/`sv`/`stat` regardless
+  - Implemented via a `.branch{}` split of `input_channel` into `reuse` (existing roi.bam) and `extract` (needs `extract_roi`) subsets, mixed back into `roi_bam_ch`
+- Added a `baf_extract` process to `modules/epi2me.nf`, generating a BAF/VAF plot (germline B-allele frequency + somatic variant allele fraction, ROI genes) from ClairS-TO's `snv.vcf.gz`, used to help evaluate sample contamination, published to `routine_results/{sample_id}/{sample_id}_baf.pdf`
+  - Added `bin/baf_extract.sh` (`<snv_vcf.gz> <output_dir> <sample_id>`) and `bin/BAF_plot.r` (`<germline_txt> <somatic_txt> <output_pdf> <sample_id>`) — both take explicit file paths rather than assuming a fixed `routine_epi2me/{id}/clairsto_output/`+`routine_results/{id}/` directory layout, so the Nextflow process can pass its staged input directly with no path-reshaping step, and the scripts are reusable standalone against any ClairS-TO VCF
+  - Plot titles include the sample ID (e.g. "BAF plot of {sample_id} assumed germline variants in the ROI genes")
+  - `BAF_plot.r` handles a sample with zero qualifying germline or somatic SNVs (e.g. an empty `snv.vcf.gz`) without crashing: `1:length(x)` on a 0-row table produces `c(1, 0)` in R rather than an empty sequence, causing a `data.frame` row-count-mismatch error — fixed with `seq_along()`; `plot()`'s auto-computed `xlim` also returns non-finite `Inf`/`-Inf` on 0-row input and crashes `plot.window()` — fixed with an explicit `xlim` fallback. Produces a clean empty plot instead of failing the process
+  - Runs right after `run_clairs_to` in its own `snv`-mode block (mirroring `extract_roi`'s style), chained off `run_clairs_to`'s `snv_vcf` emit via a workflow-level `clairsto_snv_vcf_ch`; added to the existing SNV/cramino completion barrier so `run_mode_order`/`run_mode_epiannotation` correctly wait for it before the annotation stage starts
+  - Reuses the `annotcnv_images_27feb1025` container (same one `annotatecnv` uses) with its `annotatecnv_env` conda environment activated, for R + standard shell tools
 - Added automatic PacBio/ONT platform detection to `run_clair3` and `run_clairs_to` in `modules/epi2me.nf`, so a mix of ONT and PacBio samples can be processed by the same pipeline run without a manual flag
   - Both processes read the input BAM's `@RG PL:` tag via `samtools view -H | grep -oP 'PL:\K[A-Za-z0-9_]+'`
   - `run_clair3`: `PL:PACBIO` switches to `--platform="hifi"` with `--model_path="/opt/models/hifi_revio"`; otherwise unchanged (`--platform="ont"` with the existing `clair3_model_path`/`clair3_model_path_hac` params)
@@ -132,6 +145,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `"conflicting: Conflicting classifications of pathogenicity (ClinVar)"` to the SNV table legend so users understand the abbreviation
 
 ### `Fixed`
+- Fixed `nextflow run main.nf -c conf/<annotation|epi2me|mergebam>.config` (the pattern `run_pipeline_singularity.sh`/`run_pipeline_docker.sh` use for every standalone run mode) failing immediately with `Unknown config attribute 'params.output_path'`
+  - Root cause: the `--output_path` consolidation removed each config file's own local `output_path` default in favor of the single one declared in `nextflow.config`, but Nextflow's strict config validator doesn't reliably see a value set only in `nextflow.config`'s top-level `params {}` block when a *different* file is loaded via an explicit `-c` flag — only `includeConfig`-loaded files (the `run_mode_order`/`run_mode_epiannotation` path) saw it correctly, which is why this wasn't caught earlier
+  - Fix: restored a local `output_path` default (same literal value as `nextflow.config`'s) in all three of `conf/annotation.config`, `conf/epi2me.config`, `conf/mergebam.config`, so each file parses correctly on its own via `-c`. `--output_path` (and the `--path_output` alias) still correctly override every derived path in every file either way, since CLI params take precedence over config-file defaults regardless of which file declares the fallback or how many do
 - Fixed the "High-Confidence Copy Number Variation in Cancer Genes" table in the markdown PDF report only excluding chromosome **X**, not **Y**, despite its caption stating "no sex chromosomes"
   - `nextflow_markdown_pipeline_update_final.Rmd`: changed the filter from `!grepl("X", get(chrom_col))` to `!grepl("[XY]$", get(chrom_col))` so a chrY amplification/homozygous deletion is no longer shown alongside the autosomal-only table
 - Fixed `bin/generate_report_singularity.sh` (standalone manual report re-run script) being out of sync with `nextflow_markdown_pipeline_update_final.Rmd`, which now requires at least 24 positional args (up to 32) — the script only passed 23, so any run would immediately fail with the Rmd's own `"Usage: Rscript report.R ..."` stop

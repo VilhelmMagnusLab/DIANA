@@ -387,18 +387,29 @@ create_directories() {
 
     print_success "Created routine_diana/ structure at: ${ROUTINE_DIR}"
 
-    # Update config files if the user chose a non-default path
+    # Update config files if the user chose a non-default path.
+    # nextflow.config (canonical output_path default) and conf/annotation.config
+    # (input path default) declare a user.home-based default that needs patching.
+    # conf/mergebam.config's bam_sample_id_file is intentionally decoupled from
+    # output_path (it's a stable registry, not per-run output — see that file), so
+    # it carries its own user.home-based default that also needs patching here.
+    # Patches are line-anchored to the specific param= line so they can't touch
+    # unrelated containerOptions bind-mount lines that also reference user.home.
     if [ "${WORK_DIR_PARENT}" != "${HOME}" ]; then
         print_info "Custom path detected — updating config files to use: ${ROUTINE_DIR}"
-        local configs=("${PIPELINE_DIR}/conf/annotation.config" \
-                       "${PIPELINE_DIR}/conf/epi2me.config" \
-                       "${PIPELINE_DIR}/conf/mergebam.config")
-        for cfg in "${configs[@]}"; do
-            if [ -f "$cfg" ]; then
-                sed -i "s|System.getProperty('user.home')|'${WORK_DIR_PARENT}'|g" "$cfg"
-                print_success "Updated: $(basename $cfg)"
-            fi
-        done
+        if [ -f "${PIPELINE_DIR}/nextflow.config" ]; then
+            sed -i "s|^\(\s*output_path\s*=\s*\)\"\${System.getProperty('user.home')}|\1\"${WORK_DIR_PARENT}|" "${PIPELINE_DIR}/nextflow.config"
+            sed -i "s|^\(\s*sampleFile\s*=\s*params\.bam_sample_id_file\s*?:\s*\)\"\${System.getProperty('user.home')}|\1\"${WORK_DIR_PARENT}|" "${PIPELINE_DIR}/nextflow.config"
+            print_success "Updated: nextflow.config"
+        fi
+        if [ -f "${PIPELINE_DIR}/conf/annotation.config" ]; then
+            sed -i "s|^\(\s*path\s*=\s*\)\"\${System.getProperty('user.home')}|\1\"${WORK_DIR_PARENT}|" "${PIPELINE_DIR}/conf/annotation.config"
+            print_success "Updated: annotation.config"
+        fi
+        if [ -f "${PIPELINE_DIR}/conf/mergebam.config" ]; then
+            sed -i "s|^\(\s*bam_sample_id_file\s*=\s*\)\"\${System.getProperty('user.home')}|\1\"${WORK_DIR_PARENT}|" "${PIPELINE_DIR}/conf/mergebam.config"
+            print_success "Updated: mergebam.config"
+        fi
     fi
     echo ""
 }

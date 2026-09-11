@@ -26,6 +26,11 @@ while [[ $# -gt 0 ]]; do
             CUSTOM_RUN_NAME="$2"
             shift 2
             ;;
+        -o|--output-dir)
+            # Translate to Nextflow's --output_path param
+            NEXTFLOW_ARGS+=("--output_path" "$2")
+            shift 2
+            ;;
         *)
             # Pass other arguments to Nextflow
             NEXTFLOW_ARGS+=("$1")

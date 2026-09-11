@@ -135,6 +135,7 @@ smart_sample_monitor -d /data/WGS_Dummy -i 600  # Check every 10 minutes
 | Option | Long Form | Description | Default |
 |--------|-----------|-------------|---------|
 | `-d` | `--data-dir` | Base data directory (overrides config) | Auto-detect from config |
+| `-o` | `--output-dir` | Output/routine_diana directory for this run (overrides `.diana_env`) | `.diana_env` or `$HOME/routine_diana` |
 | `-p` | `--pipeline` | Pipeline base directory | Current directory |
 | `-w` | `--workdir` | Nextflow work directory | `/data/trash` |
 | `-c` | `--config` | Config file to parse | `conf/mergebam.config` |
@@ -150,12 +151,13 @@ smart_sample_monitor -d /data/WGS_Dummy -i 600  # Check every 10 minutes
 
 ### 1. Hardcoded Sample IDs File
 
-The sample IDs file is hardcoded to:
+The sample IDs file is a fixed, externally-maintained registry at:
 ```
-/data/routine_nWGS/sample_ids_bam.txt
+<DIANA_ROUTINE_DIR>/sample_ids_bam.txt
 ```
+where `DIANA_ROUTINE_DIR` comes from `.diana_env` (written during install) or defaults to `$HOME/routine_diana`.
 
-This cannot be changed via command-line options (version 2 feature).
+It is **not** settable as its own independent option, and it does **not** move with `-o`/`--output-dir` — that flag only relocates where *this run's pipeline output* is written, not where the sample-ID registry lives. The script forwards the resolved registry path to Nextflow explicitly as `--bam_sample_id_file`, so it stays consistent regardless of `-o`.
 
 ### 2. Data Directory Override
 
@@ -164,7 +166,17 @@ When you specify `-d` option, it:
 - Is passed to the pipeline as `--input_dir` parameter
 - Overrides the config value for that run only
 
-### 3. Resume Mode
+### 3. Output Directory Override
+
+When you specify `-o` option, it:
+- Takes precedence over the `DIANA_ROUTINE_DIR` set in `.diana_env` (written during install) for *this run's output only* — it does not change where `sample_ids_bam.txt` is read from (see item 1 above)
+- Is passed to the pipeline as `--output_path` (the canonical param name; `--path_output` also works as an alias)
+- Overrides the output location for that run only — use it to point different sample runs at different project output directories, e.g.:
+  ```bash
+  smart_sample_monitor -d /data/WGS_projectA -o /data/routine_diana_projectA
+  ```
+
+### 4. Resume Mode
 
 By default, resume is **disabled** to ensure fresh runs. Use `-r` flag to enable caching:
 

@@ -196,6 +196,7 @@ nWGS_pipeline/
 5. **Path configuration issues**
    - Ensure all paths in config files point to correct locations
    - Update `params.path` in configuration files to match your data directory
+   - Update `params.output_path` (in `nextflow.config`, or per run via `--output_path`; `--path_output` also works as an alias) to change where results are written
 
 ### Getting Help
 

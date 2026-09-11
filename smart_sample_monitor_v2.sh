@@ -38,6 +38,9 @@
 #
 # Options:
 #   -d, --data-dir DIR      Base data directory (TAKES PRECEDENCE over config)
+#   -o, --output-dir DIR    Where THIS run's pipeline output is written (default: same as
+#                           .diana_env/$HOME/routine_diana). Does NOT relocate sample_ids_bam.txt,
+#                           which stays at the fixed routine_diana location either way.
 #   -p, --pipeline DIR      Pipeline base directory (default: current)
 #   -w, --workdir DIR       Nextflow work directory base (default: /tmp/nextflow_work)
 #   -c, --config FILE       Config file to parse (default: conf/mergebam.config)
@@ -51,6 +54,7 @@
 #   ./smart_sample_monitor_v2.sh
 #   ./smart_sample_monitor_v2.sh -v
 #   ./smart_sample_monitor_v2.sh -d /custom/data
+#   ./smart_sample_monitor_v2.sh -o /data/projectA/routine_diana  # Per-project output dir
 #   ./smart_sample_monitor_v2.sh -r  # Enable resume
 #==============================================================================
 
@@ -71,12 +75,21 @@ while [ -h "$SOURCE" ]; do
 done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
-# Load routine_diana path from setup if available, otherwise fall back to $HOME/routine_diana
+# Load routine_diana path from setup if available, otherwise fall back to $HOME/routine_diana.
+# DIANA_ROUTINE_DIR is the stable install-level registry location — it's where
+# sample_ids_bam.txt (an externally-maintained input, never written by this script)
+# is looked up, and it is NOT affected by -o/--output-dir.
 DIANA_ROUTINE_DIR="${HOME}/routine_diana"
 if [ -f "${SCRIPT_DIR}/.diana_env" ]; then
     source "${SCRIPT_DIR}/.diana_env"
 fi
 readonly HARDCODED_SAMPLE_IDS_FILE="${DIANA_ROUTINE_DIR}/sample_ids_bam.txt"
+
+# PIPELINE_OUTPUT_DIR is where THIS run's pipeline output is written (routine_bams/,
+# routine_epi2me/, routine_annotation/, routine_results/). Defaults to DIANA_ROUTINE_DIR
+# but -o/--output-dir overrides only this, letting different runs target different
+# project output directories without relocating the shared sample_ids_bam.txt registry.
+PIPELINE_OUTPUT_DIR="$DIANA_ROUTINE_DIR"
 
 # Default configuration
 readonly DEFAULT_CONFIG_FILE="conf/mergebam.config"
@@ -95,6 +108,7 @@ VERBOSE=false
 BASE_DATA_DIR=""
 SAMPLE_IDS_FILE="$HARDCODED_SAMPLE_IDS_FILE"
 USER_SPECIFIED_DATA_DIR=false
+USER_SPECIFIED_OUTPUT_DIR=false
 RESUME_ENABLED=false
 CONTAINER_ENGINE=""   # "singularity", "docker", or "apptainer" — auto-detected if unset
 
@@ -145,6 +159,10 @@ ${YELLOW}USAGE:${NC}
 
 ${YELLOW}OPTIONS:${NC}
     -d, --data-dir DIR      Base data directory (TAKES PRECEDENCE over config)
+    -o, --output-dir DIR    Where THIS run's pipeline output is written (default: same as
+                            .diana_env/\$HOME/routine_diana). Use this to point different sample
+                            runs at different project output directories. Does NOT relocate
+                            sample_ids_bam.txt (see item 1 above) — that stays fixed either way.
     -p, --pipeline DIR      Pipeline base directory (default: current directory)
     -w, --workdir DIR       Nextflow work directory base (default: /tmp/nextflow_work)
     -c, --config FILE       Configuration file to parse (default: conf/mergebam.config)
@@ -515,9 +533,17 @@ run_sample_pipeline() {
     # Build command with optional overrides
     local pipeline_cmd="bash $pipeline_script --run_mode_order -w \"$work_dir\" $resume_flag"
 
-    # Always pass the routine_diana path so the pipeline writes to the correct location
-    pipeline_cmd="$pipeline_cmd --path_output=\"$DIANA_ROUTINE_DIR\""
-    log "INFO" "Using routine_diana path: $DIANA_ROUTINE_DIR"
+    # Always pass the output directory so the pipeline writes to the correct location.
+    # --output_path is the canonical name (--path_output remains a working alias at the
+    # Nextflow config layer for anyone invoking the underlying pipeline scripts directly).
+    pipeline_cmd="$pipeline_cmd --output_path=\"$PIPELINE_OUTPUT_DIR\""
+    log "INFO" "Using output path: $PIPELINE_OUTPUT_DIR"
+
+    # sample_ids_bam.txt is a stable, externally-maintained registry (see
+    # HARDCODED_SAMPLE_IDS_FILE above) — it does NOT move with -o/--output-dir, so it
+    # must be forwarded explicitly; otherwise Nextflow's own default would derive it
+    # from --output_path and look in the wrong (new project) directory.
+    pipeline_cmd="$pipeline_cmd --bam_sample_id_file=\"$SAMPLE_IDS_FILE\""
 
     if [[ "$USER_SPECIFIED_DATA_DIR" == true ]]; then
         pipeline_cmd="$pipeline_cmd --input_dir=\"$BASE_DATA_DIR\""
@@ -533,9 +559,11 @@ run_sample_pipeline() {
         # not just the single sample we think we're running. We need to check ALL samples
         # and mark them as completed if they have markdown reports.
 
-        # Build result_path from DIANA_ROUTINE_DIR (already resolved from .diana_env or default)
-        # Cannot parse Groovy expressions from annotation.config in bash, so use the known structure
-        local result_path="${DIANA_ROUTINE_DIR}/routine_results"
+        # Build result_path from PIPELINE_OUTPUT_DIR (already resolved from -o/.diana_env/default).
+        # Bash can't introspect Groovy config at runtime, but this is safe to hand-build:
+        # params.output_path (== PIPELINE_OUTPUT_DIR here) is now the single source of truth
+        # that conf/annotation.config's params.result_path derives from, so this mirrors it.
+        local result_path="${PIPELINE_OUTPUT_DIR}/routine_results"
 
         # Check ALL samples (not just the one we think we're running)
         # because Nextflow processes all samples in the sample_ids file
@@ -741,6 +769,11 @@ parse_arguments() {
             -d|--data-dir)
                 BASE_DATA_DIR="$2"
                 USER_SPECIFIED_DATA_DIR=true  # VERSION 2: Track user specification
+                shift 2
+                ;;
+            -o|--output-dir)
+                PIPELINE_OUTPUT_DIR="$2"
+                USER_SPECIFIED_OUTPUT_DIR=true
                 shift 2
                 ;;
             -p|--pipeline)
