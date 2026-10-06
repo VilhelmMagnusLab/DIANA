@@ -1139,12 +1139,7 @@ process copy_results_to_summary {
     publishDir "${params.result_path}/${sample_id}", mode: "copy", overwrite: true, pattern: "roi.protein_coding_*.bed"
 
     input:
-    tuple val(sample_id), path(mnpflex_bed)
-    tuple val(sample_id), path(sturgeon_pdf)
-    tuple val(sample_id), path(tsne_html)
-    tuple val(sample_id), path(svanna_html)
-    tuple val(sample_id), path(tsne_pancan_html)
-    tuple val(sample_id), path(tsne_pancan_pdf)
+    tuple val(sample_id), path(mnpflex_bed), path(sturgeon_pdf), path(tsne_html), path(svanna_html), path(tsne_pancan_html), path(tsne_pancan_pdf)
     path(roi_bed)
 
     output:
@@ -1831,13 +1826,14 @@ workflow annotation {
                 def sturgeon_pdf_ch = sturgeon_available
                     ? sturgeon.out.sturgeon_pdf
                     : extract_epic.out.mnpflex_bed.map { sid, f -> tuple(sid, file("NO_STURGEON_PDF")) }
+                def copy_results_input = extract_epic.out.mnpflex_bed
+                    .join(sturgeon_pdf_ch)
+                    .join(tsne_plot.out.tsne_html)
+                    .join(svannasv.out.rmdsvannahtml)
+                    .join(tsne_plot_pancan.out.tsne_pancan_html)
+                    .join(tsne_plot_pancan.out.tsne_pancan_out)
                 copy_results_to_summary(
-                    extract_epic.out.mnpflex_bed,
-                    sturgeon_pdf_ch,
-                    tsne_plot.out.tsne_html,
-                    svannasv.out.rmdsvannahtml,
-                    tsne_plot_pancan.out.tsne_pancan_html,
-                    tsne_plot_pancan.out.tsne_pancan_out,
+                    copy_results_input,
                     file(params.roi_protein_coding_bed)
                 )
             }
